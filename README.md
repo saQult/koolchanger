@@ -7,13 +7,14 @@ A user-friendly skin changer for **League of Legends**, allowing you to use **sk
 
 - 🔁 Supports both **champion skins** and **chromas**
 - 🎨 Skin preview before applying
-- 🚀 Auto-detects League of Legends game path
+- 👀 User-friendly interface
 - ♻️ Simple usage - apply skins with one click
 
 ---
 
 ## 👀 Preview
-![KoolChanger_qChucEjXr0](https://github.com/user-attachments/assets/8e942b11-b307-41a7-bcbb-42d57fb2b99a)
+![KoolChanger_J1XRIk69OD](https://github.com/user-attachments/assets/b6757f67-dcf4-40a4-8434-08b84d448e95)
+
 
 ---
 
@@ -25,9 +26,6 @@ Before installation, be sure you have **.NET 8 Runtime** ([**download link**](ht
 2. **Extract** the files anywhere on your PC.
 3. **Launch** `KOOLChanger.exe`.
 4. If the game path is not detected automatically, **select your League folder manually throught settings**
-6. Open settings and click **`Download skins`**
-7. After skins are downloaded click **`Install Skins`**
-8. If you need chromas click **`Install Chromas`**
 
 ---
 
@@ -35,8 +33,8 @@ Before installation, be sure you have **.NET 8 Runtime** ([**download link**](ht
 
 1. Select any skin you want
 2. Wait before status bar shows **"Skins applied"**
-3. In game when chosing champion select **default** champion skin
-4. Enjoy
+3. In game when choosing champion select **default** champion skin
+4. Enjoy 🤗
 
 ---
 
@@ -47,13 +45,12 @@ Basicaly, it uses [cslolmanager tool](https://github.com/LeagueToolkit/cslol-man
 
 ## ✅ ToDo
 A lot of stuff actually 😅
-1. Cleanup code
-2. Custom skins support
-3. cslol manager integration
-4. Fix that installations makes ur pc boom
-5. Fix A LOT of bugs
-6. **Implement real-time skin installation, not just downloading all at once**
-7. Auto update all skins and champions repo
+- Cleanup code
+- Custom skins support
+- cslol manager integration
+- Fix that installation skins and chromas makes ur pc boom
+- Fix A LOT of bugs
+- Auto update all skins and champions repo
    
 ---
 
