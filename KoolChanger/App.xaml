@@ -1,0 +1,25 @@
+﻿<Application x:Class="KoolChanger.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:KoolChanger"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="FontFamily"
+                    Value="pack://application:,,,/Fonts/#Comfortaa" />
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="FontFamily"
+                    Value="pack://application:,,,/Fonts/#Comfortaa" />
+        </Style>
+        <Style TargetType="Label">
+            <Setter Property="FontFamily"
+                    Value="pack://application:,,,/Fonts/#Comfortaa" />
+        </Style>
+
+        <Style TargetType="Button">
+            <Setter Property="FontFamily"
+                    Value="pack://application:,,,/Fonts/#Comfortaa" />
+        </Style>
+    </Application.Resources>
+</Application>
