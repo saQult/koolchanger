@@ -41,6 +41,7 @@ public class ToolService
         _tool.SaveOverlay("default", mods, false);
         return _tool.RunOverlay("default");
     }
+    public void Import(string path) => _tool.Import(path);
     public void LoadBasicSkins(int maxParallelism = 10)
     {
         var files = Directory.GetDirectories("skins")

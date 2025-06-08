@@ -1,5 +1,4 @@
-﻿using CSLOLTool;
-using CSLOLTool.Models;
+﻿using CSLOLTool.Models;
 using CSLOLTool.Services;
 using KoolChanger.Helpers;
 using Microsoft.WindowsAPICodePack.Dialogs;
@@ -12,6 +11,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
@@ -19,14 +19,17 @@ namespace KoolChanger;
 
 public partial class MainWindow : Window
 {
+    private Config _config = new();
+
     private readonly SkinService _skinService = new();
     private readonly ChampionService _championService = new();
+    private readonly UpdateService _updateService = new();
     private ToolService _toolService = new("");
 
     private List<Champion> _champions = new();
+    private List<ChampionListItem> _championsList = new();
     private Dictionary<Champion, Skin> _selectedSkins = new();
     private Process _toolProcess = new();
-    private string _gamePath = string.Empty;
 
     private SolidColorBrush _primaryBrush = new((Color)ColorConverter.ConvertFromString("#f5dbff"));
 
@@ -35,54 +38,48 @@ public partial class MainWindow : Window
 
     private Border? _selectedBorder = null;
     private Border? _selectedCircle = null;
+    
+    private Preloader _preloader = new();
 
     public MainWindow()
     {
         InitializeComponent();
 
+        _preloader = new() {WindowStartupLocation = WindowStartupLocation.CenterScreen};
+        _preloader.Topmost = true;
+
         Loaded += StartUp;
+        Closed += (_, _) => 
+        {
+            _preloader.Close();
+            KillToolProcess();
+        };
 
     }
-    public void SaveGamePath()
-    {
-        try
-        {
-            File.WriteAllText("gamepath.txt", _gamePath);
-        }
-        catch (Exception ex)
-        {
-            statusLabel.Content  = $"Failed to save game path: {ex.Message}";
-        }
-    }
-    public string LoadGamePath()
-    {
-        try
-        {
-            if (File.Exists("gamepath.txt"))
-            {
-                return File.ReadAllText("gamepath.txt");
-            }
-        }
-        catch (Exception ex)
-        {
-            statusLabel.Content = $"Failed to load game path: {ex.Message}";
-        }
 
-        return string.Empty;
-    }
-
+    #region Configuration
     private async void StartUp(object sender, RoutedEventArgs e)
     {
         DataContext = new WindowBlurEffect(this, AccentState.ACCENT_ENABLE_BLURBEHIND) { BlurOpacity = 100 };
 
         InitializeFoldersAndFiles();
-        InitializeGamePath();
+
+        await DownloadSplashes();
+
         await LoadChampionsData();
-        LoadSelectedConfig();
+        await DownloadIcons();
 
-        championListBox.ItemsSource = _champions.Select(x => x.Name);
+        if (Directory.GetDirectories("skins").Length < 170)
+        {
+            _updateService.OnUpdating += (data) => _preloader.SetStatus(data);
+            await _updateService.DownloadSkins();
+        }
 
-        _toolService = new(_gamePath);
+        LoadConfig();
+        InitializeGamePath();
+        LoadChampionListBoxItems();
+
+        _toolService = new(_config.GamePath);
         string tooltip = "";
         _toolService.OverlayRunned += data =>
         {
@@ -96,8 +93,85 @@ public partial class MainWindow : Window
             Dispatcher.Invoke(() => statusLabel.Content = tooltip);
         };
 
-        if (string.IsNullOrEmpty(_gamePath) && _selectedSkins.Count > 0)
+        statusLabel.Content = "Please, select any skin";
+
+        KillToolProcess();
+        if (string.IsNullOrEmpty(_config.GamePath) == false && _selectedSkins.Count > 0)
             Run();
+
+        HidePreloader();
+        _preloader = new() { Owner = this };
+
+        if(IsFirstRun())
+        {
+            Application.Current.Shutdown();
+            System.Windows.Forms.Application.Restart();
+        }
+    }
+    private bool IsFirstRun()
+    {
+        string firstRunMarkerPath = System.IO.Path.Combine(AppContext.BaseDirectory, "runned");
+
+        if (!File.Exists(firstRunMarkerPath))
+        {
+            File.Create(firstRunMarkerPath).Dispose();
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    private async Task DownloadSplashes()
+    {
+        bool? resultToDownloadSkinsPreview = false;
+
+        if (Directory.GetFiles("assets\\champions\\splashes").Length == 0)
+            resultToDownloadSkinsPreview = new CustomMessageBox("Info", "Do you want to download preview for champion skins now? " +
+                "If not, previews will download in real time when you select any champion", this).ShowDialog();
+
+        ShowPreloader();
+
+        if (resultToDownloadSkinsPreview == true)
+        {
+            _championService.OnDownloaded += (message) => _preloader.SetStatus(message);
+            await _championService.DownloadAllPreviews();
+        }
+    }
+
+    private void LoadChampionListBoxItems()
+    {
+        foreach (var champion in _champions)
+        {
+            var iconPath = System.IO.Path.Combine(AppContext.BaseDirectory, "assets", "champions", $"{champion.Id}.png");
+            _championsList.Add(new ChampionListItem(iconPath, champion.Name));
+        }
+        championListBox.ItemsSource = _championsList;
+    }
+
+    public void LoadConfig()
+    {
+        if (File.Exists("config.json"))
+        {
+            var data = JsonConvert.DeserializeObject<Config>(File.ReadAllText("config.json"));
+            if (data != null)
+            {
+                _config = data;
+
+                _selectedSkins = _config.SelectedSkins
+                    .Select(pair =>
+                    {
+                        var champ = _champions.FirstOrDefault(c => c.Name == pair.Key);
+                        return champ != null ? new KeyValuePair<Champion, Skin>(champ, pair.Value) : default;
+                    })
+                    .Where(kv => kv.Key != null)
+                    .ToDictionary(kv => kv.Key, kv => kv.Value);
+            }
+        }
+    }
+    public void SaveConfig()
+    {
+        File.WriteAllText("config.json", JsonConvert.SerializeObject(_config));
     }
     private void InitializeFoldersAndFiles()
     {
@@ -105,13 +179,14 @@ public partial class MainWindow : Window
         {
             "installed",
             "profiles",
-            "skins"
+            "skins",
+            "assets\\champions",
+            "assets\\champions\\splashes"
         };
         var files = new[]
         {
-            "gamepath.txt",
-            "selected.json",
-            "champion-data.json"
+            "champion-data.json",
+            "config.json"
         };
 
         foreach (var folder in folders)
@@ -124,16 +199,14 @@ public partial class MainWindow : Window
     }
     private void InitializeGamePath()
     {
-        _gamePath = LoadGamePath();
-
-        if (Directory.Exists(_gamePath) == false)
+        if (Directory.Exists(_config.GamePath) == false)
         {
             var path = RiotPathDetector.GetLeaguePath();
             if (string.IsNullOrEmpty(path) == false)
-                _gamePath = path;
+                _config.GamePath = path;
         }
 
-        if(string.IsNullOrWhiteSpace(_gamePath))
+        if (string.IsNullOrWhiteSpace(_config.GamePath))
         {
             var dialog = new CommonOpenFileDialog
             {
@@ -144,62 +217,89 @@ public partial class MainWindow : Window
 
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                _gamePath = dialog.FileName;
-                
+                _config.GamePath = dialog.FileName;
+
             }
         }
 
-        if(_gamePath.Contains("egends\\Game") == false)
+        if (_config.GamePath.Contains("egends\\Game") == false)
         {
-            if (Directory.GetFiles(_gamePath).Contains("LeagueClient.exe"))
-                _gamePath = System.IO.Path.Combine(_gamePath, "Game");
+            if (Directory.GetFiles(_config.GamePath).Contains("LeagueClient.exe"))
+                _config.GamePath = System.IO.Path.Combine(_config.GamePath, "Game");
         }
-        SaveGamePath();
+        SaveConfig();
     }
-
-    private void LoadSelectedConfig()
+    private void SaveSelectedSkins()
     {
-        if (!File.Exists("selected.json"))
-        {
-            File.Create("selected.json").Dispose();
-            return;
-        }
-
         try
         {
-            var json = File.ReadAllText("selected.json");
-            var raw = JsonConvert.DeserializeObject<Dictionary<string, Skin>>(json);
-            if (raw is null) return;
+            _config.SelectedSkins = _selectedSkins.ToDictionary(kvp => kvp.Key.Name, kvp => kvp.Value);
+            SaveConfig();
+        }
+        catch (Exception ex)
+        {
+            new CustomMessageBox("Error!", ex.Message, this);
+        }
 
-            _selectedSkins = raw
-                .Select(pair =>
+    }
+    private void KillToolProcess()
+    {
+        try
+        {
+            var processes = Process.GetProcessesByName("cslolmoodtool");
+            foreach (var process in processes)
+            {
+                process.Kill();
+                process.WaitForExit();
+            }
+        }
+        catch { }
+    }
+
+    #endregion
+
+    #region Data
+    private async Task DownloadIcons()
+    {
+        var semaphore = new SemaphoreSlim(50);
+        var tasks = new List<Task>();
+
+        foreach (var champion in _champions)
+        {
+            await semaphore.WaitAsync();
+
+            tasks.Add(Task.Run(async () =>
+            {
+                try
                 {
-                    var champ = _champions.FirstOrDefault(c => c.Name == pair.Key);
-                    return champ != null ? new KeyValuePair<Champion, Skin>(champ, pair.Value) : default;
-                })
-                .Where(kv => kv.Key != null)
-                .ToDictionary(kv => kv.Key, kv => kv.Value);
+                    var iconPath = System.IO.Path.Combine("assets", "champions", $"{champion.Id}.png");
+                    if (!File.Exists(iconPath))
+                    {
+                        _preloader.SetStatus($"Downloading icon for {champion.Name}");
+                        await _championService.DownloadChampionIconAsync(champion.Id, "assets\\champions");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _preloader.SetStatus($"Error downloading icon: {ex.Message}");
+                }
+                finally
+                {
+                    semaphore.Release();
+                }
+            }));
         }
-        catch (Exception ex)
-        {
-            statusLabel.Content = ex.Message;
-        }
-    }
 
-    private void SaveSelectedConfig()
+        await Task.WhenAll(tasks);
+    }
+    private async Task InitializeFromServices()
     {
-        try
-        {
-            var dict = _selectedSkins.ToDictionary(kvp => kvp.Key.Name, kvp => kvp.Value);
-            var json = JsonConvert.SerializeObject(dict, Formatting.Indented);
-            File.WriteAllText("selected.json", json);
-        }
-        catch (Exception ex)
-        {
-            statusLabel.Content = ex.Message;
-        }
+        statusLabel.Content = "Getting champions info";
+        _champions = await _skinService.GetAllSkinsAsync(await _championService.GetChampionsAsync());
+        _champions.Sort((x, y) => x.Name.CompareTo(y.Name));
+        statusLabel.Content = "Finished getting info";
+        File.WriteAllText("champion-data.json", JsonConvert.SerializeObject(_champions));
     }
-
     private async Task LoadChampionsData()
     {
         try
@@ -209,7 +309,7 @@ public partial class MainWindow : Window
                 var json = File.ReadAllText("champion-data.json");
                 var data = JsonConvert.DeserializeObject<List<Champion>>(json);
 
-                if(data == null)
+                if (data == null)
                     await InitializeFromServices();
                 else
                     _champions = data;
@@ -224,23 +324,25 @@ public partial class MainWindow : Window
             statusLabel.Content = $"Error loading data, try to update in from settings";
         }
     }
-
-    public async Task InitializeFromServices()
+    private void Search(object sender, TextChangedEventArgs e)
     {
-        statusLabel.Content = "Getting champions info";
-        _champions = await _championService.GetChampionsAsync();
-        _champions.Sort((x, y) => x.Name.CompareTo(y.Name));
-
-        foreach (var champion in _champions)
-        {
-            champion.Skins = await _skinService.GetSkinsAsync(champion.Id);
-            statusLabel.Content = $"Getting skins for: {champion.Name}";
-        }
-
-        statusLabel.Content = "Finished getting info";
-        File.WriteAllText("champion-data.json", JsonConvert.SerializeObject(_champions));
+        var querry = searchTextBox.Text.ToLower();
+        championListBox.ItemsSource = _championsList.Where(x => x.Name.ToLower().Contains(querry));
     }
 
+    #endregion
+
+    #region UI
+    private void ShowPreloader()
+    {
+        Effect = new BlurEffect { Radius = 10 };
+        _preloader.Show();
+    }
+    private void HidePreloader()
+    {
+        Effect = null;
+        _preloader.Hide();
+    }
     private void ResetSelection()
     {
         if (_selectedBorder != null)
@@ -249,7 +351,6 @@ public partial class MainWindow : Window
         if (_selectedCircle != null)
             _selectedCircle.BorderBrush = Brushes.Transparent;
     }
-
     private void SelectBorder(object sender, MouseButtonEventArgs? e)
     {
         if (sender is not Border clickedBorder)
@@ -260,7 +361,6 @@ public partial class MainWindow : Window
         _selectedBorder = clickedBorder;
         _selectedCircle = null;
     }
-
     private void SelectCircle(object sender, MouseButtonEventArgs? e)
     {
         if (sender is not Border clickedCircleBorder)
@@ -283,8 +383,7 @@ public partial class MainWindow : Window
             _selectedBorder = skinBorder;
         }
     }
-
-    public Border CreateSkinBorder(string imageUrl, double width, double height, string overlayText)
+    private Border CreateSkinBorder(string imageUrl, double width, double height, string overlayText)
     {
         var imageBrush = new ImageBrush(new BitmapImage(new Uri(imageUrl)))
         {
@@ -352,11 +451,12 @@ public partial class MainWindow : Window
 
         return border;
     }
-
-    public void OnChampionSelected(object sender, SelectionChangedEventArgs e)
+    private async void OnChampionSelected(object sender, SelectionChangedEventArgs e)
     {
+        if (championListBox.SelectedItem is null)
+            return;
         ImagePanel.Children.Clear();
-        var selected = _champions.FirstOrDefault(x => x.Name == championListBox.SelectedItem?.ToString());
+        var selected = _champions.FirstOrDefault(x => x.Name == (championListBox.SelectedItem as ChampionListItem).Name);
         if (selected == null) return;
 
         foreach (var skin in selected.Skins.Skip(1))
@@ -367,8 +467,12 @@ public partial class MainWindow : Window
                 Width = SkinImageBaseWidth,
                 Height = SkinImageBaseHeight
             };
-
-            var skinBorder = CreateSkinBorder(skin.ImageUrl, SkinImageBaseWidth, SkinImageBaseHeight, skin.Name);
+            var skinImagePath = System.IO.Path.Combine(AppContext.BaseDirectory, "assets\\champions\\splashes\\", skin.Id + ".png");
+            if(File.Exists(skinImagePath) == false)
+            {
+                await _championService.DownloadImageAsync(skin.ImageUrl, skinImagePath);
+            }
+            var skinBorder = CreateSkinBorder(skinImagePath, SkinImageBaseWidth, SkinImageBaseHeight, skin.Name);
 
             if (_selectedSkins.TryGetValue(selected, out var s) && s.Id == skin.Id)
                 SelectBorder(skinBorder, null);
@@ -377,7 +481,7 @@ public partial class MainWindow : Window
             skinBorder.MouseDown += (s, _) =>
             {
                 _selectedSkins[selected] = skin;
-                SaveSelectedConfig();
+                SaveSelectedSkins();
                 Run();
             };
 
@@ -406,10 +510,14 @@ public partial class MainWindow : Window
                 foreach (var chroma in skin.Chromas)
                 {
                     var color = (Color)ColorConverter.ConvertFromString(chroma.Colors.FirstOrDefault() ?? "#FFFFFF");
-
+                    skinImagePath = System.IO.Path.Combine(AppContext.BaseDirectory, "assets\\champions\\splashes\\", chroma.Id + ".png");
+                    if (File.Exists(skinImagePath) == false)
+                    {
+                        await _championService.DownloadImageAsync(chroma.ImageUrl, skinImagePath);
+                    }
                     var image = new Image
                     {
-                        Source = new BitmapImage(new Uri(chroma.ImageUrl)),
+                        Source = new BitmapImage(new Uri(skinImagePath)),
                         Width = 130,
                         Height = 200,
                         Stretch = Stretch.Uniform,
@@ -457,7 +565,7 @@ public partial class MainWindow : Window
                     circleBorder.MouseDown += (s, _) =>
                     {
                         _selectedSkins[selected] = chroma;
-                        SaveSelectedConfig();
+                        SaveSelectedSkins();
                         Run();
                     };
 
@@ -472,21 +580,6 @@ public partial class MainWindow : Window
             ImagePanel.Children.Add(skinPanel);
         }
     }
-    private void Run()
-    {
-        var selected = _selectedSkins.Values.Select(s => s is Chroma ? $"{s.Name} {s.Id}" : s.Name).ToList();
-
-        Task.Run(() =>
-        {
-            try
-            {
-                _toolProcess.Kill();
-            }
-            catch { }
-            _toolProcess = _toolService.Run(selected);         
-        });
-    }
-
     private void DragMove(object sender, MouseButtonEventArgs e)
     {
         try
@@ -496,25 +589,74 @@ public partial class MainWindow : Window
         }
         catch { }
     }
-
     private void CloseApp(object sender, MouseButtonEventArgs e)
     {
+        _preloader.Close();
         _toolProcess.Close();
-        Close();
+        Application.Current.Shutdown();
     }
     private void Minimize(object sender, MouseButtonEventArgs e) => WindowState = WindowState.Minimized;
-
-    private void Search(object sender, TextChangedEventArgs e)
-    {
-        var querry = searchTextBox.Text.ToLower();
-        championListBox.ItemsSource = _champions.Where(x => x.Name.ToLower().Contains(querry)).Select(x => x.Name);
-    }
-
     private async void OpenSettings(object sender, MouseButtonEventArgs e)
     {
-        new SettingsWindow{ Owner = this }.ShowDialog();
-        
-        _toolService = new(LoadGamePath());
+        Effect = new BlurEffect { Radius = 10 };
+        var window = new SettingsWindow(_config.GamePath) { Owner = this };
+        window.PathSelected += (path) =>
+        {
+            _config.GamePath = path;
+            SaveConfig();
+        };
+        window.ShowDialog();
+        LoadConfig();
+        _toolService = new(_config.GamePath);
         await LoadChampionsData();
+        Effect = null;
     }
+
+    #endregion
+
+    private void Run()
+    {
+        var selected = _selectedSkins.Values.Select(s => s is Chroma ? $"{s.Name} {s.Id}" : s.Name).ToList();
+        for (int i = 0; i < selected.Count; i++)
+        {
+            selected[i] = selected[i].Replace(":", "");
+        }
+        Task.Run(() =>
+        {
+            try
+            {
+                foreach (var kvp in _selectedSkins)
+                {
+
+                    var skin = kvp.Value;
+                    var skinName = skin.Name;
+                    /*
+                    * TODO: move all logic to dev repo so I dont have to parse skin names
+                    * idk why I did not make it with dev repo initially
+                    */
+                    skinName = skinName.Replace(":", "");
+                    string skinPath = skin is Chroma ? System.IO.Path.Combine("skins", kvp.Key.Name, "chromas", skinName, $"{skinName} {skin.Id}.zip") 
+                        : System.IO.Path.Combine("skins", kvp.Key.Name, skinName + ".zip");
+                    bool isImported = skin is Chroma ? Directory.Exists(System.IO.Path.Combine("installed", skin.Name + " " + skin.Id))
+                        : Directory.Exists(System.IO.Path.Combine("installed", skin.Name));
+
+                    if (isImported == false)
+                        _toolService.Import(skinPath);
+                }
+                if (_toolProcess != null)
+                {
+                    _toolProcess.Kill();
+                }
+
+            }
+            catch {}
+            _toolProcess = _toolService.Run(selected);
+        });
+    }
+
+    public class ChampionListItem (string iconUrl, string name)
+    {
+        public string IconUrl { get; set; } = iconUrl;
+        public string Name { get; set; } = name;
+    } 
 }

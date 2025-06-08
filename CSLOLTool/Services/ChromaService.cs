@@ -44,39 +44,4 @@ public class ChromaService
 
         return chromas;
     }
-
-    //public List<Chroma>? FromFolder(string path)
-    //{
-    //    if(File.Exists(path + "\\README.md") == false)
-    //        return null;
-
-    //    var list = new List<Chroma>();
-
-    //    var chromaNames = GetNamesFromFolder(path);
-    //    var championId = chromaNames[0].Substring(chromaNames[0].Length - 6, 3);
-    //    var chromaIds = chromaNames.Select(x => x.Substring(x.Length - 6, 6)).ToList();
-
-    //    for (int i = 0; i < chromaNames.Count(); i++)
-    //    {
-    //        list.Add(new Chroma()
-    //        {
-    //            Name = chromaNames[i],
-    //            ChromaId = int.Parse(chromaIds[i]),
-    //            ImageUrl = $"{_imageEndpoint}{championId}/{chromaIds[i]}"
-    //        });
-    //    }
-
-    //    return list;
-    //}
-    //private List<string> GetNamesFromFolder(string folderPath)
-    //{
-    //    if (!Directory.Exists(folderPath))
-    //        return new();
-
-    //    return Directory.GetFiles(folderPath)
-    //                    .Select(x => Path.GetFileName(x))
-    //                    .Where(name => !string.IsNullOrEmpty(name) && name.Contains(".zip"))
-    //                    .Select(x => x.Replace(".zip", ""))
-    //                    .ToList();
-    //}
 }

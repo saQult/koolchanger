@@ -10,9 +10,9 @@
         AllowsTransparency="True"
         ShowInTaskbar="False"
         Title="Settings"
-        Height="350"
+        Height="400"
         Width="500"
-        MouseDown="Window_MouseDown">
+        MouseDown="DragWindow">
 
     <Window.Resources>
         <Style x:Key="MaterialPurpleButton" TargetType="Button">
@@ -68,24 +68,27 @@
             </Setter>
         </Style>
     </Window.Resources>
-
-    <Border Background="#99372435" CornerRadius="10">
+    <!--99372435-->
+    <Border Background="#99000000" CornerRadius="10">
         <Grid>
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                <Button Content="Select game folder" Width="160" Height="40" Margin="0,0,0,10"
+                <Button Content="Select game folder" Width="200" Height="40" Margin="0,0,0,10"
                         Click="SelectGameFolder"
                         Style="{StaticResource MaterialPurpleButton}"/>
-                <Button Content="Get champions data" Width="160" Height="40" Margin="0,0,0,10"
+                <Button Content="Get champions data" Width="200" Height="40" Margin="0,0,0,10"
                         Click="GetChampionData"
                         Style="{StaticResource MaterialPurpleButton}"/>
-                <Button Content="Download Skins" Width="160" Height="40" Margin="0,0,0,10"
-                        Click="DownloadSkins_Click"
+                <Button Content="Download Skins" Width="200" Height="40" Margin="0,0,0,10"
+                        Click="DownloadSkins"
                         Style="{StaticResource MaterialPurpleButton}"/>
-                <Button Content="Install Skins" Width="160" Height="40" Margin="0,0,0,10"
-                        Click="InstallSkins_Click"
+                <Button Content="Download skins preview" Width="200" Height="40" Margin="0,0,0,10"
+                        Click="DownloadSkinsPreview"
                         Style="{StaticResource MaterialPurpleButton}"/>
-                <Button Content="Install Chromas" Width="160" Height="40"
-                        Click="InstallChromas_Click"
+                <Button Content="Install Skins" Width="200" Height="40" Margin="0,0,0,10"
+                        Click="InstallSkins"
+                        Style="{StaticResource MaterialPurpleButton}"/>
+                <Button Content="Install Chromas" Width="200" Height="40"
+                        Click="InstallChromas"
                         Style="{StaticResource MaterialPurpleButton}"/>
             </StackPanel>
 
@@ -101,7 +104,7 @@
                    VerticalAlignment="Top"
                    HorizontalAlignment="Right"
                    Margin="10"
-                   MouseDown="CloseIcon_MouseDown"/>
+                   MouseDown="Close"/>
         </Grid>
     </Border>
 </Window>

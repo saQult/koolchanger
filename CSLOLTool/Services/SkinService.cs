@@ -12,7 +12,8 @@ public class SkinService
     private readonly string _championsInfoEndpoint = "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champions/";
     private readonly string _splashArtEndpoint = "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/";
     private readonly string _chromaEndpoint = "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/";
-    //private readonly string _splashArtEndpoint = "https://raw.communitydragon.org/latest/game/assets/characters/";
+    public event Action<string>? OnDownloaded;
+    public event Action<string>? OnError;
 
     private readonly HttpClient _httpClient = new HttpClient();
     public SkinFromFileInfo? GetModInfoFromZip(string zipPath)
@@ -86,6 +87,36 @@ public class SkinService
         }
 
         return skins;
+    }
+    public async Task<List<Champion>> GetAllSkinsAsync(List<Champion> champions)
+    {
+        var semaphore = new SemaphoreSlim(50);
+        var tasks = new List<Task>();
+
+        foreach (var champion in champions)
+        {
+            await semaphore.WaitAsync();
+            tasks.Add(Task.Run(async () =>
+            {
+                try
+                {
+                    var skins = await GetSkinsAsync(champion.Id);
+                    OnDownloaded?.Invoke($"Downloaded skins for {champion.Name}");
+                    champion.Skins = skins;
+                }
+                catch (Exception ex)
+                {
+                    OnError?.Invoke($"Failed to get skins for {champion.Name}: {ex.Message}");
+                }
+                finally
+                {
+                    semaphore.Release();
+                }
+            }));
+        }
+
+        await Task.WhenAll(tasks);
+        return champions;
     }
 
 }

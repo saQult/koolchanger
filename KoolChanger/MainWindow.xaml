@@ -6,7 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="clr-namespace:KoolChanger"
     mc:Ignorable="d"
-    Title="MainWindow"
+    Title="KOOLChanger"
     Height="650" Width="1160"
     WindowStartupLocation="CenterScreen"
     AllowsTransparency="True"
@@ -77,10 +77,26 @@
 
                 <!-- Champion List -->
                 <Grid Grid.Row="2">
-                    <ListBox x:Name="championListBox" Margin="10,-30,0,10"
+                    <ListBox x:Name="championListBox" Margin="10,-30,0,35"
                              SelectionChanged="OnChampionSelected"
                              Background="Transparent" Foreground="#f5dbff" FontSize="20"
                              BorderThickness="0" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Ellipse Width="40" Height="40"
+                                             Margin="0,0,10,0">
+                                        <Ellipse.Fill>
+                                            <ImageBrush ImageSource="{Binding IconUrl}" Stretch="UniformToFill"
+                    Viewbox="0.1,0.1,0.8,0.8" ViewboxUnits="RelativeToBoundingBox"/>
+                                        </Ellipse.Fill>
+                                    </Ellipse>
+                                    <TextBlock Text="{Binding Name}" 
+                                               VerticalAlignment="Center" 
+                                               Foreground="White" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
                         <ListBox.Resources>
                             <Style TargetType="ListBoxItem">
                                 <Setter Property="Background" Value="Transparent" />
@@ -171,7 +187,8 @@
                     </Grid.ColumnDefinitions>
 
                     <Label x:Name="statusLabel" Content="Status: waiting"
-                           Margin="10" Foreground="#f5dbff" FontSize="20" />
+                           Margin="10" Foreground="#f5dbff" FontSize="20"
+                           VerticalAlignment="Bottom"/>
 
                     <StackPanel Orientation="Horizontal" Grid.Column="3" HorizontalAlignment="Right" Cursor="">
                         <!-- Settings -->

@@ -13,13 +13,13 @@
   <ItemGroup>
     <None Remove="assets\champnone.jpg" />
     <None Remove="assets\closeicon.png" />
+    <None Remove="assets\loading.gif" />
     <None Remove="assets\logo.png" />
     <None Remove="assets\minimizeicon.png" />
     <None Remove="assets\searchicon.png" />
     <None Remove="assets\settings.png" />
     <None Remove="csloltools\cslol-diag.exe" />
     <None Remove="csloltools\cslol-dll.dll" />
-    <None Remove="csloltools\mod-tools.exe" />
     <None Remove="csloltools\wad-extract-multi.bat" />
     <None Remove="csloltools\wad-extract.exe" />
     <None Remove="csloltools\wad-make-multi.bat" />
@@ -40,6 +40,9 @@
     <Content Include="assets\closeicon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="assets\loading.gif">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="assets\logo.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -58,7 +61,7 @@
     <Content Include="csloltools\cslol-dll.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="csloltools\mod-tools.exe">
+    <Content Include="csloltools\cslolmoodtool.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="csloltools\wad-extract-multi.bat">
@@ -84,6 +87,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.5" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="WpfAnimatedGif" Version="2.0.2" />
   </ItemGroup>
 
   <ItemGroup>

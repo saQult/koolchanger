@@ -22,7 +22,7 @@ public static class RiotPathDetector
             foreach (var kv in data.associated_client)
             {
                 var path =  kv.Key.TrimEnd('\\', '/');
-                return Path.Combine(path, "Game");
+                return Path.Combine(path, "Game").Replace("/", "\\");
             }
         }
 
