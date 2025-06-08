@@ -22,7 +22,7 @@ A user-friendly skin changer for **League of Legends**, allowing you to use **sk
 
 Before installation, be sure you have **.NET 8 Runtime** ([**download link**](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)) on your PC 
 
-1. **Download** the latest release from [Releases](#) 
+1. **Download** the latest release from [Releases](https://github.com/saQult/koolchanger/releases) 
 2. **Extract** the files anywhere on your PC.
 3. **Launch** `KOOLChanger.exe`.
 4. If the game path is not detected automatically, **select your League folder manually throught settings**
