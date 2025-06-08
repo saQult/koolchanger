@@ -8,7 +8,6 @@ A user-friendly skin changer for **League of Legends**, allowing you to use **sk
 - 🔁 Supports both **champion skins** and **chromas**
 - 🎨 Skin preview before applying
 - 🚀 Auto-detects League of Legends game path
-- 🛠 Works with `.wad.client` files and custom splash art
 - ♻️ Simple usage - apply skins with one click
 
 ---
@@ -20,7 +19,9 @@ A user-friendly skin changer for **League of Legends**, allowing you to use **sk
 
 ## 📥 Installation
 
-1. **Download** the latest release from [Releases](#) 
+Before installation, be sure you have **.NET 8 Runtime** ([**download link**](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)) on your PC 
+
+1. **Download** the latest release from [Releases](https://github.com/saQult/koolchanger/releases) 
 2. **Extract** the files anywhere on your PC.
 3. **Launch** `KOOLChanger.exe`.
 4. If the game path is not detected automatically, **select your League folder manually throught settings**
@@ -34,7 +35,7 @@ A user-friendly skin changer for **League of Legends**, allowing you to use **sk
 
 1. Select any skin you want
 2. Wait before status bar shows **"Skins applied"**
-3. Select **default** champion skin
+3. In game when chosing champion select **default** champion skin
 4. Enjoy
 
 ---
@@ -57,8 +58,8 @@ A lot of stuff actually 😅
 ---
 
 ## 🙏 Special thanks
-1. [cslolmanager tool](https://github.com/LeagueToolkit/cslol-manager/tree/master/cslol-tools) - main tool to apply skins
-2. [All of dark seal's contributors](https://github.com/darkseal-org/lol-skins) - all skins are from this repo
+- [cslolmanager tool](https://github.com/LeagueToolkit/cslol-manager/tree/master/cslol-tools) - main tool to apply skins
+- [All of dark seal's contributors](https://github.com/darkseal-org/lol-skins) - all skins are from this repo
 
 ---
 
