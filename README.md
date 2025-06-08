@@ -35,7 +35,7 @@ Before installation, be sure you have **.NET 8 Runtime** ([**download link**](ht
 
 1. Select any skin you want
 2. Wait before status bar shows **"Skins applied"**
-3. Select **default** champion skin
+3. In game when chosing champion select **default** champion skin
 4. Enjoy
 
 ---
