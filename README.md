@@ -5,7 +5,7 @@ A user-friendly skin changer for **League of Legends**, allowing you to use **sk
 
 ## ✨ Features
 
-- 🔁 Supports both **champion skins** and **chromas**
+- 🔁 Supports ***all** skins, chromas and special forms
 - 🎨 Skin preview before applying
 - 👀 User-friendly interface
 - ♻️ Simple usage - apply skins with one click
@@ -13,7 +13,8 @@ A user-friendly skin changer for **League of Legends**, allowing you to use **sk
 ---
 
 ## 👀 Preview
-![KoolChanger_uEbYFWq5EN](https://github.com/user-attachments/assets/29cc9799-97c0-4a35-9c6c-842b8528db77)
+![KoolChanger_9RCA3qGznp](https://github.com/user-attachments/assets/87f2300b-0458-4085-b0b3-a8b9a99ffde9)
+
 
 ---
 
@@ -38,7 +39,7 @@ Before installation, be sure you have **.NET 8 Runtime** ([**download link**](ht
 ---
 
 ## 🤔 How this works
-Basicaly, it uses [cslolmanager tool](https://github.com/LeagueToolkit/cslol-manager/tree/master/cslol-tools) cli to install and load .WAD files from [dark seal's repository](https://github.com/darkseal-org/lol-skins)
+Basicaly, it uses [cslolmanager tool](https://github.com/LeagueToolkit/cslol-manager/tree/master/cslol-tools) cli to install and load .fantome files from [dark seal's repository](https://github.com/darkseal-org/lol-skins-developer)
 
 ---
 
@@ -47,14 +48,16 @@ A lot of stuff actually 😅
 - Cleanup code
 - Custom skins support
 - cslol manager integration
+- Party mode
 - Fix A LOT of bugs
 - Auto update all skins and champions repo
+- Fix elementalist lux forms previews
    
 ---
 
 ## 🙏 Special thanks
 - [cslolmanager tool](https://github.com/LeagueToolkit/cslol-manager/tree/master/cslol-tools) - main tool to apply skins
-- [All of dark seal's contributors](https://github.com/darkseal-org/lol-skins) - all skins are from this repo
+- [All of dark seal's contributors](https://github.com/darkseal-org/lol-skins-developer) - all skins are from this repo
 
 ---
 
