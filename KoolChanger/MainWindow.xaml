@@ -286,7 +286,7 @@
                                     <ControlTemplate TargetType="ScrollBar">
                                         <Grid>
                                             <Border Background="#66333333" CornerRadius="6">
-                                                <Track Name="PART_Track" IsDirectionReversed="True">
+                                                <Track Name="PART_Track" IsDirectionReversed="True" Height="560">
                                                     <Track.Thumb>
                                                         <Thumb>
                                                             <Thumb.Template>

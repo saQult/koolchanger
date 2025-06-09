@@ -82,24 +82,24 @@ public class SkinService
                     }
                 }
 
-                if (skinElement.TryGetProperty("questSkinInfo", out var questSkinInfo) &&
-                    questSkinInfo.TryGetProperty("tiers", out var tiersElement))
-                {
-                    foreach (var tierElement in tiersElement.EnumerateArray())
-                    {
-                        var tier = new Tier
-                        {
-                            Id = tierElement.GetProperty("id").GetInt32(),
-                            Name = tierElement.GetProperty("name").GetString() ?? "Unknown",
-                            Stage = tierElement.GetProperty("stage").GetInt32(),
-                            ImageUrl = _splashArtEndpoint + (
-                                tierElement.GetProperty("loadScreenPath").GetString() ?? ""
-                            ).Replace(prefix, "").ToLower()
-                        };
+                //if (skinElement.TryGetProperty("questSkinInfo", out var questSkinInfo) &&
+                //    questSkinInfo.TryGetProperty("tiers", out var tiersElement))
+                //{
+                //    foreach (var tierElement in tiersElement.EnumerateArray())
+                //    {
+                //        var tier = new Tier
+                //        {
+                //            Id = tierElement.GetProperty("id").GetInt32(),
+                //            Name = tierElement.GetProperty("name").GetString() ?? "Unknown",
+                //            Stage = tierElement.GetProperty("stage").GetInt32(),
+                //            ImageUrl = _splashArtEndpoint + (
+                //                tierElement.GetProperty("loadScreenPath").GetString() ?? ""
+                //            ).Replace(prefix, "").ToLower()
+                //        };
 
-                        skin.Tiers.Add(tier);
-                    }
-                }
+                //        skin.Tiers.Add(tier);
+                //    }
+                //}
 
                 skins.Add(skin);
             }

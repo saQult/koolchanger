@@ -1,4 +1,5 @@
-﻿using CSLOLTool.Models;
+﻿using CSLOLTool.Dto;
+using CSLOLTool.Models;
 using CSLOLTool.Services;
 using KoolChanger.Helpers;
 using Microsoft.WindowsAPICodePack.Dialogs;
@@ -457,25 +458,23 @@ public partial class MainWindow : Window
     {
         if (championListBox.SelectedItem is null)
             return;
+
         ImagePanel.Children.Clear();
+
         var selected = _champions.FirstOrDefault(x => x.Name == (championListBox.SelectedItem as ChampionListItem)!.Name);
         if (selected == null) return;
 
         foreach (var skin in selected.Skins.Skip(1))
         {
-            var skinPanel = new Grid
-            {
-                Margin = new Thickness(5),
-                Width = SkinImageBaseWidth,
-                Height = SkinImageBaseHeight
-            };
-            var skinImagePath = Path.Combine(AppContext.BaseDirectory, "assets\\champions\\splashes\\", skin.Id + ".png");
-            if (File.Exists(skinImagePath) == false)
-            {
-                await _championService.DownloadImageAsync(skin.ImageUrl, skinImagePath);
-            }
-            var skinBorder = CreateSkinBorder(skinImagePath, SkinImageBaseWidth, SkinImageBaseHeight, skin.Name);
-            var mainSkinPreview = skinBorder.Background;
+            var skinPanel = CreateSkinPanel();
+
+            await DownloadSkinPreview(skin);
+
+            var skinBorder = CreateSkinBorder(Path.Combine(AppContext.BaseDirectory, "assets\\champions\\splashes\\", skin.Id + ".png"), 
+                SkinImageBaseWidth, 
+                SkinImageBaseHeight, 
+                skin.Name);
+
             if (_selectedSkins.TryGetValue(selected, out var s) && s.Id == skin.Id)
                 SelectBorder(skinBorder, null);
 
@@ -491,201 +490,246 @@ public partial class MainWindow : Window
             skinPanel.Children.Add(skinBorder);
 
             if (skin.Chromas.Count > 0)
-            {
-                var chromasPanel = new WrapPanel
-                {
-                    Orientation = Orientation.Horizontal,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Bottom,
-                    Margin = new Thickness(5)
-                };
+                await AddChromasAsync(skin, selected, skinPanel);
 
-                var chromasPanelContainer = new Border
-                {
-                    CornerRadius = new CornerRadius(10),
-                    Background = new SolidColorBrush(Color.FromArgb(150, 30, 30, 30)),
-                    Child = chromasPanel,
-                    Margin = new Thickness(10),
-                    VerticalAlignment = VerticalAlignment.Bottom
-                };
-
-                foreach (var chroma in skin.Chromas)
-                {
-                    var color = (Color)ColorConverter.ConvertFromString(chroma.Colors.FirstOrDefault() ?? "#FFFFFF");
-                    skinImagePath = System.IO.Path.Combine(AppContext.BaseDirectory, "assets\\champions\\splashes\\", chroma.Id + ".png");
-                    if (File.Exists(skinImagePath) == false)
-                    {
-                        await _championService.DownloadImageAsync(chroma.ImageUrl, skinImagePath);
-                    }
-                    var image = new Image
-                    {
-                        Source = new BitmapImage(new Uri(skinImagePath)),
-                        Width = 130,
-                        Height = 200,
-                        Stretch = Stretch.Uniform,
-                        VerticalAlignment = VerticalAlignment.Center
-                    };
-
-                    var chromaPreviewBorder = new Border
-                    {
-                        Width = 130,
-                        Height = 160,
-                        CornerRadius = new CornerRadius(10),
-                        Background = new SolidColorBrush(Color.FromArgb(200, 0, 0, 0)),
-                        Visibility = Visibility.Collapsed,
-                        Margin = new Thickness(0, 13, 0, 0),
-                        VerticalAlignment = VerticalAlignment.Top,
-                        Child = image
-                    };
-
-                    var ellipse = new Ellipse
-                    {
-                        Width = 14,
-                        Height = 14,
-                        Fill = new SolidColorBrush(color),
-                        Cursor = Cursors.Hand,
-                        Tag = chroma
-                    };
-
-                    var circleBorder = new Border
-                    {
-                        CornerRadius = new CornerRadius(20),
-                        BorderThickness = new Thickness(2),
-                        Margin = new Thickness(3),
-                        Child = ellipse,
-                        Tag = ellipse
-                    };
-
-                    if (_selectedSkins.TryGetValue(selected, out var cs) && cs.Id == chroma.Id)
-                    {
-                        SelectCircle(circleBorder, null);
-                    }
-
-                    skinPanel.Children.Add(chromaPreviewBorder);
-                    Grid.SetRow(chromaPreviewBorder, 1);
-                    chromasPanel.Children.Add(circleBorder);
-
-                    circleBorder.MouseDown += SelectCircle;
-                    circleBorder.MouseDown += (s, _) =>
-                    {
-                        _selectedSkins[selected] = chroma;
-                        SaveSelectedSkins();
-                        Run();
-                    };
-
-                    circleBorder.MouseEnter += (s, _) => chromaPreviewBorder.Visibility = Visibility.Visible;
-                    circleBorder.MouseLeave += (s, _) => chromaPreviewBorder.Visibility = Visibility.Collapsed;
-                }
-
-                Grid.SetRow(chromasPanel, 1);
-                skinPanel.Children.Add(chromasPanelContainer);
-            }
-
-            if (skin.Tiers.Count > 0)
-            {
-                var tiersPanel = new WrapPanel
-                {
-                    Orientation = Orientation.Horizontal,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Bottom,
-                    Margin = new Thickness(5)
-                };
-
-                var tiersPanelContainer = new Border
-                {
-                    CornerRadius = new CornerRadius(10),
-                    Background = new SolidColorBrush(Color.FromArgb(150, 30, 30, 30)),
-                    Child = tiersPanel,
-                    Margin = new Thickness(10),
-                    VerticalAlignment = VerticalAlignment.Bottom
-                };
-
-                foreach (var tier in skin.Tiers)
-                {
-                    skinImagePath = System.IO.Path.Combine(AppContext.BaseDirectory, "assets\\champions\\splashes\\", tier.Id + ".png");
-                    if (File.Exists(skinImagePath) == false)
-                    {
-                        await _championService.DownloadImageAsync(tier.ImageUrl, skinImagePath);
-                    }
-                    var tierPreview = new ImageBrush(new BitmapImage(new Uri(skinImagePath)))
-                    {
-                        Stretch = Stretch.UniformToFill,
-                        AlignmentX = AlignmentX.Center,
-                        AlignmentY = AlignmentY.Center,
-                        Transform = new ScaleTransform(1.0, 1.0, 0.5, 0.5)
-                    };
-                    var ellipseBackground = new Ellipse
-                    {
-                        Width = 22,
-                        Height = 22,
-                        Fill = new SolidColorBrush(Color.FromArgb(150, 255, 255, 255)),
-                    };
-
-                    var stageText = new TextBlock
-                    {
-                        Text = tier.Stage.ToString(),
-                        Foreground = Brushes.Black,
-                        FontWeight = FontWeights.Bold,
-                        FontSize = 12,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center
-                    };
-
-                    var stageGrid = new Grid
-                    {
-                        Width = 22,
-                        Height = 22,
-                        Cursor = Cursors.Hand,
-                        Tag = tier
-                    };
-                    stageGrid.Children.Add(ellipseBackground);
-                    stageGrid.Children.Add(stageText);
-
-                    var circleBorder = new Border
-                    {
-                        CornerRadius = new CornerRadius(20),
-                        BorderThickness = new Thickness(2),
-                        Margin = new Thickness(3),
-                        Child = stageGrid,
-                        Tag = stageGrid
-                    };
-                    var isTierSelected = _selectedSkins.TryGetValue(selected, out var cs) && cs.Id == tier.Id;
-                    if (isTierSelected)
-                    {
-                        skinBorder.Background = tierPreview;
-                        mainSkinPreview = tierPreview;
-                        SelectCircle(circleBorder, null);
-                    }
-                    tiersPanel.Children.Add(circleBorder);
-
-                    circleBorder.MouseDown += SelectCircle;
-                    circleBorder.MouseDown += (s, _) =>
-                    {
-                        skinBorder.Background = tierPreview;
-                        mainSkinPreview = tierPreview;
-                        _selectedSkins[selected] = tier;
-                        SaveSelectedSkins();
-                        Run();
-                    };
-
-                    circleBorder.MouseEnter += (s, _) =>
-                    {
-                        skinBorder.Background = tierPreview;
-                    };
-                    circleBorder.MouseLeave += (s, _) =>
-                    {
-                        skinBorder.Background = mainSkinPreview;
-                    };
-                }
-
-                Grid.SetRow(tiersPanel, 1);
-                skinPanel.Children.Add(tiersPanelContainer);
-            }
+            AddSpecialForms(skin, selected, skinPanel);
 
             ImagePanel.Children.Add(skinPanel);
         }
-        Console.WriteLine();
     }
+
+    private Grid CreateSkinPanel()
+    {
+        return new Grid
+        {
+            Margin = new Thickness(5),
+            Width = SkinImageBaseWidth,
+            Height = SkinImageBaseHeight
+        };
+    }
+
+    private async Task DownloadSkinPreview(Skin skin)
+    {
+        var path = Path.Combine(AppContext.BaseDirectory, "assets\\champions\\splashes\\", skin.Id + ".png");
+        if (!File.Exists(path))
+            await _championService.DownloadImageAsync(skin.ImageUrl, path);
+    }
+
+    private async Task AddChromasAsync(Skin skin, Champion selected, Grid skinPanel)
+    {
+        var chromasPanel = new WrapPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Bottom,
+            Margin = new Thickness(5)
+        };
+
+        var chromasPanelContainer = new Border
+        {
+            CornerRadius = new CornerRadius(10),
+            Background = new SolidColorBrush(Color.FromArgb(150, 30, 30, 30)),
+            Child = chromasPanel,
+            Margin = new Thickness(10),
+            VerticalAlignment = VerticalAlignment.Bottom
+        };
+
+        foreach (var chroma in skin.Chromas)
+        {
+            var color = (Color)ColorConverter.ConvertFromString(chroma.Colors.FirstOrDefault() ?? "#FFFFFF");
+
+            var skinImagePath = Path.Combine(AppContext.BaseDirectory, "assets\\champions\\splashes\\", chroma.Id + ".png");
+            if (!File.Exists(skinImagePath))
+                await _championService.DownloadImageAsync(chroma.ImageUrl, skinImagePath);
+
+            var image = new Image
+            {
+                Source = new BitmapImage(new Uri(skinImagePath)),
+                Width = 130,
+                Height = 200,
+                Stretch = Stretch.Uniform,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+
+            var chromaPreviewBorder = new Border
+            {
+                Width = 130,
+                Height = 160,
+                CornerRadius = new CornerRadius(10),
+                Background = new SolidColorBrush(Color.FromArgb(200, 0, 0, 0)),
+                Visibility = Visibility.Collapsed,
+                Margin = new Thickness(0, 13, 0, 0),
+                VerticalAlignment = VerticalAlignment.Top,
+                Child = image
+            };
+
+            var ellipse = new Ellipse
+            {
+                Width = 14,
+                Height = 14,
+                Fill = new SolidColorBrush(color),
+                Cursor = Cursors.Hand,
+                Tag = chroma
+            };
+
+            var circleBorder = new Border
+            {
+                CornerRadius = new CornerRadius(20),
+                BorderThickness = new Thickness(2),
+                Margin = new Thickness(3),
+                Child = ellipse,
+                Tag = ellipse
+            };
+
+            if (_selectedSkins.TryGetValue(selected, out var cs) && cs.Id == chroma.Id)
+                SelectCircle(circleBorder, null);
+
+            circleBorder.MouseDown += SelectCircle;
+            circleBorder.MouseDown += (s, _) =>
+            {
+                _selectedSkins[selected] = chroma;
+                SaveSelectedSkins();
+                Run();
+            };
+
+            circleBorder.MouseEnter += (s, _) => chromaPreviewBorder.Visibility = Visibility.Visible;
+            circleBorder.MouseLeave += (s, _) => chromaPreviewBorder.Visibility = Visibility.Collapsed;
+
+            skinPanel.Children.Add(chromaPreviewBorder);
+            Grid.SetRow(chromaPreviewBorder, 1);
+            chromasPanel.Children.Add(circleBorder);
+        }
+
+        Grid.SetRow(chromasPanel, 1);
+        skinPanel.Children.Add(chromasPanelContainer);
+    }
+
+    private void AddSpecialForms(Skin skin, Champion selected, Grid skinPanel)
+    {
+        var skinId = Convert.ToInt32(skin.Id.ToString().Substring(selected.Id.ToString().Length));
+        var specialFormsPath = Path.Combine("skins", $"{selected.Id}", "special_forms", $"{skinId}");
+
+        if (!Directory.Exists(specialFormsPath)) return;
+
+        var formsPanel = new WrapPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Bottom,
+            Margin = new Thickness(5)
+        };
+
+        var formsPanelContainer = new Border
+        {
+            CornerRadius = new CornerRadius(10),
+            Background = new SolidColorBrush(Color.FromArgb(150, 30, 30, 30)),
+            Child = formsPanel,
+            Margin = new Thickness(10),
+            VerticalAlignment = VerticalAlignment.Bottom
+        };
+
+        var sortedFormsFileList = Directory.GetFiles(specialFormsPath)
+            .OrderBy(x => int.Parse(Path.GetFileNameWithoutExtension(x)))
+            .ToList();
+
+        foreach (var file in sortedFormsFileList)
+        {
+            var name = Path.GetFileNameWithoutExtension(file);
+            var formImage = Path.Combine(AppContext.BaseDirectory, specialFormsPath, "models_image", $"{name}.png");
+
+            var image = new Image
+            {
+                Source = new BitmapImage(new Uri(formImage)),
+                Width = 130,
+                Height = 200,
+                Stretch = Stretch.Uniform,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+
+            var formPreviewBorder = new Border
+            {
+                Width = 130,
+                Height = 210,
+                CornerRadius = new CornerRadius(10),
+                Background = new SolidColorBrush(Color.FromArgb(200, 0, 0, 0)),
+                Visibility = Visibility.Collapsed,
+                Margin = new Thickness(0, 13, 0, 0),
+                VerticalAlignment = VerticalAlignment.Top,
+                Child = image
+            };
+
+            var formGrid = CreateFormGrid(name);
+
+            var circleBorder = new Border
+            {
+                CornerRadius = new CornerRadius(20),
+                BorderThickness = new Thickness(2),
+                Margin = new Thickness(3),
+                Child = formGrid,
+                Tag = formGrid
+            };
+
+            circleBorder.MouseDown += SelectCircle;
+            circleBorder.MouseDown += (s, _) =>
+            {
+                SkinForm formSkin = new()
+                {
+                    Id = skin.Id,
+                    Name = skin.Name,
+                    ImageUrl = skin.ImageUrl,
+                    Chromas = skin.Chromas,
+                    Stage = name
+                };
+
+                _selectedSkins[selected] = formSkin;
+                SaveSelectedSkins();
+                Run();
+            };
+
+            circleBorder.MouseEnter += (s, _) => formPreviewBorder.Visibility = Visibility.Visible;
+            circleBorder.MouseLeave += (s, _) => formPreviewBorder.Visibility = Visibility.Collapsed;
+
+            formsPanel.Children.Add(circleBorder);
+
+            skinPanel.Children.Add(formPreviewBorder);
+            Grid.SetRow(formPreviewBorder, 1);
+        }
+
+        Grid.SetRow(formsPanel, 1);
+        skinPanel.Children.Add(formsPanelContainer);
+    }
+
+    private Grid CreateFormGrid(string name)
+    {
+        var formText = new TextBlock
+        {
+            Text = name,
+            Foreground = _primaryBrush,
+            FontWeight = FontWeights.Bold,
+            FontSize = 12,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+
+        var formGrid = new Grid
+        {
+            Width = 22,
+            Height = 22,
+            Cursor = Cursors.Hand,
+        };
+
+        formGrid.Children.Add(new Ellipse
+        {
+            Width = 22,
+            Height = 22,
+            Fill = new SolidColorBrush(Color.FromRgb(80, 80, 80)),
+        });
+
+        formGrid.Children.Add(formText);
+        return formGrid;
+    }
+
+
     private void DragMove(object sender, MouseButtonEventArgs e)
     {
         try
@@ -734,11 +778,23 @@ public partial class MainWindow : Window
                     var skinId = Convert.ToInt32(skin.Id.ToString()
                         .Substring(champion.Id.ToString().Length,
                         skin.Id.ToString().Length - champion.Id.ToString().Length));
-                    
-                    string skinPath =  Path.Combine("skins", $"{champion.Id}", $"{skinId}.fantome");
-                    
-                    if (Directory.Exists(Path.Combine("installed", $"{skin.Id}")) == false)
-                        _toolService.Import(skinPath, $"{skin.Id}");
+
+
+                    if (skin is SkinForm skinForm)
+                    {
+                       var skinPath = Path.Combine("skins", $"{champion.Id}", "special_forms", $"{skinId}", $"{skinForm.Stage}.fantome");
+                       if (Directory.Exists(Path.Combine("installed", $"{skin.Id}-{skinForm.Stage}")) == false)
+                            _toolService.Import(skinPath, $"{skin.Id}");
+                    }
+                    else
+                    {
+                        var skinPath = Path.Combine("skins", $"{champion.Id}", $"{skinId}.fantome");
+
+                        if (Directory.Exists(Path.Combine("installed", $"{skin.Id}")) == false)
+                            _toolService.Import(skinPath, $"{skin.Id}");
+                    }
+
+
                 }
                 if (_toolProcess != null)
                 {
