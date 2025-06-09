@@ -13,7 +13,8 @@ A user-friendly skin changer for **League of Legends**, allowing you to use **sk
 ---
 
 ## 👀 Preview
-![KoolChanger_J1XRIk69OD](https://github.com/user-attachments/assets/b6757f67-dcf4-40a4-8434-08b84d448e95)
+![KoolChanger_kyJyfrmbKJ](https://github.com/user-attachments/assets/a0559a96-3243-44a3-a3a5-901e1a6009dc)
+
 
 
 ---
