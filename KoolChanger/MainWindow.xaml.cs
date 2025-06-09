@@ -3,6 +3,7 @@ using CSLOLTool.Services;
 using KoolChanger.Helpers;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using Newtonsoft.Json;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
@@ -14,6 +15,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Path = System.IO.Path;
 
 namespace KoolChanger;
 
@@ -110,7 +112,7 @@ public partial class MainWindow : Window
     }
     private bool IsFirstRun()
     {
-        string firstRunMarkerPath = System.IO.Path.Combine(AppContext.BaseDirectory, "runned");
+        string firstRunMarkerPath = Path.Combine(AppContext.BaseDirectory, "runned");
 
         if (!File.Exists(firstRunMarkerPath))
         {
@@ -143,7 +145,7 @@ public partial class MainWindow : Window
     {
         foreach (var champion in _champions)
         {
-            var iconPath = System.IO.Path.Combine(AppContext.BaseDirectory, "assets", "champions", $"{champion.Id}.png");
+            var iconPath = Path.Combine(AppContext.BaseDirectory, "assets", "champions", $"{champion.Id}.png");
             _championsList.Add(new ChampionListItem(iconPath, champion.Name));
         }
         championListBox.ItemsSource = _championsList;
@@ -225,7 +227,7 @@ public partial class MainWindow : Window
         if (_config.GamePath.Contains("egends\\Game") == false)
         {
             if (Directory.GetFiles(_config.GamePath).Contains("LeagueClient.exe"))
-                _config.GamePath = System.IO.Path.Combine(_config.GamePath, "Game");
+                _config.GamePath = Path.Combine(_config.GamePath, "Game");
         }
         SaveConfig();
     }
@@ -272,7 +274,7 @@ public partial class MainWindow : Window
             {
                 try
                 {
-                    var iconPath = System.IO.Path.Combine("assets", "champions", $"{champion.Id}.png");
+                    var iconPath = Path.Combine("assets", "champions", $"{champion.Id}.png");
                     if (!File.Exists(iconPath))
                     {
                         _preloader.SetStatus($"Downloading icon for {champion.Name}");
@@ -436,16 +438,16 @@ public partial class MainWindow : Window
         border.MouseEnter += (s, e) =>
         {
             var zoom = new DoubleAnimation(1.1, TimeSpan.FromMilliseconds(200)) { EasingFunction = new QuadraticEase() };
-            ((ScaleTransform)imageBrush.Transform).BeginAnimation(ScaleTransform.ScaleXProperty, zoom);
-            ((ScaleTransform)imageBrush.Transform).BeginAnimation(ScaleTransform.ScaleYProperty, zoom);
+            ((ScaleTransform)border.Background.Transform).BeginAnimation(ScaleTransform.ScaleXProperty, zoom);
+            ((ScaleTransform)border.Background.Transform).BeginAnimation(ScaleTransform.ScaleYProperty, zoom);
             textBackground.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(1.0, TimeSpan.FromMilliseconds(200)));
         };
 
         border.MouseLeave += (s, e) =>
         {
             var zoom = new DoubleAnimation(1.0, TimeSpan.FromMilliseconds(200)) { EasingFunction = new QuadraticEase() };
-            ((ScaleTransform)imageBrush.Transform).BeginAnimation(ScaleTransform.ScaleXProperty, zoom);
-            ((ScaleTransform)imageBrush.Transform).BeginAnimation(ScaleTransform.ScaleYProperty, zoom);
+            ((ScaleTransform)border.Background.Transform).BeginAnimation(ScaleTransform.ScaleXProperty, zoom);
+            ((ScaleTransform)border.Background.Transform).BeginAnimation(ScaleTransform.ScaleYProperty, zoom);
             textBackground.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(0.0, TimeSpan.FromMilliseconds(200)));
         };
 
@@ -456,7 +458,7 @@ public partial class MainWindow : Window
         if (championListBox.SelectedItem is null)
             return;
         ImagePanel.Children.Clear();
-        var selected = _champions.FirstOrDefault(x => x.Name == (championListBox.SelectedItem as ChampionListItem).Name);
+        var selected = _champions.FirstOrDefault(x => x.Name == (championListBox.SelectedItem as ChampionListItem)!.Name);
         if (selected == null) return;
 
         foreach (var skin in selected.Skins.Skip(1))
@@ -467,13 +469,13 @@ public partial class MainWindow : Window
                 Width = SkinImageBaseWidth,
                 Height = SkinImageBaseHeight
             };
-            var skinImagePath = System.IO.Path.Combine(AppContext.BaseDirectory, "assets\\champions\\splashes\\", skin.Id + ".png");
-            if(File.Exists(skinImagePath) == false)
+            var skinImagePath = Path.Combine(AppContext.BaseDirectory, "assets\\champions\\splashes\\", skin.Id + ".png");
+            if (File.Exists(skinImagePath) == false)
             {
                 await _championService.DownloadImageAsync(skin.ImageUrl, skinImagePath);
             }
             var skinBorder = CreateSkinBorder(skinImagePath, SkinImageBaseWidth, SkinImageBaseHeight, skin.Name);
-
+            var mainSkinPreview = skinBorder.Background;
             if (_selectedSkins.TryGetValue(selected, out var s) && s.Id == skin.Id)
                 SelectBorder(skinBorder, null);
 
@@ -555,7 +557,9 @@ public partial class MainWindow : Window
                     };
 
                     if (_selectedSkins.TryGetValue(selected, out var cs) && cs.Id == chroma.Id)
+                    {
                         SelectCircle(circleBorder, null);
+                    }
 
                     skinPanel.Children.Add(chromaPreviewBorder);
                     Grid.SetRow(chromaPreviewBorder, 1);
@@ -577,8 +581,110 @@ public partial class MainWindow : Window
                 skinPanel.Children.Add(chromasPanelContainer);
             }
 
+            if (skin.Tiers.Count > 0)
+            {
+                var tiersPanel = new WrapPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Bottom,
+                    Margin = new Thickness(5)
+                };
+
+                var tiersPanelContainer = new Border
+                {
+                    CornerRadius = new CornerRadius(10),
+                    Background = new SolidColorBrush(Color.FromArgb(150, 30, 30, 30)),
+                    Child = tiersPanel,
+                    Margin = new Thickness(10),
+                    VerticalAlignment = VerticalAlignment.Bottom
+                };
+
+                foreach (var tier in skin.Tiers)
+                {
+                    skinImagePath = System.IO.Path.Combine(AppContext.BaseDirectory, "assets\\champions\\splashes\\", tier.Id + ".png");
+                    if (File.Exists(skinImagePath) == false)
+                    {
+                        await _championService.DownloadImageAsync(tier.ImageUrl, skinImagePath);
+                    }
+                    var tierPreview = new ImageBrush(new BitmapImage(new Uri(skinImagePath)))
+                    {
+                        Stretch = Stretch.UniformToFill,
+                        AlignmentX = AlignmentX.Center,
+                        AlignmentY = AlignmentY.Center,
+                        Transform = new ScaleTransform(1.0, 1.0, 0.5, 0.5)
+                    };
+                    var ellipseBackground = new Ellipse
+                    {
+                        Width = 22,
+                        Height = 22,
+                        Fill = new SolidColorBrush(Color.FromArgb(150, 255, 255, 255)),
+                    };
+
+                    var stageText = new TextBlock
+                    {
+                        Text = tier.Stage.ToString(),
+                        Foreground = Brushes.Black,
+                        FontWeight = FontWeights.Bold,
+                        FontSize = 12,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center
+                    };
+
+                    var stageGrid = new Grid
+                    {
+                        Width = 22,
+                        Height = 22,
+                        Cursor = Cursors.Hand,
+                        Tag = tier
+                    };
+                    stageGrid.Children.Add(ellipseBackground);
+                    stageGrid.Children.Add(stageText);
+
+                    var circleBorder = new Border
+                    {
+                        CornerRadius = new CornerRadius(20),
+                        BorderThickness = new Thickness(2),
+                        Margin = new Thickness(3),
+                        Child = stageGrid,
+                        Tag = stageGrid
+                    };
+                    var isTierSelected = _selectedSkins.TryGetValue(selected, out var cs) && cs.Id == tier.Id;
+                    if (isTierSelected)
+                    {
+                        skinBorder.Background = tierPreview;
+                        mainSkinPreview = tierPreview;
+                        SelectCircle(circleBorder, null);
+                    }
+                    tiersPanel.Children.Add(circleBorder);
+
+                    circleBorder.MouseDown += SelectCircle;
+                    circleBorder.MouseDown += (s, _) =>
+                    {
+                        skinBorder.Background = tierPreview;
+                        mainSkinPreview = tierPreview;
+                        _selectedSkins[selected] = tier;
+                        SaveSelectedSkins();
+                        Run();
+                    };
+
+                    circleBorder.MouseEnter += (s, _) =>
+                    {
+                        skinBorder.Background = tierPreview;
+                    };
+                    circleBorder.MouseLeave += (s, _) =>
+                    {
+                        skinBorder.Background = mainSkinPreview;
+                    };
+                }
+
+                Grid.SetRow(tiersPanel, 1);
+                skinPanel.Children.Add(tiersPanelContainer);
+            }
+
             ImagePanel.Children.Add(skinPanel);
         }
+        Console.WriteLine();
     }
     private void DragMove(object sender, MouseButtonEventArgs e)
     {
@@ -616,32 +722,23 @@ public partial class MainWindow : Window
 
     private void Run()
     {
-        var selected = _selectedSkins.Values.Select(s => s is Chroma ? $"{s.Name} {s.Id}" : s.Name).ToList();
-        for (int i = 0; i < selected.Count; i++)
-        {
-            selected[i] = selected[i].Replace(":", "");
-        }
         Task.Run(() =>
         {
             try
             {
                 foreach (var kvp in _selectedSkins)
                 {
-
                     var skin = kvp.Value;
-                    var skinName = skin.Name;
-                    /*
-                    * TODO: move all logic to dev repo so I dont have to parse skin names
-                    * idk why I did not make it with dev repo initially
-                    */
-                    skinName = skinName.Replace(":", "");
-                    string skinPath = skin is Chroma ? System.IO.Path.Combine("skins", kvp.Key.Name, "chromas", skinName, $"{skinName} {skin.Id}.zip") 
-                        : System.IO.Path.Combine("skins", kvp.Key.Name, skinName + ".zip");
-                    bool isImported = skin is Chroma ? Directory.Exists(System.IO.Path.Combine("installed", skin.Name + " " + skin.Id))
-                        : Directory.Exists(System.IO.Path.Combine("installed", skin.Name));
-
-                    if (isImported == false)
-                        _toolService.Import(skinPath);
+                    var champion = kvp.Key;
+                    
+                    var skinId = Convert.ToInt32(skin.Id.ToString()
+                        .Substring(champion.Id.ToString().Length,
+                        skin.Id.ToString().Length - champion.Id.ToString().Length));
+                    
+                    string skinPath =  Path.Combine("skins", $"{champion.Id}", $"{skinId}.fantome");
+                    
+                    if (Directory.Exists(Path.Combine("installed", $"{skin.Id}")) == false)
+                        _toolService.Import(skinPath, $"{skin.Id}");
                 }
                 if (_toolProcess != null)
                 {
@@ -650,7 +747,7 @@ public partial class MainWindow : Window
 
             }
             catch {}
-            _toolProcess = _toolService.Run(selected);
+            _toolProcess = _toolService.Run(_selectedSkins.Values.Select(x => x.Id.ToString()).ToList());
         });
     }
 

@@ -39,12 +39,6 @@ public partial class SettingsWindow : Window
 
         _updateService.OnUpdating += message => _preloader.SetStatus(message);
 
-        _toolService.SkinInstalled += skinName =>
-            _preloader.SetStatus($"Installing {skinName}\n{_toolService.InstalledSkins} / {_toolService.InstallSkinCount}");
-
-        _toolService.ChromaInstalled += chromaName =>
-            _preloader.SetStatus($"Installing {chromaName}\n{_toolService.InstalledChromas} / {_toolService.InstallChromaCount}");
-
         _skinService.OnDownloaded += (message) => _preloader.SetStatus(message);
         _championService.OnDownloaded += (message) => _preloader.SetStatus(message);
 
@@ -84,39 +78,11 @@ public partial class SettingsWindow : Window
 
         HidePreloader();
     }
-
-    private void InstallSkins(object sender, RoutedEventArgs e)
-    {
-        var result = new CustomMessageBox("Warning", "Do you want to install all skins at once? \nIt will reduce time to apply skin but may take a lot of time and it will cost a lot of PC resourses", this) { Owner = this }.ShowDialog();
-
-        if (result == false)
-            return;
-
-        ShowPreloader();
-        _toolService.LoadBasicSkins(1);
-        HidePreloader();
-        StatusLabel.Content = "Skins installed";
-    }
-
-    private void InstallChromas(object sender, RoutedEventArgs e)
-    {
-        var result = new CustomMessageBox("Warning", "Do you want to install all skins at once? \nIt will reduce time to apply skin but may take ACTUALLY A LOT OF TIME and it will cost a lot of PC resourses", this) { Owner = this }.ShowDialog();
-
-        if (result == false)
-            return;
-
-        ShowPreloader();
-        _toolService.LoadChromas(1);
-        HidePreloader();
-        StatusLabel.Content = "Chromas installed";
-    }
-
     private void Close(object sender, MouseButtonEventArgs e)
     {
         _preloader.Close();
         Close();
     }
-
     private void DragWindow(object sender, MouseButtonEventArgs e)
     {
         if (e.ChangedButton == MouseButton.Left)
@@ -124,7 +90,6 @@ public partial class SettingsWindow : Window
             try { DragMove(); } catch { }
         }
     }
-
     private void SelectGameFolder(object sender, RoutedEventArgs e)
     {
         var dialog = new CommonOpenFileDialog
@@ -146,7 +111,6 @@ public partial class SettingsWindow : Window
             PathSelected?.Invoke(_gamePath);
         }
     }
-
     private async void DownloadSkinsPreview(object sender, RoutedEventArgs e)
     {
         ShowPreloader();

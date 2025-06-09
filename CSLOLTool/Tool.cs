@@ -66,14 +66,14 @@ public class Tool
         }
     }
 
-    public void Import(string src)
+    public void Import(string src, string name)
     {
         if (File.Exists(src) == false)
             return;
         var modInfo = GetModInfoFromZip(src);
         if (modInfo == null)
             return;
-        var path = Path.Combine(_programPath, "installed", modInfo.Name);
+        var path = Path.Combine(_programPath, "installed", name);
         var args = new List<string>
         {
             "import",

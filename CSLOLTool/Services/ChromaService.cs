@@ -7,7 +7,7 @@ public class ChromaService
 {
     private readonly string _imageEndpoint = "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/";
 
-    public async Task<List<Chroma>> LoadChromasAsync(int championId)
+    public async Task<List<Chroma>> GetChromasAsync(int championId)
     {
         using var http = new HttpClient();
 

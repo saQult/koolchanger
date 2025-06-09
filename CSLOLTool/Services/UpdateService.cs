@@ -1,4 +1,5 @@
-﻿using System.IO.Compression;
+﻿using CSLOLTool.Models;
+using System.IO.Compression;
 
 namespace CSLOLTool.Services;
 public class UpdateService
@@ -6,9 +7,9 @@ public class UpdateService
     public event Action<string>? OnUpdating;
     public async Task DownloadSkins()
     {
-        string repoName = "lol-skins";
+        string repoName = "lol-skins-developer";
         string branch = "main";
-        string zipUrl = $"https://github.com/darkseal-org/lol-skins/archive/refs/heads/main.zip";
+        string zipUrl = $"https://github.com/darkseal-org/{repoName}/archive/refs/heads/{branch}.zip";
 
         string tempDir = Path.Combine(Path.GetTempPath(), $"lolskins-{Guid.NewGuid()}");
         string zipPath = Path.Combine(tempDir, "repo.zip");
@@ -18,7 +19,7 @@ public class UpdateService
         try
         {
             Directory.CreateDirectory(tempDir);
-            OnUpdating?.Invoke("Downloading skins repo");
+            OnUpdating?.Invoke("Downloading skins repo...");
 
             using (HttpClient client = new HttpClient())
             using (var response = await client.GetAsync(zipUrl))
@@ -28,24 +29,31 @@ public class UpdateService
                 await response.Content.CopyToAsync(fs);
             }
 
-            OnUpdating?.Invoke("Unzipping skins repo");
+            OnUpdating?.Invoke("Unzipping skins repo...");
             ZipFile.ExtractToDirectory(zipPath, extractPath);
 
             string extractedRepoPath = Path.Combine(extractPath, $"{repoName}-{branch}");
-            string skinsSourcePath = Path.Combine(extractedRepoPath, "skins");
 
-            if (!Directory.Exists(skinsSourcePath))
+            if (!Directory.Exists(extractedRepoPath))
             {
-                OnUpdating?.Invoke("Folder 'skins' not found");
+                OnUpdating?.Invoke("Extracted repo folder not found");
                 return;
             }
 
-            OnUpdating?.Invoke("Copying folder 'skins'...");
+            OnUpdating?.Invoke("Copying champion folders...");
             if (Directory.Exists(targetDir))
                 Directory.Delete(targetDir, true);
 
-            CopyDirectory(skinsSourcePath, targetDir);
-            OnUpdating?.Invoke("Finished copying 'skins' folder");
+            Directory.CreateDirectory(targetDir);
+
+            foreach (string dir in Directory.GetDirectories(extractedRepoPath))
+            {
+                string folderName = Path.GetFileName(dir);
+                string dest = Path.Combine(targetDir, folderName);
+                CopyDirectory(dir, dest);
+            }
+
+            OnUpdating?.Invoke("Finished copying folders");
         }
         catch (Exception ex)
         {
@@ -58,9 +66,10 @@ public class UpdateService
                 if (Directory.Exists(tempDir))
                     Directory.Delete(tempDir, true);
             }
-            catch {  }
+            catch { }
         }
     }
+
     static void CopyDirectory(string sourceDir, string targetDir)
     {
         Directory.CreateDirectory(targetDir);

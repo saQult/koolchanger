@@ -10,7 +10,7 @@
         AllowsTransparency="True"
         ShowInTaskbar="False"
         Title="Settings"
-        Height="400"
+        Height="300"
         Width="500"
         MouseDown="DragWindow">
 
@@ -84,12 +84,6 @@
                 <Button Content="Download skins preview" Width="200" Height="40" Margin="0,0,0,10"
                         Click="DownloadSkinsPreview"
                         Style="{StaticResource MaterialPurpleButton}"/>
-                <Button Content="Install Skins" Width="200" Height="40" Margin="0,0,0,10"
-                        Click="InstallSkins"
-                        Style="{StaticResource MaterialPurpleButton}"/>
-                <Button Content="Install Chromas" Width="200" Height="40"
-                        Click="InstallChromas"
-                        Style="{StaticResource MaterialPurpleButton}"/>
             </StackPanel>
 
 
@@ -104,7 +98,32 @@
                    VerticalAlignment="Top"
                    HorizontalAlignment="Right"
                    Margin="10"
-                   MouseDown="Close"/>
+                   MouseDown="Close"
+                   Cursor="Hand">
+                <Image.Style>
+                    <Style TargetType="Image">
+                        <Setter Property="Width" Value="24" />
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="Width" To="25" Duration="0:0:0.2" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="Width" To="20" Duration="0:0:0.2" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Image.Style>
+            </Image>
         </Grid>
     </Border>
 </Window>
