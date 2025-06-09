@@ -5,7 +5,7 @@ A user-friendly skin changer for **League of Legends**, allowing you to use **sk
 
 ## ✨ Features
 
-- 🔁 Supports ***all** skins, chromas and special forms
+- 🔁 Supports **all** skins, chromas and special forms
 - 🎨 Skin preview before applying
 - 👀 User-friendly interface
 - ♻️ Simple usage - apply skins with one click
