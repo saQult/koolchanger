@@ -15,8 +15,6 @@ A user-friendly skin changer for **League of Legends**, allowing you to use **sk
 ## 👀 Preview
 ![KoolChanger_kyJyfrmbKJ](https://github.com/user-attachments/assets/a0559a96-3243-44a3-a3a5-901e1a6009dc)
 
-
-
 ---
 
 ## 📥 Installation
@@ -49,7 +47,6 @@ A lot of stuff actually 😅
 - Cleanup code
 - Custom skins support
 - cslol manager integration
-- Fix that installation skins and chromas makes ur pc boom
 - Fix A LOT of bugs
 - Auto update all skins and champions repo
    
