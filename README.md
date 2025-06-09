@@ -1,24 +1,23 @@
 # 😎 KOOLChanger
-A user-friendly skin changer for **League of Legends**, allowing you to use **skins** and **chromas**
+A skin changer for **League of Legends**, allowing you to use **skins** and **chromas**
 
 ---
 
-## ✨ Features
+## Features
 
-- 🔁 Supports **all** skins, chromas and special forms
-- 🎨 Skin preview before applying
-- 👀 User-friendly interface
-- ♻️ Simple usage - apply skins with one click
+- Supports **all** skins, chromas and special forms
+- Skin preview before applying
+- Simple usage - apply skins with one click
 
 ---
 
-## 👀 Preview
+## Preview
 ![KoolChanger_9RCA3qGznp](https://github.com/user-attachments/assets/87f2300b-0458-4085-b0b3-a8b9a99ffde9)
 
 
 ---
 
-## 📥 Installation
+## Installation
 
 Before installation, be sure you have **.NET 8 Runtime** ([**download link**](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)) on your PC 
 
@@ -29,7 +28,7 @@ Before installation, be sure you have **.NET 8 Runtime** ([**download link**](ht
 
 ---
 
-## ⚒ Usage
+## Usage
 
 1. Select any skin you want
 2. Wait before status bar shows **"Skins applied"**
@@ -38,12 +37,12 @@ Before installation, be sure you have **.NET 8 Runtime** ([**download link**](ht
 
 ---
 
-## 🤔 How this works
+## How this works
 Basicaly, it uses [cslolmanager tool](https://github.com/LeagueToolkit/cslol-manager/tree/master/cslol-tools) cli to install and load .fantome files from [dark seal's repository](https://github.com/darkseal-org/lol-skins-developer)
 
 ---
 
-## ✅ ToDo
+## ToDo
 A lot of stuff actually 😅
 - Cleanup code
 - Custom skins support
