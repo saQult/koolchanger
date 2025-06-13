@@ -86,6 +86,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.5" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client.Core" Version="9.0.6" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="WpfAnimatedGif" Version="2.0.2" />
   </ItemGroup>
@@ -94,6 +95,13 @@
     <ProjectReference Include="..\CSLOLTool\CSLOLTool.csproj" />
   </ItemGroup>
 
+
+
+  <ItemGroup>
+    <Reference Include="LCUSharp">
+      <HintPath>..\..\..\..\Downloads\lcu-sharp-master\LCUSharp\bin\Debug\net5.0\publish\LCUSharp.dll</HintPath>
+    </Reference>
+  </ItemGroup>
   <ItemGroup>
     <Resource Include="Fonts\Comfortaa-Bold.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

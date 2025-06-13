@@ -2,12 +2,13 @@
 using CSLOLTool.Models;
 using CSLOLTool.Services;
 using KoolChanger.Helpers;
+using LCUSharp;
+using LCUSharp.Websocket;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using Newtonsoft.Json;
-using System;
 using System.Diagnostics;
 using System.IO;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -28,11 +29,17 @@ public partial class MainWindow : Window
     private readonly ChampionService _championService = new();
     private readonly UpdateService _updateService = new();
     private ToolService _toolService = new("");
+    private LobbyService _lobbyService = new();
+    private LCUService _lcuService = new();
 
     private List<Champion> _champions = new();
     private List<ChampionListItem> _championsList = new();
     private Dictionary<Champion, Skin> _selectedSkins = new();
+    private Dictionary<Champion, Skin> _savedSelectedSkins = new();
+    private LobbyData _currentLobby;
+
     private Process _toolProcess = new();
+    private HubConnection _lobbyConnection;
 
     private SolidColorBrush _primaryBrush = new((Color)ColorConverter.ConvertFromString("#f5dbff"));
 
@@ -141,7 +148,6 @@ public partial class MainWindow : Window
             await _championService.DownloadAllPreviews();
         }
     }
-
     private void LoadChampionListBoxItems()
     {
         foreach (var champion in _champions)
@@ -151,7 +157,6 @@ public partial class MainWindow : Window
         }
         championListBox.ItemsSource = _championsList;
     }
-
     public void LoadConfig()
     {
         if (File.Exists("config.json"))
@@ -258,9 +263,7 @@ public partial class MainWindow : Window
         }
         catch { }
     }
-
     #endregion
-
     #region Data
     private async Task DownloadIcons()
     {
@@ -334,7 +337,6 @@ public partial class MainWindow : Window
     }
 
     #endregion
-
     #region UI
     private void ShowPreloader()
     {
@@ -479,9 +481,22 @@ public partial class MainWindow : Window
                 SelectBorder(skinBorder, null);
 
             skinBorder.MouseDown += SelectBorder;
-            skinBorder.MouseDown += (s, _) =>
+            skinBorder.MouseDown += async (s, _) =>
             {
                 _selectedSkins[selected] = skin;
+                if (_lobbyConnection != null)
+                {
+                    var data = _selectedSkins.ToDictionary(kvp => kvp.Key.Id, kvp => kvp.Value);
+                    try
+                    {
+                        await _lobbyConnection.InvokeAsync("SendMessage", _currentLobby.LobbyId,
+                            JsonConvert.SerializeObject(data));
+                    } catch(Exception ex)
+                    {
+                        new CustomMessageBox("Error!", "Error applying skin: " + ex.Message, this).ShowDialog();
+                    }
+
+                }
                 SaveSelectedSkins();
                 Run();
             };
@@ -497,7 +512,6 @@ public partial class MainWindow : Window
             ImagePanel.Children.Add(skinPanel);
         }
     }
-
     private Grid CreateSkinPanel()
     {
         return new Grid
@@ -507,14 +521,12 @@ public partial class MainWindow : Window
             Height = SkinImageBaseHeight
         };
     }
-
     private async Task DownloadSkinPreview(Skin skin)
     {
         var path = Path.Combine(AppContext.BaseDirectory, "assets\\champions\\splashes\\", skin.Id + ".png");
         if (!File.Exists(path))
             await _championService.DownloadImageAsync(skin.ImageUrl, path);
     }
-
     private async Task AddChromasAsync(Skin skin, Champion selected, Grid skinPanel)
     {
         var chromasPanel = new WrapPanel
@@ -585,10 +597,24 @@ public partial class MainWindow : Window
                 SelectCircle(circleBorder, null);
 
             circleBorder.MouseDown += SelectCircle;
-            circleBorder.MouseDown += (s, _) =>
+            circleBorder.MouseDown += async (s, _) =>
             {
                 _selectedSkins[selected] = chroma;
-                SaveSelectedSkins();
+                if (_lobbyConnection != null)
+                {
+                    var data = _selectedSkins.ToDictionary(kvp => kvp.Key.Id, kvp => kvp.Value);
+                    try
+                    {
+                        await _lobbyConnection.InvokeAsync("SendMessage", _currentLobby.LobbyId,
+                            JsonConvert.SerializeObject(data));
+                    }
+                    catch (Exception ex)
+                    {
+                        new CustomMessageBox("Error!", "Error applying skin: " + ex.Message, this).ShowDialog();
+                    }
+                }
+                else
+                    SaveSelectedSkins();
                 Run();
             };
 
@@ -603,7 +629,6 @@ public partial class MainWindow : Window
         Grid.SetRow(chromasPanel, 1);
         skinPanel.Children.Add(chromasPanelContainer);
     }
-
     private void AddSpecialForms(Skin skin, Champion selected, Grid skinPanel)
     {
         var skinId = Convert.ToInt32(skin.Id.ToString().Substring(selected.Id.ToString().Length));
@@ -670,7 +695,7 @@ public partial class MainWindow : Window
             };
 
             circleBorder.MouseDown += SelectCircle;
-            circleBorder.MouseDown += (s, _) =>
+            circleBorder.MouseDown += async (s, _) =>
             {
                 SkinForm formSkin = new()
                 {
@@ -682,7 +707,21 @@ public partial class MainWindow : Window
                 };
 
                 _selectedSkins[selected] = formSkin;
-                SaveSelectedSkins();
+                if (_lobbyConnection != null)
+                {
+                    var data = _selectedSkins.ToDictionary(kvp => kvp.Key.Id, kvp => kvp.Value);
+                    try
+                    {
+                        await _lobbyConnection.InvokeAsync("SendMessage", _currentLobby.LobbyId,
+                            JsonConvert.SerializeObject(data));
+                    }
+                    catch (Exception ex)
+                    {
+                        new CustomMessageBox("Error!", "Error applying skin: " + ex.Message, this).ShowDialog();
+                    }
+                }
+                else
+                    SaveSelectedSkins();
                 Run();
             };
 
@@ -698,7 +737,6 @@ public partial class MainWindow : Window
         Grid.SetRow(formsPanel, 1);
         skinPanel.Children.Add(formsPanelContainer);
     }
-
     private Grid CreateFormGrid(string name)
     {
         var formText = new TextBlock
@@ -728,8 +766,6 @@ public partial class MainWindow : Window
         formGrid.Children.Add(formText);
         return formGrid;
     }
-
-
     private void DragMove(object sender, MouseButtonEventArgs e)
     {
         try
@@ -761,9 +797,139 @@ public partial class MainWindow : Window
         await LoadChampionsData();
         Effect = null;
     }
-
     #endregion
+    #region Party mode
+    private async void EnablePartyMode(object sender, RoutedEventArgs e)
+    {
+        partyModeCheckbox.IsEnabled = false;
+        ShowPreloader();
+        
+        BackupSelectedSkins();
 
+        await _lcuService.ConnectAsync();
+        try
+        {
+            _currentLobby = await _lobbyService.ExtractLobbyInfoAsync();
+            await ConnectToLobby(_currentLobby);
+        }
+        catch { }
+        _lcuService.GameFlowChanged += OnGameFlowChanged;
+        _lcuService.SubscrbeLobbyEvent();
+
+        HidePreloader();
+        partyModeCheckbox.IsEnabled = true;
+    }
+    private async void DisablePartyMode(object sender, RoutedEventArgs e)
+    {
+        RestoreSelectedSkins();
+        await _lobbyConnection.DisposeAsync();
+        _lcuService.Api.Disconnect();
+        Dispatcher.Invoke(() => lobbyStatusLabel.Content = "Lobby status: disconnected");
+    }
+    private void BackupSelectedSkins()
+    {
+        if (_savedSelectedSkins.Count > 0)
+            _savedSelectedSkins = _selectedSkins;
+        _selectedSkins = new();
+    }
+    private void RestoreSelectedSkins()
+    {
+        _selectedSkins = _savedSelectedSkins;
+        _savedSelectedSkins = new();
+    }
+    private async void OnGameFlowChanged(object? sender, LeagueEvent e)
+    {
+        var data = e.Data.ToString();
+
+        if (data == "Lobby")
+        {
+            _currentLobby = await _lobbyService.ExtractLobbyInfoAsync();
+            await ConnectToLobby(_currentLobby);
+        }
+    }
+    private async Task ConnectToLobby(LobbyData lobby)
+    {
+        try
+        {
+            _lobbyConnection = _lobbyService.CreateConnection();
+            RegisterLobbyHandlers();
+
+            await _lobbyConnection.StartAsync();
+            await JoinOrCreateLobby(lobby);
+            Dispatcher.Invoke(() => lobbyStatusLabel.Content = "Lobby status: connected");
+        }
+        catch  
+        {
+            Dispatcher.Invoke(() => new CustomMessageBox("Error!", "Failed to connect to looby, try again", this).ShowDialog());
+        }
+
+    }
+    private void RegisterLobbyHandlers()
+    {
+        _lobbyConnection.On<LobbyMember>("MemberJoined", async member =>
+        {
+            var data = _selectedSkins.ToDictionary(kvp => kvp.Key.Id, kvp => kvp.Value);
+            try
+            {
+                await _lobbyConnection.InvokeAsync("SendMessage", _currentLobby.LobbyId,
+                    JsonConvert.SerializeObject(data));
+            }
+            catch (Exception ex)
+            {
+                new CustomMessageBox("Error!", "Error applying skin: " + ex.Message, this).ShowDialog();
+            }
+        });
+
+        _lobbyConnection.On<string, string, string>("ReceiveMessage", (lobbyId, puuid, msg) =>
+        {
+            if (puuid == _currentLobby.LocalMember.Puuid)
+                return;
+            MessageBox.Show(msg);
+            Dispatcher.Invoke(() => { });
+
+            var data = JsonConvert.DeserializeObject<Dictionary<int, Skin>>(msg);
+            if (data == null)
+                return;
+
+            var skins = data.ToDictionary(
+                kvp => _champions.First(c => c.Id == kvp.Key),
+                kvp => kvp.Value
+            );
+
+            if (skins == null)
+                return;
+
+            foreach (var pair in skins)
+            {
+                _selectedSkins[pair.Key] = pair.Value;
+            }
+
+            Run();
+        });
+    }
+    private async Task JoinOrCreateLobby(LobbyData lobby)
+    {
+        bool lobbyFound = false;
+
+        foreach (var member in lobby.Members)
+        {
+            var result = await _lobbyConnection.InvokeAsync<bool>("JoinLobby", member.Puuid, lobby.LocalMember.Puuid);
+            if (result)
+            {
+                lobbyFound = true;
+                _currentLobby.LobbyId = member.Puuid;
+                break;
+            }
+        }
+
+        if (!lobbyFound)
+        {
+            await _lobbyConnection.InvokeAsync("CreateLobby", lobby.LocalMember.Puuid, lobby.LocalMember.Puuid);
+            Dispatcher.Invoke(() => lobbyStatusLabel.Content = "Lobby status: connected");
+            _currentLobby.LobbyId = lobby.LocalMember.Puuid;
+        }
+    }
+    #endregion
     private void Run()
     {
         Task.Run(() =>
@@ -807,9 +973,9 @@ public partial class MainWindow : Window
         });
     }
 
-    public class ChampionListItem (string iconUrl, string name)
-    {
-        public string IconUrl { get; set; } = iconUrl;
-        public string Name { get; set; } = name;
-    } 
+}
+public class ChampionListItem(string iconUrl, string name)
+{
+    public string IconUrl { get; set; } = iconUrl;
+    public string Name { get; set; } = name;
 }

@@ -1,23 +1,23 @@
 # 😎 KOOLChanger
-A user-friendly skin changer for **League of Legends**, allowing you to use **skins** and **chromas**
+A skin changer for **League of Legends**, allowing you to use **skins** and **chromas**
 
 ---
 
-## ✨ Features
+## Features
 
-- 🔁 Supports both **champion skins** and **chromas**
-- 🎨 Skin preview before applying
-- 👀 User-friendly interface
-- ♻️ Simple usage - apply skins with one click
-
----
-
-## 👀 Preview
-![KoolChanger_uEbYFWq5EN](https://github.com/user-attachments/assets/29cc9799-97c0-4a35-9c6c-842b8528db77)
+- Supports **all** skins, chromas and special forms
+- Skin preview before applying
+- Simple usage - apply skins with one click
 
 ---
 
-## 📥 Installation
+## Preview
+![KoolChanger_9RCA3qGznp](https://github.com/user-attachments/assets/87f2300b-0458-4085-b0b3-a8b9a99ffde9)
+
+
+---
+
+## Installation
 
 Before installation, be sure you have **.NET 8 Runtime** ([**download link**](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)) on your PC 
 
@@ -28,7 +28,7 @@ Before installation, be sure you have **.NET 8 Runtime** ([**download link**](ht
 
 ---
 
-## ⚒ Usage
+## Usage
 
 1. Select any skin you want
 2. Wait before status bar shows **"Skins applied"**
@@ -37,24 +37,26 @@ Before installation, be sure you have **.NET 8 Runtime** ([**download link**](ht
 
 ---
 
-## 🤔 How this works
-Basicaly, it uses [cslolmanager tool](https://github.com/LeagueToolkit/cslol-manager/tree/master/cslol-tools) cli to install and load .WAD files from [dark seal's repository](https://github.com/darkseal-org/lol-skins)
+## How this works
+Basicaly, it uses [cslolmanager tool](https://github.com/LeagueToolkit/cslol-manager/tree/master/cslol-tools) cli to install and load .fantome files from [dark seal's repository](https://github.com/darkseal-org/lol-skins-developer)
 
 ---
 
-## ✅ ToDo
+## ToDo
 A lot of stuff actually 😅
 - Cleanup code
 - Custom skins support
 - cslol manager integration
+- Party mode
 - Fix A LOT of bugs
 - Auto update all skins and champions repo
+- Fix elementalist lux forms previews
    
 ---
 
 ## 🙏 Special thanks
 - [cslolmanager tool](https://github.com/LeagueToolkit/cslol-manager/tree/master/cslol-tools) - main tool to apply skins
-- [All of dark seal's contributors](https://github.com/darkseal-org/lol-skins) - all skins are from this repo
+- [All of dark seal's contributors](https://github.com/darkseal-org/lol-skins-developer) - all skins are from this repo
 
 ---
 
