@@ -884,7 +884,6 @@ public partial class MainWindow : Window
         {
             if (puuid == _currentLobby.LocalMember.Puuid)
                 return;
-            MessageBox.Show(msg);
             Dispatcher.Invoke(() => { });
 
             var data = JsonConvert.DeserializeObject<Dictionary<int, Skin>>(msg);
