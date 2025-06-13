@@ -38,7 +38,7 @@ Before installation, be sure you have **.NET 8 Runtime** ([**download link**](ht
 
 # Party mode
 
-### Attention
+### ⚠ ATTENTION ⚠
 **If you are in Russia or in any country with banned cloudflare use any kind of bypass services like vpn or zapret if you want to use our free server**
 
 By default party mode connects to remote server "mrekk.ru"
