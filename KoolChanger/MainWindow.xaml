@@ -8,7 +8,7 @@
     mc:Ignorable="d"
     Title="KOOLChanger"
     KeyDown="CheckForCombinations"
-    Height="710" Width="1160"
+    Height="730" Width="1160"
     WindowStartupLocation="CenterScreen"
     AllowsTransparency="True"
     Background="Transparent"
@@ -21,7 +21,7 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="60"/>
+                <RowDefinition Height="80"/>
             </Grid.RowDefinitions>
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -378,10 +378,13 @@
                        Margin="10" Foreground="#f5dbff" FontSize="20"
                        VerticalAlignment="Center"/>
                 <StackPanel Grid.Column="1">
-                    <Label x:Name="lobbyStatusLabel"
-                           Margin="0,0,10,0" Foreground="#f5dbff" FontSize="20"
+                    <Label x:Name="lobbyStatusLabel" Content=""
+                           Margin="0,0,10,0" Foreground="#f5dbff" FontSize="14"
                            VerticalAlignment="Center" HorizontalAlignment="Right"/>
-                    <Label x:Name="lobbyIdLabel"
+                    <Label x:Name="lobbyIdLabel" Content=""
+                           Margin="0,0,10,0" Foreground="#f5dbff" FontSize="14"
+                           VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                    <Label x:Name="membersLabel" Content=""
                            Margin="0,0,10,0" Foreground="#f5dbff" FontSize="14"
                            VerticalAlignment="Center" HorizontalAlignment="Right"/>
                 </StackPanel>
