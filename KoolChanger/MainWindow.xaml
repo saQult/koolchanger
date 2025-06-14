@@ -7,6 +7,7 @@
     xmlns:local="clr-namespace:KoolChanger"
     mc:Ignorable="d"
     Title="KOOLChanger"
+    KeyDown="CheckForCombinations"
     Height="710" Width="1160"
     WindowStartupLocation="CenterScreen"
     AllowsTransparency="True"
@@ -26,6 +27,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="300" />
                     <ColumnDefinition Width="*" />
+                    <ColumnDefinition Name="debugColum" Width="0" />
                 </Grid.ColumnDefinitions>
 
                 <!-- Sidebar -->
@@ -246,9 +248,9 @@
                             </CheckBox.Template>
                             Enable party mode
                         </CheckBox>
-                        <StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Right" Cursor="">
+                        <StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Right" Cursor="" >
                             <!-- Settings -->
-                            <Image Source="/assets/settings.png" Cursor="Hand" MouseDown="OpenSettings">
+                            <Image Source="/assets/settings.png" Cursor="Hand" MouseDown="OpenSettings" VerticalAlignment="Top" Margin="0,15,0,0">
                                 <Image.Style>
                                     <Style TargetType="Image">
                                         <Setter Property="Width" Value="24" />
@@ -275,7 +277,7 @@
                             </Image>
 
                             <!-- Minimize -->
-                            <Image Source="/assets/minimizeicon.png" Cursor="Hand" MouseDown="Minimize" Margin="10,0,0,0">
+                            <Image Source="/assets/minimizeicon.png" Cursor="Hand" MouseDown="Minimize" Margin="10,15,0,0" VerticalAlignment="Top">
                                 <Image.Style>
                                     <Style TargetType="Image">
                                         <Setter Property="Width" Value="24" />
@@ -302,7 +304,7 @@
                             </Image>
 
                             <!-- Close -->
-                            <Image Source="/assets/closeicon.png" Cursor="Hand" MouseDown="CloseApp" Margin="10,0,10,0">
+                            <Image Source="/assets/closeicon.png" Cursor="Hand" MouseDown="CloseApp" Margin="10,15,15,0" VerticalAlignment="Top">
                                 <Image.Style>
                                     <Style TargetType="Image">
                                         <Setter Property="Width" Value="24" />
@@ -363,21 +365,26 @@
                         <WrapPanel x:Name="ImagePanel" />
                     </ScrollViewer>
                 </Grid>
+                <Border Name="debugBorder" Grid.Column="2" Height="600" Width="350"></Border>
             </Grid>
 
             <!-- Status -->
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="300"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <Label x:Name="statusLabel" Content="Status: waiting"
                        Margin="10" Foreground="#f5dbff" FontSize="20"
                        VerticalAlignment="Center"/>
-                <Label x:Name="lobbyStatusLabel" Content="" 
-                       Grid.Column="1"
-                       Margin="0" Foreground="#f5dbff" FontSize="20"
-                       VerticalAlignment="Center"/>
+                <StackPanel Grid.Column="1">
+                    <Label x:Name="lobbyStatusLabel"
+                           Margin="0,0,10,0" Foreground="#f5dbff" FontSize="20"
+                           VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                    <Label x:Name="lobbyIdLabel"
+                           Margin="0,0,10,0" Foreground="#f5dbff" FontSize="14"
+                           VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                </StackPanel>
             </Grid>
         </Grid>
 

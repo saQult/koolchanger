@@ -12,7 +12,7 @@ public class LobbyService
     {
         return new HubConnectionBuilder()
              .WithUrl(_url)
-             .WithAutomaticReconnect()
+             .WithAutomaticReconnect([TimeSpan.Zero, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(5)])
              .Build();
     }
 
@@ -30,7 +30,7 @@ public class LobbyService
 
         var localMember = new LocalMember
         {
-            Puuid = localMemberJson.GetProperty("puuid").GetString(),
+            Puuid = localMemberJson.GetProperty("puuid").GetString()!,
         };
 
         var membersJson = root.GetProperty("members");
@@ -40,7 +40,7 @@ public class LobbyService
         {
             members.Add(new LobbyMember
             {
-                Puuid = memberJson.GetProperty("puuid").GetString(),
+                Puuid = memberJson.GetProperty("puuid").GetString()!,
                 IsLeader = memberJson.GetProperty("isLeader").GetBoolean()
             });
         }
