@@ -60,6 +60,8 @@ First of all, it completly removes all of your selected skins (after disabling i
    
 Use party mode if you trust your friends because they can make u play with some ugly skin XD
 
+To open debug log press **F1**
+
 ---
 
 ## How this works
