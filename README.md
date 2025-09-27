@@ -6,13 +6,14 @@ A skin changer for **League of Legends**, allowing you to use **skins** and **ch
 ## Features
 
 - Supports **all** skins, chromas and special forms
+- Custom skins support
 - Skin preview before applying
 - Simple usage - apply skins with one click
 - Party mode
 ---
 
 ## Preview
-![preview](https://github.com/user-attachments/assets/4beb409e-7edb-4a16-bf2c-3a3212ab4394)
+![preview](https://github.com/user-attachments/assets/8da874ee-2b3b-49e4-a265-6ae1ddf6ae39)
 
 ---
 
@@ -33,6 +34,13 @@ Before installation, be sure you have **.NET 8 Runtime** ([**download link**](ht
 2. Wait before status bar shows **"Skins applied"**
 3. In game when choosing champion select **default** champion skin
 4. Enjoy 🤗
+
+## Custom Skins
+
+1. Open custom skins menu by pressing on button "Custom skins"
+2. Drag and drop archive with the custom skin
+3. Enable it
+4. Enjoy your gassy gragor skin
 
 ---
 
@@ -56,7 +64,8 @@ First of all, it completly removes all of your selected skins (after disabling i
 4. When you are in league lobby, KoolChanger checks if someone already created lobby with UUID of any lobby members, if not, it creates lobby hub in remote server
 5. When someone joins, all other players send their skins to joined player
 6. If someone select any skin, this skin sends to another lobby members
-   
+
+# PARTY MODE DOES NOT WORK WITH CUSTOM SKINS (at least for now)
    
 Use party mode if you trust your friends because they can make u play with some ugly skin XD
 
@@ -72,17 +81,16 @@ Basicaly, it uses [cslolmanager tool](https://github.com/LeagueToolkit/cslol-man
 ## ToDo
 A lot of stuff actually 😅
 - **CLEANUP CODE**
-- Custom skins support
-- cslol manager integration
 - Fix A LOT of bugs
-- Auto update all skins and champions repo
+- Party mode with custom skins
 - Fix elementalist lux forms previews
-   
+- Add more info to custom skins (image, author links etc)
+
 ---
 
 ## 🙏 Special thanks
 - [cslolmanager tool](https://github.com/LeagueToolkit/cslol-manager/tree/master/cslol-tools) - main tool to apply skins
-- [All of dark seal's contributors](https://github.com/darkseal-org/lol-skins-developer) - all skins are from this repo
+- [All of dark seal's contributors](https://github.com/darkseal-org/lol-skins) - all skins are from this repo
 - [LCU api](https://github.com/bryanhitc/lcu-sharp) - used to parse lobby data
 
 ---
