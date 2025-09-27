@@ -8,7 +8,7 @@ public class Champion
 
     public override bool Equals(object? obj)
     {
-        if (obj is not Champion && obj is null)
+        if (obj is not Champion || obj is null)
             return false;
         return (obj as Champion)!.Id == Id;
     }

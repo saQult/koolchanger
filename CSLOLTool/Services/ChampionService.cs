@@ -24,8 +24,10 @@ public class ChampionService
         foreach (var element in root.EnumerateArray())
         {
             int id = element.GetProperty("id").GetInt32();
-            if(id < 0 ) continue;
+            if(id < 0) continue;
             string name = element.GetProperty("name").GetString() ?? "Unknown";
+
+            if (name.ToLower().Contains("doom")) continue;
 
             champions.Add(new Champion
             {

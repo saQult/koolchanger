@@ -14,7 +14,6 @@ public class SkinService
     private readonly string _chromaEndpoint = "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/";
     public event Action<string>? OnDownloaded;
     public event Action<string>? OnError;
-
     private readonly HttpClient _httpClient = new HttpClient();
     public SkinFromFileInfo? GetModInfoFromZip(string zipPath)
     {
@@ -107,7 +106,6 @@ public class SkinService
 
         return skins;
     }
-
     public async Task<List<Champion>> GetAllSkinsAsync(List<Champion> champions)
     {
         var semaphore = new SemaphoreSlim(50);

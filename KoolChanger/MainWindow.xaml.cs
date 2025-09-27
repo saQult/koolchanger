@@ -1,11 +1,8 @@
-﻿using CSLOLTool.Dto;
-using CSLOLTool.Models;
+﻿using CSLOLTool.Models;
 using CSLOLTool.Services;
 using KoolChanger.Helpers;
-using LCUSharp;
 using LCUSharp.Websocket;
 using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.VisualBasic.Logging;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using Newtonsoft.Json;
 using System.Diagnostics;
@@ -482,10 +479,19 @@ public partial class MainWindow : Window
             if (_selectedSkins.TryGetValue(selected, out var s) && s.Id == skin.Id)
                 SelectBorder(skinBorder, null);
 
-            skinBorder.MouseDown += SelectBorder;
             skinBorder.MouseDown += async (s, _) =>
             {
+                if(IsSkinDownloaded(skin) == false)
+                {
+                    new CustomMessageBox("Error!", "This skin does not exists.\n" +
+                        "Try to re-download skins or put it manually.\n" +
+                        $"Current skin id - {skin.Id}", this).ShowDialog();
+                    return;
+                }
+                SelectBorder(s, _);
                 _selectedSkins[selected] = skin;
+                
+
                 await SendSkinDataToParty();
                 Run();
             };
@@ -585,9 +591,17 @@ public partial class MainWindow : Window
             if (_selectedSkins.TryGetValue(selected, out var cs) && cs.Id == chroma.Id)
                 SelectCircle(circleBorder, null);
 
-            circleBorder.MouseDown += SelectCircle;
             circleBorder.MouseDown += async (s, _) =>
             {
+                if (IsSkinDownloaded(skin) == false)
+                {
+                    new CustomMessageBox("Error!", "This skin does not exists.\n" +
+                        "Try to re-download skins or put it manually.\n" +
+                        $"Current skin id - {skin.Id}", this).ShowDialog();
+                    return;
+                }
+                SelectCircle(s, _);
+
                 _selectedSkins[selected] = chroma;
                 await SendSkinDataToParty();
                 Run();
@@ -682,6 +696,7 @@ public partial class MainWindow : Window
                 };
 
                 _selectedSkins[selected] = formSkin;
+
                 await SendSkinDataToParty();
                 Run();
             };
@@ -915,9 +930,9 @@ public partial class MainWindow : Window
         {
             _lobbyConnection = _lobbyService.CreateConnection();
             RegisterLobbyHandlers();
-
             await _lobbyConnection.StartAsync();
             await JoinOrCreateLobby(lobby);
+
         }
         catch (Exception ex)
         {
@@ -1032,12 +1047,10 @@ public partial class MainWindow : Window
             _currentLobby!.LobbyId = lobby.LocalMember.Puuid;
 
             var members = await _lobbyConnection!.InvokeAsync<List<LobbyMember>>("GetLobbyMembers", _currentLobby!.LobbyId);
-            
             Dispatcher.Invoke(() =>
             {
                 lobbyStatusLabel.Content = "Lobby status: created";
                 lobbyIdLabel.Content = $"Lobby id: {lobby.LocalMember.Puuid}";
-                membersLabel.Content = $"Members count: {members.Count}";
             });
         }
 
@@ -1084,7 +1097,26 @@ public partial class MainWindow : Window
         });
     }
     private void Log(string msg) => Dispatcher.Invoke(() => _debugTextBlock.Text = msg + "\n" + _debugTextBlock.Text);
+    private bool IsSkinDownloaded(Skin skin)
+    {
+        var champion = GetChampionBySkin(skin);
+        if(champion == null)
+            return false;
+        var skinId = Convert.ToInt32(skin.Id.ToString()
+            .Substring(champion.Id.ToString().Length,
+            skin.Id.ToString().Length - champion.Id.ToString().Length));
 
+        if (skin is SkinForm skinForm)
+            return File.Exists(Path.Combine("skins", $"{champion.Id}", "special_forms", $"{skinId}", $"{skinForm.Stage}.fantome"));
+
+        bool result = File.Exists(Path.Combine("skins", $"{champion.Id}", $"{skinId}.fantome"));
+        return result;
+    }
+
+    private Champion? GetChampionBySkin(Skin skin)
+    {
+        return _champions.FirstOrDefault(c => c.Skins.Contains(skin));
+    }
 }
 public class ChampionListItem(string iconUrl, string name)
 {
