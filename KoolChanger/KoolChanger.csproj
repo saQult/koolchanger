@@ -18,6 +18,7 @@
     <None Remove="assets\minimizeicon.png" />
     <None Remove="assets\searchicon.png" />
     <None Remove="assets\settings.png" />
+    <None Remove="assets\trash.png" />
     <None Remove="csloltools\cslol-diag.exe" />
     <None Remove="csloltools\cslol-dll.dll" />
     <None Remove="csloltools\wad-extract-multi.bat" />
@@ -53,6 +54,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="assets\settings.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\trash.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="csloltools\cslol-diag.exe">

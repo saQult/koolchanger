@@ -30,6 +30,7 @@ public partial class MainWindow : Window
     private ToolService _toolService = new("");
     private LobbyService _lobbyService = new();
     private LCUService _lcuService = new();
+    private CustomSkinService _customSkinService;
 
     private List<Champion> _champions = new();
     private List<ChampionListItem> _championsList = new();
@@ -63,7 +64,7 @@ public partial class MainWindow : Window
             _preloader.Close();
             KillToolProcess();
         };
-
+        _customSkinService = new(_toolService);
     }
 
     #region Configuration
@@ -193,6 +194,7 @@ public partial class MainWindow : Window
         var files = new[]
         {
             "champion-data.json",
+            "customskins.json",
             "config.json"
         };
 
@@ -334,9 +336,36 @@ public partial class MainWindow : Window
         var querry = searchTextBox.Text.ToLower();
         championListBox.ItemsSource = _championsList.Where(x => x.Name.ToLower().Contains(querry));
     }
+    private bool IsSkinDownloaded(Skin skin)
+    {
+        var champion = GetChampionBySkin(skin);
+        if (champion == null)
+            return false;
+        var skinId = Convert.ToInt32(skin.Id.ToString()
+            .Substring(champion.Id.ToString().Length,
+            skin.Id.ToString().Length - champion.Id.ToString().Length));
 
+        if (skin is SkinForm skinForm)
+            return File.Exists(Path.Combine("skins", $"{champion.Id}", "special_forms", $"{skinId}", $"{skinForm.Stage}.fantome"));
+
+        bool result = File.Exists(Path.Combine("skins", $"{champion.Id}", $"{skinId}.fantome"));
+        return result;
+    }
+
+    private Champion? GetChampionBySkin(Skin skin)
+    {
+        return _champions.FirstOrDefault(c => c.Skins.Contains(skin));
+    }
     #endregion
     #region UI
+
+    private void OpenCustomSkins(object sender, RoutedEventArgs e) 
+    {
+        var form = new CustomSkinsForm(_toolService) { Owner = this };
+        form.ShowDialog();
+        _customSkinService.GetSkins();
+        Run();
+    }
     private void ShowPreloader()
     {
         Effect = new BlurEffect { Radius = 10 };
@@ -1086,6 +1115,10 @@ public partial class MainWindow : Window
                             _toolService.Import(skinPath, $"{skin.Id}");
                     }
                 }
+                foreach (var skin in _customSkinService.ImportedSkins)
+                {
+                    var skinPath = Path.Combine("customskins", skin.Name);
+                }
                 if (_toolProcess != null)
                 {
                     _toolProcess.Kill();
@@ -1093,30 +1126,14 @@ public partial class MainWindow : Window
 
             }
             catch {}
-            _toolProcess = _toolService.Run(_selectedSkins.Values.Select(x => x.Id.ToString()).ToList());
+
+            var selected = _selectedSkins.Values.Select(x => x.Id.ToString()).ToList();
+            selected.AddRange(_customSkinService.ImportedSkins.Where(x => x.Enabled).Select(x => x.Name));
+
+            _toolProcess = _toolService.Run(selected);
         });
     }
     private void Log(string msg) => Dispatcher.Invoke(() => _debugTextBlock.Text = msg + "\n" + _debugTextBlock.Text);
-    private bool IsSkinDownloaded(Skin skin)
-    {
-        var champion = GetChampionBySkin(skin);
-        if(champion == null)
-            return false;
-        var skinId = Convert.ToInt32(skin.Id.ToString()
-            .Substring(champion.Id.ToString().Length,
-            skin.Id.ToString().Length - champion.Id.ToString().Length));
-
-        if (skin is SkinForm skinForm)
-            return File.Exists(Path.Combine("skins", $"{champion.Id}", "special_forms", $"{skinId}", $"{skinForm.Stage}.fantome"));
-
-        bool result = File.Exists(Path.Combine("skins", $"{champion.Id}", $"{skinId}.fantome"));
-        return result;
-    }
-
-    private Champion? GetChampionBySkin(Skin skin)
-    {
-        return _champions.FirstOrDefault(c => c.Skins.Contains(skin));
-    }
 }
 public class ChampionListItem(string iconUrl, string name)
 {

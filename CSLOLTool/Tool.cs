@@ -35,7 +35,7 @@ public class Tool
         if (entry == null)
             return null;
 
-        using var reader = new StreamReader(entry.Open());
+         using var reader = new StreamReader(entry.Open());
         var json = reader.ReadToEnd();
 
         var modInfo = JsonSerializer.Deserialize<ModInfo>(json);
