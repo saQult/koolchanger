@@ -28,9 +28,10 @@ public class PartyService
     private bool _isSkinSelected = false;
     private List<Champion> _champions;
     private Skin _selectedSkin = new();
-    private Dictionary<Champion, Skin> _backupedSkins = [];
+    public Dictionary<Champion, Skin> BackupedSkins = [];
     public Dictionary<Champion, Skin> SelectedSkins { get; set; }
     public string SelectedChampionId { get; set; } = string.Empty;
+    public bool IsEnabled { get; set; }
 
     public PartyService(List<Champion> champions, Dictionary<Champion, Skin> selectedSkins)
     {
@@ -38,14 +39,14 @@ public class PartyService
         SelectedSkins = selectedSkins;
     }
 
-    public async Task<bool> EnableAsync()
+    public async Task<bool> EnableAsync(Dictionary<Champion, Skin> skins)
     {
         if (!Process.GetProcessesByName("LeagueClient").Any())
         {
             OnError?.Invoke("Please launch League of Legends before enabling party mode");
             return false;
         }
-        
+        BackupedSkins = skins;
         await _lcuService.ConnectAsync();
 
         if (_lcuService.Api != null)
@@ -66,7 +67,7 @@ public class PartyService
         _lcuService.ChampionSelected += OnChampionSelected;
         _lcuService.SubscrbeLobbyEvent();
         _lcuService.SubscrbeLChampionSelect();
-
+        IsEnabled = true;
         return true;
     }
     public async Task DisableAsync()
@@ -82,6 +83,7 @@ public class PartyService
             _lcuService.Api!.Disconnect();
 
         Disabled?.Invoke();
+        IsEnabled = false;
     }
     private async Task ConnectToLobbyAsync(LobbyData lobby)
     {
@@ -176,7 +178,7 @@ public class PartyService
         if (lobbyFound == false)
         {
             OnLog?.Invoke("Lobby not found, creating...");
-            await   _hubConnection!.InvokeAsync("CreateLobby", lobby.LocalMember.Puuid, lobby.LocalMember.Puuid);
+            await _hubConnection!.InvokeAsync("CreateLobby", lobby.LocalMember.Puuid, lobby.LocalMember.Puuid);
 
             _currentLobby!.LobbyId = lobby.LocalMember.Puuid;
 

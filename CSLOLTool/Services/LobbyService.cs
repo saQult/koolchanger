@@ -1,13 +1,10 @@
-﻿using CSLOLTool.Models;
-using LCUSharp;
-using Microsoft.AspNetCore.SignalR.Client;
-using System.Text.Json;
+﻿using Microsoft.AspNetCore.SignalR.Client;
 
 namespace CSLOLTool.Services;
 
 public class LobbyService
 {
-    private readonly string _url = "https://mrekk.ru/lobbyhub";
+    private readonly string _url = "https://koolchanger.mrekk.ru/lobbyhub";
 
     public HubConnection CreateConnection()
     {

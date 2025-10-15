@@ -38,12 +38,8 @@ public partial class MainWindow : Window
     private List<ChampionListItem> _championsList = new();
     private Dictionary<Champion, Skin> _selectedSkins = new();
     private Dictionary<Champion, Skin> _savedSelectedSkins = new();
-    private LobbyData? _currentLobby;
 
     private Process _toolProcess = new();
-    private HubConnection? _lobbyConnection;
-
-    private SolidColorBrush _primaryBrush = new((Color)ColorConverter.ConvertFromString("#f5dbff"));
 
     private const double SkinImageBaseWidth = 154;
     private const double SkinImageBaseHeight = 280;
@@ -53,6 +49,7 @@ public partial class MainWindow : Window
     private TextBlock _debugTextBlock = new();
     private Preloader _preloader = new();
 
+    private SolidColorBrush _primaryBrush = new((Color)ColorConverter.ConvertFromString("#f5dbff"));
     public MainWindow()
     {
         InitializeComponent();
@@ -105,6 +102,7 @@ public partial class MainWindow : Window
                     _ => data
                 };
                 Dispatcher.Invoke(() => statusLabel.Content = tooltip);
+                Log(data);
             }
             catch { }
         };
@@ -132,21 +130,27 @@ public partial class MainWindow : Window
         if (_partyService != null) return;
 
         _partyService = new PartyService(_champions, _selectedSkins);
-        _partyService.OnLog += (msg) => Dispatcher.Invoke(() => Log(msg));
+        _partyService.OnLog += Log;
         _partyService.OnError += (msg) => Dispatcher.Invoke(() =>
             new CustomMessageBox("Error!", msg, this).ShowDialog());
         _partyService.SkinRecieved += (skin) =>
         {
             try
             {
-                Dispatcher.Invoke(() => Log("Recieved skin: " + skin.Name));
+                Log("Recieved skin: " + skin.Name);
+                Log(JsonConvert.SerializeObject(skin));
+
                 var recievedChampion = GetChampionBySkin(skin);
                 if (recievedChampion != null)
                 {
                     _selectedSkins[recievedChampion] = skin;
-                    Dispatcher.Invoke(() => Log("Successfully applied skin: " + skin.Name));
+                    Run();
+                    Log("Successfully applied skin: " + skin.Name);
                 }
-                Run();
+                else
+                {
+                    Log("Champion is null");
+                }
             }
             catch (Exception ex)
             {
@@ -163,9 +167,10 @@ public partial class MainWindow : Window
             Log("Party mode disabled");
             lobbyIdLabel.Content = "";
             lobbyStatusLabel.Content = "";
+            _selectedSkins = _partyService.BackupedSkins;
         });
-        _partyService.Enabled += () => Dispatcher.Invoke(() => Log("Party mode enabled"));
-        _partyService.SkinSended += (skin) => Dispatcher.Invoke(() => Log("Sending skin: " + skin.Name));
+        _partyService.Enabled += () => Log("Party mode enabled");
+        _partyService.SkinSended += (skin) => Log("Sending skin: " + skin.Name);
         _partyService.LobbyJoined += (lobby) => Dispatcher.Invoke(() =>
         {
             lobbyIdLabel.Content = "Lobby id: " + lobby.LobbyId;
@@ -414,7 +419,7 @@ public partial class MainWindow : Window
 
     private Champion? GetChampionBySkin(Skin skin)
     {
-        return _champions.FirstOrDefault(c => c.Skins.Contains(skin));
+        return _champions.FirstOrDefault(c => c.Skins.Where(x => x.Id == skin.Id).Count() > 0);
     }
     #endregion
     #region UI
@@ -580,9 +585,9 @@ public partial class MainWindow : Window
                 SelectBorder(s, _);
                 _selectedSkins[selected] = skin;
 
-
+                SaveSelectedSkins();
                 //await SendSkinDataToParty();
-                _partyService.SelectedSkins[selected] = skin;
+                _partyService!.SelectedSkins[selected] = skin;
                 await _partyService.SendSkinDataToPartyAsync(skin);
                 Run();
             };
@@ -694,8 +699,9 @@ public partial class MainWindow : Window
                 SelectCircle(s, _);
 
                 _selectedSkins[selected] = chroma;
+                SaveSelectedSkins();
                 //await SendSkinDataToParty();
-                _partyService.SelectedSkins[selected] = chroma;
+                _partyService!.SelectedSkins[selected] = chroma;
                 await _partyService.SendSkinDataToPartyAsync(skin);
                 Run();
             };
@@ -789,9 +795,10 @@ public partial class MainWindow : Window
                 };
 
                 _selectedSkins[selected] = formSkin;
+                SaveSelectedSkins();
 
                 //await SendSkinDataToParty();
-                _partyService.SelectedSkins[selected] = formSkin;
+                _partyService!.SelectedSkins[selected] = formSkin;
                 await _partyService.SendSkinDataToPartyAsync(skin);
                 Run();
             };
@@ -809,36 +816,6 @@ public partial class MainWindow : Window
         skinPanel.Children.Add(formsPanelContainer);
     }
      
-    private async Task SendSkinDataToParty()
-    {
-        if(_lobbyConnection == null)
-        {
-            SaveSelectedSkins();
-            return;
-        }
-        if (_lobbyConnection.State != HubConnectionState.Connected)
-        {
-           
-            SaveSelectedSkins();
-            return;
-           
-        }
-
-        ShowPreloader();
-        var data = _selectedSkins.ToDictionary(kvp => kvp.Key.Id, kvp => kvp.Value);
-        try
-        {
-            await _lobbyConnection.InvokeAsync("SendMessage", _currentLobby!.LobbyId,
-                JsonConvert.SerializeObject(data));
-            await Task.Delay(1000);
-        }
-        catch (Exception ex)
-        {
-            new CustomMessageBox("Error!", "Error applying skin: " + ex.Message, this).ShowDialog();
-        }
-        finally { HidePreloader(); }
-    }
-
     private Grid CreateFormGrid(string name)
     {
         var formText = new TextBlock
@@ -924,8 +901,8 @@ public partial class MainWindow : Window
         partyModeCheckbox.IsEnabled = false;
 
         ShowPreloader();
-
-        var result = await _partyService.EnableAsync();
+        
+        var result = await _partyService!.EnableAsync(_selectedSkins);
 
         BackupSelectedSkins();
 
@@ -935,7 +912,7 @@ public partial class MainWindow : Window
     private async void DisablePartyMode(object sender, RoutedEventArgs e)
     {
         RestoreSelectedSkins();
-        await _partyService.DisableAsync();
+        await _partyService!.DisableAsync();
         Dispatcher.Invoke(() => {
             lobbyStatusLabel.Content = "";
             lobbyIdLabel.Content = "";
@@ -986,6 +963,7 @@ public partial class MainWindow : Window
                 if (_toolProcess != null)
                 {
                     _toolProcess.Kill();
+                    _toolProcess.Dispose();
                 }
 
             }
@@ -994,7 +972,7 @@ public partial class MainWindow : Window
             var selected = _selectedSkins.Values.Select(x => x.Id.ToString()).ToList();
             selected.AddRange(_customSkinService.ImportedSkins.Where(x => x.Enabled).Select(x => x.Name));
 
-            _toolProcess = _toolService.Run(selected);
+            _toolProcess = _toolService.Run(selected.Where(x => Directory.Exists(Path.Combine("installed", x))));
         });
     }
     private void Log(string msg) => Dispatcher.Invoke(() => _debugTextBlock.Text = msg + "\n" + _debugTextBlock.Text);

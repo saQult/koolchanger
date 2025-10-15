@@ -11,7 +11,6 @@ public class Tool
     private string _gamePath;
 
     public event Action<string>? StatusChanged;
-    public event Action<string, string, string>? ErrorReported;
 
     private record ModInfo(string Author, string Name, string Description, string Version);
 
