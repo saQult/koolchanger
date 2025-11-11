@@ -65,9 +65,6 @@
     <Content Include="csloltools\cslol-dll.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="csloltools\cslolmoodtool.exe">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="csloltools\wad-extract-multi.bat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
