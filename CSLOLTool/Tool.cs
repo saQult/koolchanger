@@ -128,7 +128,7 @@ public class Tool
         {
             StartInfo = new ProcessStartInfo
             {
-                FileName = Path.Combine(_programPath, "csloltools", "cslolmoodtool.exe"),
+                FileName = Path.Combine(_programPath, "csloltools", "mod-tools.exe"),
                 Arguments = string.Join(" ", args),
                 UseShellExecute = false,
                 RedirectStandardOutput = true,

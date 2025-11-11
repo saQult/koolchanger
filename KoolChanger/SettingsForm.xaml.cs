@@ -1,13 +1,8 @@
-﻿using CSLOLTool;
-using CSLOLTool.Models;
-using CSLOLTool.Services;
+﻿using CSLOLTool.Services;
 using KoolChanger.Helpers;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using Newtonsoft.Json;
-using System.Diagnostics;
 using System.IO;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Effects;
