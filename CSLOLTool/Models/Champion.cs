@@ -15,3 +15,5 @@ public class Champion
 
     public override int GetHashCode() => Id.GetHashCode();
 }
+
+

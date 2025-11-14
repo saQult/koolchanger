@@ -11,7 +11,6 @@ public class Tool
     private string _gamePath;
 
     public event Action<string>? StatusChanged;
-    public event Action<string, string, string>? ErrorReported;
 
     private record ModInfo(string Author, string Name, string Description, string Version);
 
@@ -129,7 +128,7 @@ public class Tool
         {
             StartInfo = new ProcessStartInfo
             {
-                FileName = Path.Combine(_programPath, "csloltools", "cslolmoodtool.exe"),
+                FileName = Path.Combine(_programPath, "csloltools", "mod-tools.exe"),
                 Arguments = string.Join(" ", args),
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
