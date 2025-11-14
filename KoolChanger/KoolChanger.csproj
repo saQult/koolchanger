@@ -21,6 +21,8 @@
     <None Remove="assets\trash.png" />
     <None Remove="csloltools\cslol-diag.exe" />
     <None Remove="csloltools\cslol-dll.dll" />
+    <None Remove="csloltools\mod-tools.exe" />
+    <None Remove="csloltools\proxy-0\cslol-dll-proxy.dll" />
     <None Remove="csloltools\wad-extract-multi.bat" />
     <None Remove="csloltools\wad-extract.exe" />
     <None Remove="csloltools\wad-make-multi.bat" />
@@ -63,6 +65,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="csloltools\cslol-dll.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="csloltools\mod-tools.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="csloltools\proxy-0\cslol-dll-proxy.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="csloltools\wad-extract-multi.bat">
