@@ -320,7 +320,7 @@ public partial class MainWindow : Window
     {
         try
         {
-            var processes = Process.GetProcessesByName("cslolmoodtool");
+            var processes = Process.GetProcessesByName("mod-tools");
             foreach (var process in processes)
             {
                 process.Kill();
