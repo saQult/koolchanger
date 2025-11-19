@@ -111,13 +111,13 @@ public class LobbyHub : Hub
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         await LeaveLobby();
-        _logger.LogInformation($"Client disconnected: ConnID: {Context.ConnectionId}, UI: {Context.UserIdentifier} {JsonConvert.SerializeObject(Context.User)}");
+        _logger.LogInformation($"Client disconnected: ConnID: {Context.ConnectionId}, UI: {Context.UserIdentifier} {(Context.User)}");
         await base.OnDisconnectedAsync(exception);
     }
 
     public override async Task OnConnectedAsync()
     {
-        _logger.LogInformation($"Client connected: ConnID: {Context.ConnectionId}, UI: {Context.UserIdentifier} {JsonConvert.SerializeObject(Context.User)}");
+        _logger.LogInformation($"Client connected: ConnID: {Context.ConnectionId}, UI: {Context.UserIdentifier} {(Context.User)}");
         await base.OnConnectedAsync();
     }
 }

@@ -7,9 +7,10 @@ using System.Threading.Tasks;
 
 namespace KoolChanger.Helpers
 {
-    class Config
+    public class Config
     {
         public Dictionary<string, Skin> SelectedSkins { get; set; } = new();
         public string GamePath { get; set; } = "";
+        public string PartyModeUrl { get; set; } = "";
     }
 }

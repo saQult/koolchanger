@@ -50,15 +50,16 @@ public partial class MainWindow : Window
     private Preloader _preloader = new();
 
     private SolidColorBrush _primaryBrush = new((Color)ColorConverter.ConvertFromString("#f5dbff"));
+
     public MainWindow()
     {
         InitializeComponent();
 
-        _preloader = new() {WindowStartupLocation = WindowStartupLocation.CenterScreen};
+        _preloader = new() { WindowStartupLocation = WindowStartupLocation.CenterScreen };
         _preloader.Topmost = true;
 
         Loaded += StartUp;
-        Closed += (_, _) => 
+        Closed += (_, _) =>
         {
             _preloader.Close();
             KillToolProcess();
@@ -67,6 +68,7 @@ public partial class MainWindow : Window
     }
 
     #region Configuration
+
     private async void StartUp(object sender, RoutedEventArgs e)
     {
         DataContext = new WindowBlurEffect(this, AccentState.ACCENT_ENABLE_BLURBEHIND) { BlurOpacity = 100 };
@@ -129,7 +131,7 @@ public partial class MainWindow : Window
     {
         if (_partyService != null) return;
 
-        _partyService = new PartyService(_champions, _selectedSkins);
+        _partyService = new PartyService(_champions, _selectedSkins, _config.PartyModeUrl);
         _partyService.OnLog += Log;
         _partyService.OnError += (msg) => Dispatcher.Invoke(() =>
             new CustomMessageBox("Error!", msg, this).ShowDialog());
@@ -197,6 +199,7 @@ public partial class MainWindow : Window
             return false;
         }
     }
+
     private async Task DownloadSplashes()
     {
         bool? resultToDownloadSkinsPreview = false;
@@ -213,6 +216,7 @@ public partial class MainWindow : Window
             await _championService.DownloadAllPreviews();
         }
     }
+
     private void LoadChampionListBoxItems()
     {
         foreach (var champion in _champions)
@@ -222,6 +226,7 @@ public partial class MainWindow : Window
         }
         championListBox.ItemsSource = _championsList;
     }
+
     public void LoadConfig()
     {
         if (File.Exists("config.json"))
@@ -242,10 +247,12 @@ public partial class MainWindow : Window
             }
         }
     }
+
     public void SaveConfig()
     {
         File.WriteAllText("config.json", JsonConvert.SerializeObject(_config));
     }
+
     private void InitializeFoldersAndFiles()
     {
         var folders = new[]
@@ -271,6 +278,7 @@ public partial class MainWindow : Window
             if (File.Exists(file) == false)
                 File.Create(file).Dispose();
     }
+
     private void InitializeGamePath()
     {
         if (Directory.Exists(_config.GamePath) == false)
@@ -292,7 +300,6 @@ public partial class MainWindow : Window
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 _config.GamePath = dialog.FileName;
-
             }
         }
 
@@ -303,6 +310,7 @@ public partial class MainWindow : Window
         }
         SaveConfig();
     }
+
     private void SaveSelectedSkins()
     {
         try
@@ -314,8 +322,8 @@ public partial class MainWindow : Window
         {
             new CustomMessageBox("Error!", ex.Message, this);
         }
-
     }
+
     private void KillToolProcess()
     {
         try
@@ -329,8 +337,11 @@ public partial class MainWindow : Window
         }
         catch { }
     }
-    #endregion
+
+    #endregion Configuration
+
     #region Data
+
     private async Task DownloadIcons()
     {
         var semaphore = new SemaphoreSlim(50);
@@ -364,6 +375,7 @@ public partial class MainWindow : Window
 
         await Task.WhenAll(tasks);
     }
+
     private async Task InitializeFromServices()
     {
         statusLabel.Content = "Getting champions info";
@@ -372,6 +384,7 @@ public partial class MainWindow : Window
         statusLabel.Content = "Finished getting info";
         File.WriteAllText("champion-data.json", JsonConvert.SerializeObject(_champions));
     }
+
     private async Task LoadChampionsData()
     {
         try
@@ -396,11 +409,13 @@ public partial class MainWindow : Window
             statusLabel.Content = $"Error loading data, try to update in from settings";
         }
     }
+
     private void Search(object sender, TextChangedEventArgs e)
     {
         var querry = searchTextBox.Text.ToLower();
         championListBox.ItemsSource = _championsList.Where(x => x.Name.ToLower().Contains(querry));
     }
+
     private bool IsSkinDownloaded(Skin skin)
     {
         var champion = GetChampionBySkin(skin);
@@ -421,26 +436,31 @@ public partial class MainWindow : Window
     {
         return _champions.FirstOrDefault(c => c.Skins.Where(x => x.Id == skin.Id).Count() > 0);
     }
-    #endregion
+
+    #endregion Data
+
     #region UI
 
-    private void OpenCustomSkins(object sender, RoutedEventArgs e) 
+    private void OpenCustomSkins(object sender, RoutedEventArgs e)
     {
         var form = new CustomSkinsForm(_toolService) { Owner = this };
         form.ShowDialog();
         _customSkinService.GetSkins();
         Run();
     }
+
     private void ShowPreloader()
     {
         Effect = new BlurEffect { Radius = 10 };
         _preloader.Show();
     }
+
     private void HidePreloader()
     {
         Effect = null;
         _preloader.Hide();
     }
+
     private void ResetSelection()
     {
         if (_selectedBorder != null)
@@ -449,6 +469,7 @@ public partial class MainWindow : Window
         if (_selectedCircle != null)
             _selectedCircle.BorderBrush = Brushes.Transparent;
     }
+
     private void SelectBorder(object sender, MouseButtonEventArgs? e)
     {
         if (sender is not Border clickedBorder)
@@ -459,6 +480,7 @@ public partial class MainWindow : Window
         _selectedBorder = clickedBorder;
         _selectedCircle = null;
     }
+
     private void SelectCircle(object sender, MouseButtonEventArgs? e)
     {
         if (sender is not Border clickedCircleBorder)
@@ -481,6 +503,7 @@ public partial class MainWindow : Window
             _selectedBorder = skinBorder;
         }
     }
+
     private Border CreateSkinBorder(string imageUrl, double width, double height, string overlayText)
     {
         var imageBrush = new ImageBrush(new BitmapImage(new Uri(imageUrl)))
@@ -549,6 +572,7 @@ public partial class MainWindow : Window
 
         return border;
     }
+
     private async void OnChampionSelected(object sender, SelectionChangedEventArgs e)
     {
         if (championListBox.SelectedItem is null)
@@ -565,9 +589,9 @@ public partial class MainWindow : Window
 
             await DownloadSkinPreview(skin);
 
-            var skinBorder = CreateSkinBorder(Path.Combine(AppContext.BaseDirectory, "assets\\champions\\splashes\\", skin.Id + ".png"), 
-                SkinImageBaseWidth, 
-                SkinImageBaseHeight, 
+            var skinBorder = CreateSkinBorder(Path.Combine(AppContext.BaseDirectory, "assets\\champions\\splashes\\", skin.Id + ".png"),
+                SkinImageBaseWidth,
+                SkinImageBaseHeight,
                 skin.Name);
 
             if (_selectedSkins.TryGetValue(selected, out var s) && s.Id == skin.Id)
@@ -575,7 +599,7 @@ public partial class MainWindow : Window
 
             skinBorder.MouseDown += async (s, _) =>
             {
-                if(IsSkinDownloaded(skin) == false)
+                if (IsSkinDownloaded(skin) == false)
                 {
                     new CustomMessageBox("Error!", "This skin does not exists.\n" +
                         "Try to re-download skins or put it manually.\n" +
@@ -603,6 +627,7 @@ public partial class MainWindow : Window
             ImagePanel.Children.Add(skinPanel);
         }
     }
+
     private Grid CreateSkinPanel()
     {
         return new Grid
@@ -612,12 +637,14 @@ public partial class MainWindow : Window
             Height = SkinImageBaseHeight
         };
     }
+
     private async Task DownloadSkinPreview(Skin skin)
     {
         var path = Path.Combine(AppContext.BaseDirectory, "assets\\champions\\splashes\\", skin.Id + ".png");
         if (!File.Exists(path))
             await _championService.DownloadImageAsync(skin.ImageUrl, path);
     }
+
     private async Task AddChromasAsync(Skin skin, Champion selected, Grid skinPanel)
     {
         var chromasPanel = new WrapPanel
@@ -717,6 +744,7 @@ public partial class MainWindow : Window
         Grid.SetRow(chromasPanel, 1);
         skinPanel.Children.Add(chromasPanelContainer);
     }
+
     private void AddSpecialForms(Skin skin, Champion selected, Grid skinPanel)
     {
         var skinId = Convert.ToInt32(skin.Id.ToString().Substring(selected.Id.ToString().Length));
@@ -815,7 +843,7 @@ public partial class MainWindow : Window
         Grid.SetRow(formsPanel, 1);
         skinPanel.Children.Add(formsPanelContainer);
     }
-     
+
     private Grid CreateFormGrid(string name)
     {
         var formText = new TextBlock
@@ -845,6 +873,7 @@ public partial class MainWindow : Window
         formGrid.Children.Add(formText);
         return formGrid;
     }
+
     private void DragMove(object sender, MouseButtonEventArgs e)
     {
         try
@@ -854,13 +883,16 @@ public partial class MainWindow : Window
         }
         catch { }
     }
+
     private void CloseApp(object sender, MouseButtonEventArgs e)
     {
         _preloader.Close();
         _toolProcess.Close();
         Application.Current.Shutdown();
     }
+
     private void Minimize(object sender, MouseButtonEventArgs e) => WindowState = WindowState.Minimized;
+
     private async void OpenSettings(object sender, MouseButtonEventArgs e)
     {
         Effect = new BlurEffect { Radius = 10 };
@@ -876,6 +908,7 @@ public partial class MainWindow : Window
         await LoadChampionsData();
         Effect = null;
     }
+
     private void CheckForCombinations(object sender, KeyEventArgs e)
     {
         if (e.Key == Key.F1)
@@ -894,14 +927,16 @@ public partial class MainWindow : Window
         }
     }
 
-    #endregion
+    #endregion UI
+
     #region Party mode
+
     private async void EnablePartyMode(object sender, RoutedEventArgs e)
     {
         partyModeCheckbox.IsEnabled = false;
 
         ShowPreloader();
-        
+
         var result = await _partyService!.EnableAsync(_selectedSkins);
 
         BackupSelectedSkins();
@@ -909,27 +944,33 @@ public partial class MainWindow : Window
         HidePreloader();
         partyModeCheckbox.IsEnabled = true;
     }
+
     private async void DisablePartyMode(object sender, RoutedEventArgs e)
     {
         RestoreSelectedSkins();
         await _partyService!.DisableAsync();
-        Dispatcher.Invoke(() => {
+        Dispatcher.Invoke(() =>
+        {
             lobbyStatusLabel.Content = "";
             lobbyIdLabel.Content = "";
             membersLabel.Content = "";
         });
     }
+
     private void BackupSelectedSkins()
     {
         _savedSelectedSkins = _selectedSkins;
         _selectedSkins = new();
     }
+
     private void RestoreSelectedSkins()
     {
         _selectedSkins = _savedSelectedSkins;
         _savedSelectedSkins = new();
     }
-    #endregion
+
+    #endregion Party mode
+
     private void Run()
     {
         Task.Run(() =>
@@ -940,16 +981,15 @@ public partial class MainWindow : Window
                 {
                     var skin = kvp.Value;
                     var champion = kvp.Key;
-                    
+
                     var skinId = Convert.ToInt32(skin.Id.ToString()
                         .Substring(champion.Id.ToString().Length,
                         skin.Id.ToString().Length - champion.Id.ToString().Length));
 
-
                     if (skin is SkinForm skinForm)
                     {
-                       var skinPath = Path.Combine("skins", $"{champion.Id}", "special_forms", $"{skinId}", $"{skinForm.Stage}.fantome");
-                       if (Directory.Exists(Path.Combine("installed", $"{skin.Id}-{skinForm.Stage}")) == false)
+                        var skinPath = Path.Combine("skins", $"{champion.Id}", "special_forms", $"{skinId}", $"{skinForm.Stage}.fantome");
+                        if (Directory.Exists(Path.Combine("installed", $"{skin.Id}-{skinForm.Stage}")) == false)
                             _toolService.Import(skinPath, $"{skin.Id}");
                     }
                     else
@@ -965,9 +1005,8 @@ public partial class MainWindow : Window
                     _toolProcess.Kill();
                     _toolProcess.Dispose();
                 }
-
             }
-            catch {}
+            catch { }
 
             var selected = _selectedSkins.Values.Select(x => x.Id.ToString()).ToList();
             selected.AddRange(_customSkinService.ImportedSkins.Where(x => x.Enabled).Select(x => x.Name));
@@ -975,8 +1014,10 @@ public partial class MainWindow : Window
             _toolProcess = _toolService.Run(selected.Where(x => Directory.Exists(Path.Combine("installed", x))));
         });
     }
+
     private void Log(string msg) => Dispatcher.Invoke(() => _debugTextBlock.Text = msg + "\n" + _debugTextBlock.Text);
 }
+
 public class ChampionListItem(string iconUrl, string name)
 {
     public string IconUrl { get; set; } = iconUrl;
