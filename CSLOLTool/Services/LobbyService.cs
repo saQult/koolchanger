@@ -4,12 +4,10 @@ namespace CSLOLTool.Services;
 
 public class LobbyService
 {
-    private readonly string _url = "https://koolchanger.mrekk.ru/lobbyhub";
-
-    public HubConnection CreateConnection()
+    public HubConnection CreateConnection(string url)
     {
         return new HubConnectionBuilder()
-             .WithUrl(_url)
+             .WithUrl(url)
              .WithServerTimeout(TimeSpan.FromMilliseconds(120000))
              .WithAutomaticReconnect([TimeSpan.Zero, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(5)])
              .Build();
