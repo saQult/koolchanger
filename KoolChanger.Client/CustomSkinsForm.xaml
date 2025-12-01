@@ -137,7 +137,7 @@
                                VerticalAlignment="Center"
                                Padding="0"/>
                         <Image Grid.Column="1"
-                               Source="/assets/trash.png"
+                               Source="pack://application:,,,/assets/trash.png"
                                Style="{StaticResource TrashImageStyle}"
                                MouseDown="DeleteSkin"/>
                     </Grid>
@@ -160,7 +160,7 @@
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"/>
 
-            <Image Source="/assets/closeicon.png"
+            <Image Source="pack://application:,,,/assets/closeicon.png"
                    Width="20"
                    VerticalAlignment="Top"
                    HorizontalAlignment="Right"
@@ -196,7 +196,7 @@
             <Grid Grid.Row="1" Margin="30,35">
                 <Border Background="#993C3C3C" CornerRadius="6">
                     <StackPanel Orientation="Horizontal">
-                        <Image Source="/assets/searchicon.png" Margin="3" />
+                        <Image Source="pack://application:,,,/assets/searchicon.png" Margin="3" />
                         <TextBox x:Name="searchTextBox" Width="240" FontSize="18" Padding="4"
                  FontFamily="Comfortaa" Background="Transparent" BorderBrush="Transparent"
                  Foreground="#99F5DBFF" SelectionBrush="#66FFFFFF" TextChanged="Search">

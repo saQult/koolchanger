@@ -1,0 +1,305 @@
+﻿<Window x:Class="KoolChanger.ClientMvvm.Views.Windows.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:local="clr-namespace:KoolChanger.ClientMvvm"
+        xmlns:vm="clr-namespace:KoolChanger.ClientMvvm.ViewModels"
+        xmlns:dialogs="clr-namespace:KoolChanger.ClientMvvm.Views.Dialogs"
+        mc:Ignorable="d"
+        Title="KOOLChanger"
+        Height="730" Width="1160"
+        WindowStartupLocation="CenterScreen"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="CanResize"
+        WindowStyle="None"
+        Icon="pack://application:,,,/Assets/icon.ico"
+        KeyDown="CheckForCombinations"
+        MouseDown="DragMove">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </Window.Resources>
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding LoadedCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
+
+    <Grid>
+        <Border Background="#99000000" CornerRadius="6">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="80" />
+                </Grid.RowDefinitions>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Name="debugColum" Width="0" />
+                    </Grid.ColumnDefinitions>
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="70" />
+                            <RowDefinition Height="70" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Margin="10" VerticalAlignment="Center" Orientation="Horizontal">
+                            <Image Source="pack://application:,,,/assets/logo.png" Width="30" />
+                            <Label Content="KOOLChanger" Foreground="#f5dbff" FontWeight="ExtraBold" FontSize="30" />
+                        </StackPanel>
+
+                        <Grid Grid.Row="1" Margin="20,0,0,40">
+                            <Border Background="#993C3C3C" CornerRadius="6">
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="pack://application:,,,/assets/searchicon.png" Margin="3" />
+                                    <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                             Width="240" FontSize="18" Padding="4"
+                                             FontFamily="Comfortaa" Background="Transparent" BorderBrush="Transparent"
+                                             Foreground="#99F5DBFF" SelectionBrush="#66FFFFFF" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <Grid Grid.Row="2">
+                            <ListBox ItemsSource="{Binding ChampionListItems}"
+                                     SelectedItem="{Binding SelectedChampionItem}"
+                                     Margin="10,-30,0,35"
+                                     Background="Transparent" Foreground="#f5dbff" FontSize="20"
+                                     BorderThickness="0" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Cursor="Hand">
+                                            <Ellipse Width="40" Height="40" Margin="0,0,10,0">
+                                                <Ellipse.Fill>
+                                                    <ImageBrush ImageSource="{Binding IconUrl}" Stretch="UniformToFill"
+                                                                Viewbox="0.1,0.1,0.8,0.8"
+                                                                ViewboxUnits="RelativeToBoundingBox" />
+                                                </Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center"
+                                                       Foreground="White" FontWeight="SemiBold" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                                <ListBox.Resources>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ListBoxItem">
+                                                    <Border x:Name="Bd" Padding="10" CornerRadius="5"
+                                                            Background="{TemplateBinding Background}">
+                                                        <ContentPresenter x:Name="contentPresenter"
+                                                                          TextElement.FontSize="20" />
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsSelected" Value="True">
+                                                            <Setter TargetName="Bd" Property="Background"
+                                                                    Value="#99000000" />
+                                                        </Trigger>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="Bd" Property="Background"
+                                                                    Value="#66000000" />
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ListBox.Resources>
+                            </ListBox>
+                        </Grid>
+                    </Grid>
+
+                    <Grid Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="70" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="150" />
+                            </Grid.ColumnDefinitions>
+
+                            <CheckBox Grid.Column="0" Margin="15,0,0,0" VerticalAlignment="Center"
+                                      Foreground="#f5dbff" FontSize="20"
+                                      Command="{Binding TogglePartyModeCommand}"
+                                      IsChecked="{Binding IsPartyModeEnabled, Mode=OneWay}"
+                                      Cursor="Hand" Content="Enable party mode" />
+
+                            <Button Grid.Column="1" Margin="15,0,240,0" VerticalAlignment="Center"
+                                    Foreground="#f5dbff" FontSize="20" Background="Transparent"
+                                    BorderBrush="#f5dbff" BorderThickness="1" Cursor="Hand"
+                                    Command="{Binding OpenCustomSkinsCommand}" Content="Custom skins" />
+
+                            <StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Right"
+                                        VerticalAlignment="Top" Margin="0,15,0,0">
+                                <Image Source="pack://application:,,,/assets/settings.png" Width="24" Cursor="Hand"
+                                       MouseDown="OpenSettings_Click" />
+                                <Image Source="pack://application:,,,/assets/minimizeicon.png" Width="24"
+                                       Margin="10,0,0,0" Cursor="Hand" MouseDown="Minimize_Click" />
+                                <Image Source="pack://application:,,,/assets/closeicon.png" Width="24"
+                                       Margin="10,0,15,0" Cursor="Hand" MouseDown="CloseApp_Click" />
+                            </StackPanel>
+                        </Grid>
+
+                        <ScrollViewer Grid.Row="1" Margin="10,0,0,0" VerticalScrollBarVisibility="Auto">
+                            <ItemsControl ItemsSource="{Binding DisplayedSkins}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="5" Width="154" Height="280">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+
+                                            <Border Width="154" Height="280" CornerRadius="10" BorderThickness="1"
+                                                    ClipToBounds="True" Cursor="Hand">
+                                                <Border.InputBindings>
+                                                    <MouseBinding MouseAction="LeftClick"
+                                                                  Command="{Binding DataContext.SelectSkinCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                  CommandParameter="{Binding}" />
+                                                </Border.InputBindings>
+
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="BorderBrush" Value="#f5dbff" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                                <Setter Property="BorderBrush" Value="Lime" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+
+                                                <Border.Background>
+                                                    <ImageBrush ImageSource="{Binding ImageUrl}"
+                                                                Stretch="UniformToFill" AlignmentX="Center"
+                                                                AlignmentY="Center">
+                                                        <ImageBrush.Transform>
+                                                            <ScaleTransform CenterX="0.5" CenterY="0.5" ScaleX="1.0"
+                                                                            ScaleY="1.0" />
+                                                        </ImageBrush.Transform>
+                                                    </ImageBrush>
+                                                </Border.Background>
+
+                                                <Grid>
+                                                    <Border Background="#80000000" VerticalAlignment="Top" Height="30"
+                                                            CornerRadius="10,10,0,0">
+                                                        <TextBlock Text="{Binding Name}" Foreground="White"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center" FontSize="14"
+                                                                   TextTrimming="CharacterEllipsis" Margin="5" />
+                                                    </Border>
+                                                </Grid>
+                                            </Border>
+                                            
+                                            <Border Width="130" Height="160" CornerRadius="10" Background="#C8000000"
+                                                    VerticalAlignment="Top" Margin="0,13,0,0"
+                                                    Visibility="{Binding ChromaPreview, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
+                                                <Image Source="{Binding ChromaPreview.ImageUrl}" Width="130" Height="200" Stretch="Uniform" VerticalAlignment="Center"/>
+                                            </Border>
+
+                                            <ItemsControl Grid.Row="1" ItemsSource="{Binding Children}"
+                                                          VerticalAlignment="Bottom" Margin="0,-60,0,10">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <WrapPanel Orientation="Horizontal"
+                                                                   HorizontalAlignment="Center" />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Width="24" Height="24" CornerRadius="12" Margin="2"
+                                                                BorderThickness="2" Cursor="Hand">
+                                                            <i:Interaction.Triggers>
+                                                                <i:EventTrigger EventName="MouseEnter">
+                                                                    <i:InvokeCommandAction Command="{Binding DataContext.ShowChromaPreviewCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"/>
+                                                                </i:EventTrigger>
+                                                                <i:EventTrigger EventName="MouseLeave">
+                                                                    <i:InvokeCommandAction Command="{Binding DataContext.HideChromaPreviewCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"/>
+                                                                </i:EventTrigger>
+                                                            </i:Interaction.Triggers>
+                                                            <Border.InputBindings>
+                                                                <MouseBinding MouseAction="LeftClick"
+                                                                              Command="{Binding DataContext.SelectSkinCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                              CommandParameter="{Binding}" />
+                                                            </Border.InputBindings>
+
+                                                            <Border.Style>
+                                                                <Style TargetType="Border">
+                                                                    <Setter Property="BorderBrush" Value="Transparent" />
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsSelected}"
+                                                                                Value="True">
+                                                                            <Setter Property="BorderBrush"
+                                                                                    Value="White" />
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Border.Style>
+
+                                                            <Grid>
+                                                                <Ellipse Fill="{Binding Color}" Width="20" Height="20"
+                                                                         Visibility="{Binding IsChroma, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                                                <Grid
+                                                                    Visibility="{Binding IsForm, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                                    <Ellipse Fill="#505050" Width="20" Height="20" />
+                                                                    <TextBlock Text="{Binding Name}"
+                                                                               Foreground="#f5dbff" FontWeight="Bold"
+                                                                               FontSize="10"
+                                                                               HorizontalAlignment="Center"
+                                                                               VerticalAlignment="Center" />
+                                                                </Grid>
+                                                            </Grid>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+
+                    <Border Name="debugBorder" Grid.Column="2" Height="600" Width="350">
+                        <TextBlock Text="{Binding DebugText}" Foreground="#f5dbff" TextWrapping="Wrap" />
+                    </Border>
+                </Grid>
+
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Label Content="{Binding StatusText}" ContentStringFormat="Status: {0}"
+                           Margin="10" Foreground="#f5dbff" FontSize="20" VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,10,0">
+                        <Label Content="{Binding LobbyStatus}" Foreground="#f5dbff" FontSize="14"
+                               VerticalAlignment="Center" />
+                        <Label Content="{Binding LobbyId}" Foreground="#f5dbff" FontSize="14"
+                               VerticalAlignment="Center" Margin="10,0,0,0" />
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

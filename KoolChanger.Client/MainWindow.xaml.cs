@@ -1,5 +1,5 @@
-﻿using CSLOLTool.Models;
-using CSLOLTool.Services;
+﻿using KoolChanger.Models;
+using KoolChanger.Services;
 using KoolChanger.Helpers;
 using LCUSharp.Websocket;
 using Microsoft.AspNetCore.SignalR.Client;

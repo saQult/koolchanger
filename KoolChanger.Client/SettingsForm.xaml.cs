@@ -1,4 +1,4 @@
-﻿using CSLOLTool.Services;
+﻿using KoolChanger.Services;
 using KoolChanger.Helpers;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using Newtonsoft.Json;

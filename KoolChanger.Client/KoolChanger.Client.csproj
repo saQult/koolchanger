@@ -43,9 +43,9 @@
     <Content Include="assets\closeicon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="assets\loading.gif">
+    <Resource Include="assets\loading.gif">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    </Resource>
     <Content Include="assets\logo.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -101,7 +101,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CSLOLTool\CSLOLTool.csproj" />
+    <ProjectReference Include="..\KoolChanger\KoolChanger.csproj" />
   </ItemGroup>
 
 
