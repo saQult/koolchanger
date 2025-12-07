@@ -61,7 +61,7 @@ public class SkinService
                     Name = name,
                     ImageUrl = _splashArtEndpoint + imageUrl
                 };
-
+                Console.WriteLine(name);
                 if (skinElement.TryGetProperty("chromas", out var chromasElement))
                 {
                     foreach (var chromaElement in chromasElement.EnumerateArray())
@@ -76,29 +76,30 @@ public class SkinService
                                 ? colorsElement.EnumerateArray().Select(c => c.GetString() ?? "").ToList()
                                 : new List<string>()
                         };
-
+                        
                         skin.Chromas.Add(chroma);
                     }
                 }
 
-                //if (skinElement.TryGetProperty("questSkinInfo", out var questSkinInfo) &&
-                //    questSkinInfo.TryGetProperty("tiers", out var tiersElement))
-                //{
-                //    foreach (var tierElement in tiersElement.EnumerateArray())
-                //    {
-                //        var tier = new Tier
-                //        {
-                //            Id = tierElement.GetProperty("id").GetInt32(),
-                //            Name = tierElement.GetProperty("name").GetString() ?? "Unknown",
-                //            Stage = tierElement.GetProperty("stage").GetInt32(),
-                //            ImageUrl = _splashArtEndpoint + (
-                //                tierElement.GetProperty("loadScreenPath").GetString() ?? ""
-                //            ).Replace(prefix, "").ToLower()
-                //        };
+                if (skinElement.TryGetProperty("questSkinInfo", out var questSkinInfo) &&
+                    questSkinInfo.TryGetProperty("tiers", out var tiersElement))
+                {
+                    foreach (var tierElement in tiersElement.EnumerateArray())
+                    {
 
-                //        skin.Tiers.Add(tier);
-                //    }
-                //}
+                        var skinForm = new SkinForm
+                        {
+                            Id = tierElement.GetProperty("id").GetInt32(),
+                            Name = tierElement.GetProperty("name").GetString() ?? "Unknown",
+                            Stage = tierElement.GetProperty("stage").GetInt32(),
+                            ImageUrl = _splashArtEndpoint + (
+                                tierElement.GetProperty("loadScreenPath").GetString() ?? ""
+                            ).Replace(prefix, "").ToLower()
+                        };
+                        Console.WriteLine(skinForm.Name);
+                        skin.Forms.Add(skinForm);
+                    }
+                }
 
                 skins.Add(skin);
             }

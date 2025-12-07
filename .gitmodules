@@ -1,0 +1,3 @@
+[submodule "lcu-sharp"]
+	path = lcu-sharp
+	url = https://github.com/saQult/lcu-sharp.git

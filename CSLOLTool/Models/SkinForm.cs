@@ -2,5 +2,5 @@
 
 public class SkinForm : Skin
 {
-    public string Stage { get; set; } = string.Empty;
+    public int Stage { get; set; }
 }

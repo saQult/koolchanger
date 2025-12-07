@@ -78,6 +78,15 @@ Basicaly, it uses [cslolmanager tool](https://github.com/LeagueToolkit/cslol-man
 
 ---
 
+## Build from sources
+
+Before build, be sure you have **.NET 8 SDK** ([**download link**](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)) on your PC 
+
+1. Clone repo with submodules
+....
+
+---
+
 ## ToDo
 A lot of stuff actually 😅
 - **CLEANUP CODE**

@@ -10,33 +10,44 @@ public class PartyService
 {
     // Services
     private readonly LCUService _lcuService = new();
+
     private readonly LobbyService _lobbyService = new();
     private HubConnection? _hubConnection;
     private LobbyData? _currentLobby;
 
     // Events
     public event Action? Enabled;
+
     public event Action? Disabled;
+
     public event Action<string>? OnError;
+
     public event Action<string>? OnLog;
+
     public event Action<Skin>? SkinRecieved;
+
     public event Action<Skin>? SkinSended;
+
     public event Action<LobbyData>? LobbyJoined;
+
     public event Action? LobbyLeaved;
 
     // State
     private bool _isSkinSelected = false;
+
     private List<Champion> _champions;
     private Skin _selectedSkin = new();
     public Dictionary<Champion, Skin> BackupedSkins = [];
     public Dictionary<Champion, Skin> SelectedSkins { get; set; }
     public string SelectedChampionId { get; set; } = string.Empty;
     public bool IsEnabled { get; set; }
+    public string PartyServerUrl { get; set; }
 
-    public PartyService(List<Champion> champions, Dictionary<Champion, Skin> selectedSkins)
+    public PartyService(List<Champion> champions, Dictionary<Champion, Skin> selectedSkins, string partyServerUrl)
     {
         _champions = champions;
         SelectedSkins = selectedSkins;
+        PartyServerUrl = "http://188.68.220.248:5000/lobbyhub";
     }
 
     public async Task<bool> EnableAsync(Dictionary<Champion, Skin> skins)
@@ -70,6 +81,7 @@ public class PartyService
         IsEnabled = true;
         return true;
     }
+
     public async Task DisableAsync()
     {
         if (_hubConnection != null)
@@ -85,11 +97,12 @@ public class PartyService
         Disabled?.Invoke();
         IsEnabled = false;
     }
+
     private async Task ConnectToLobbyAsync(LobbyData lobby)
     {
         try
         {
-            _hubConnection = _lobbyService.CreateConnection();
+            _hubConnection = _lobbyService.CreateConnection(PartyServerUrl);
             await _hubConnection.StartAsync();
             await JoinOrCreateLobbyAsync(lobby);
 
@@ -104,8 +117,8 @@ public class PartyService
             }
             catch { }
         }
-
     }
+
     private void RegisterLobbyHandlers()
     {
         if (_hubConnection == null)
@@ -151,6 +164,7 @@ public class PartyService
             catch { }
         };
     }
+
     private async Task JoinOrCreateLobbyAsync(LobbyData lobby)
     {
         bool lobbyFound = false;
@@ -187,8 +201,8 @@ public class PartyService
             OnLog?.Invoke($"Lobby id: {lobby.LocalMember.Puuid}");
             LobbyJoined?.Invoke(_currentLobby);
         }
-
     }
+
     private async void OnGameFlowChanged(object? sender, LeagueEvent e)
     {
         var data = e.Data.ToString();
@@ -223,6 +237,7 @@ public class PartyService
             }
         }
     }
+
     private async void OnChampionSelected(object? sender, LeagueEvent e)
     {
         SelectedChampionId = e.Data.ToString();
@@ -234,6 +249,7 @@ public class PartyService
         await SendSkinDataToPartyAsync(_selectedSkin);
         SkinSended?.Invoke(_selectedSkin);
     }
+
     public async Task SendSkinDataToPartyAsync(Skin skin)
     {
         if (_hubConnection == null) return;
@@ -249,7 +265,6 @@ public class PartyService
             await _hubConnection.InvokeAsync("SendMessage", _currentLobby!.LobbyId,
                 JsonConvert.SerializeObject(skin));
             OnLog?.Invoke("Sended successfully");
-
         }
         catch (Exception ex)
         {
