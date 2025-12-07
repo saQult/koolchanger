@@ -74,7 +74,7 @@ To open debug log press **F1**
 ---
 
 ## How this works
-Basicaly, it uses [cslolmanager tool](https://github.com/LeagueToolkit/cslol-manager/tree/master/cslol-tools) cli to install and load .fantome files from [dark seal's repository](https://github.com/darkseal-org/lol-skins-developer)
+Basicaly, it uses [cslolmanager tool](https://github.com/LeagueToolkit/cslol-manager/tree/master/cslol-tools) cli to install and load .fantome files from [Rose's repository](https://github.com/Alban1911/LeagueSkins)
 
 ---
 
@@ -99,7 +99,7 @@ A lot of stuff actually 😅
 
 ## 🙏 Special thanks
 - [cslolmanager tool](https://github.com/LeagueToolkit/cslol-manager/tree/master/cslol-tools) - main tool to apply skins
-- [All of dark seal's contributors](https://github.com/darkseal-org/lol-skins) - all skins are from this repo
+- [Rose](https://github.com/Alban1911/LeagueSkins) - all skins are from this repo
 - [LCU api](https://github.com/bryanhitc/lcu-sharp) - used to parse lobby data
 
 ---
