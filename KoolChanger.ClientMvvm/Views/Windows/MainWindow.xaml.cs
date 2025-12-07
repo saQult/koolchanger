@@ -40,13 +40,11 @@ public partial class MainWindow : Window
                             if (vm.IsBusy)
                             {
                                 Effect = new BlurEffect { Radius = 10 };
-                                Console.WriteLine("Preloader must be shown!");
                                 _preloader?.Show();
                             }
                             else
                             {
                                 Effect = null;
-                                Console.WriteLine("Preloader must be hide!");
                                 _preloader?.Hide();
                             }
                         });

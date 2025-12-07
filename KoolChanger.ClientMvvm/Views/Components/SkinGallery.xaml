@@ -1,0 +1,128 @@
+﻿<UserControl x:Class="KoolChanger.ClientMvvm.Views.Components.SkinGallery"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="800">
+    
+    <ScrollViewer Margin="10,0,0,0" VerticalScrollBarVisibility="Auto">
+        <ItemsControl ItemsSource="{Binding DisplayedSkins}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Grid Margin="5" Width="154" Height="280">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        
+                        <Border Width="154" Height="280" CornerRadius="10" BorderThickness="1"
+                                ClipToBounds="True" Cursor="Hand">
+                            <Border.InputBindings>
+                                <MouseBinding MouseAction="LeftClick"
+                                              Command="{Binding DataContext.SelectSkinCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                              CommandParameter="{Binding}" />
+                            </Border.InputBindings>
+
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="BorderBrush" Value="#f5dbff" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                            <Setter Property="BorderBrush" Value="Lime" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+
+                            <Border.Background>
+                                <ImageBrush ImageSource="{Binding ImageUrl}"
+                                            Stretch="UniformToFill" AlignmentX="Center"
+                                            AlignmentY="Center">
+                                    <ImageBrush.Transform>
+                                        <ScaleTransform CenterX="0.5" CenterY="0.5" ScaleX="1.0"
+                                                        ScaleY="1.0" />
+                                    </ImageBrush.Transform>
+                                </ImageBrush>
+                            </Border.Background>
+
+                            <Grid>
+                                <Border Background="#80000000" VerticalAlignment="Top" Height="30"
+                                        CornerRadius="10,10,0,0">
+                                    <TextBlock Text="{Binding Name}" Foreground="White"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" FontSize="14"
+                                               TextTrimming="CharacterEllipsis" Margin="5" />
+                                </Border>
+                            </Grid>
+                        </Border>
+                        
+                        <Border Width="130" Height="160" CornerRadius="10" Background="#C8000000"
+                                VerticalAlignment="Top" Margin="0,13,0,0"
+                                Visibility="{Binding ChromaPreview, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
+                            <Image Source="{Binding ChromaPreview.ImageUrl}" Width="130" Height="200" Stretch="Uniform" VerticalAlignment="Center"/>
+                        </Border>
+
+                        <ItemsControl Grid.Row="1" ItemsSource="{Binding Children}"
+                                      VerticalAlignment="Bottom" Margin="0,-60,0,10">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal"
+                                               HorizontalAlignment="Center" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Width="24" Height="24" CornerRadius="12" Margin="2"
+                                            BorderThickness="2" Cursor="Hand">
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="MouseEnter">
+                                                <i:InvokeCommandAction Command="{Binding DataContext.ShowChromaPreviewCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}"/>
+                                            </i:EventTrigger>
+                                            <i:EventTrigger EventName="MouseLeave">
+                                                <i:InvokeCommandAction Command="{Binding DataContext.HideChromaPreviewCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
+                                        <Border.InputBindings>
+                                            <MouseBinding MouseAction="LeftClick"
+                                                          Command="{Binding DataContext.SelectSkinCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                          CommandParameter="{Binding}" />
+                                        </Border.InputBindings>
+                                        
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="BorderBrush" Value="Transparent" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                        <Setter Property="BorderBrush" Value="White" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <Grid>
+                                            <Ellipse Fill="{Binding Color}" Width="20" Height="20"
+                                                     Visibility="{Binding IsChroma, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                            <Grid Visibility="{Binding IsForm, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                <Ellipse Fill="#505050" Width="20" Height="20" />
+                                                <TextBlock Text="{Binding Name}" Foreground="#f5dbff" FontWeight="Bold"
+                                                           FontSize="10" HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center" />
+                                            </Grid>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </ScrollViewer>
+</UserControl>

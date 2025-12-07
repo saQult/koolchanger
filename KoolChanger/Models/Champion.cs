@@ -1,4 +1,7 @@
-﻿namespace KoolChanger.Models;
+﻿using System.Text.Json.Nodes;
+using Newtonsoft.Json;
+
+namespace KoolChanger.Models;
 
 public class Champion
 {
@@ -11,6 +14,11 @@ public class Champion
         if (obj is not Champion || obj is null)
             return false;
         return (obj as Champion)!.Id == Id;
+    }
+
+    public override string ToString()
+    {
+        return Newtonsoft.Json.JsonConvert.SerializeObject(this, Formatting.Indented);
     }
 
     public override int GetHashCode() => Id.GetHashCode();

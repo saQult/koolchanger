@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using KoolChanger.ClientMvvm.Interfaces;
 using KoolChanger.ClientMvvm.Services;
 using KoolChanger.Services;
 using Newtonsoft.Json;
@@ -16,7 +17,6 @@ namespace KoolChanger.ClientMvvm.ViewModels.Dialogs;
 public class SettingsViewModel : ObservableObject
 {
     private readonly ChampionService _championService;
-    private readonly INavigationService _navigationService;
     private readonly SkinService _skinService;
 
     private readonly UpdateService _updateService;
@@ -26,16 +26,15 @@ public class SettingsViewModel : ObservableObject
     private bool _isBusy;
     private string _status;
 
-    public SettingsViewModel(string gamePath, UpdateService updateService, SkinService skinService,
+    public SettingsViewModel(IConfigService configService, UpdateService updateService, SkinService skinService,
         ChampionService championService, INavigationService navigationService)
     {
-        _gamePath = gamePath;
+        _gamePath = configService.LoadConfig().GamePath;
         _updateService = updateService;
         _skinService = skinService;
         _championService = championService;
-        _navigationService = navigationService;
 
-        CloseCommand = new RelayCommand(() => _navigationService.CloseWindow(this));
+        CloseCommand = new RelayCommand(() => navigationService.CloseWindow(this));
         SelectGameFolderCommand = new RelayCommand(SelectGameFolder);
         DownloadSkinsCommand = new RelayCommand(async void () => await DownloadSkins(), () => CanExecute());
         GetChampionDataCommand = new RelayCommand(async void () => await GetChampionData(), () => CanExecute());
@@ -79,7 +78,7 @@ public class SettingsViewModel : ObservableObject
     private async Task DownloadSkins()
     {
         IsBusy = true;
-        await _updateService.DownloadSkins();
+        await _updateService.GenerateSkins();
         Status = "Finished downloading skins";
         IsBusy = false;
     }

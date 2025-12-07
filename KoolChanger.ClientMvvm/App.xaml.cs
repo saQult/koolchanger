@@ -1,6 +1,9 @@
 ﻿#region
 
+using System.Configuration;
 using System.Windows;
+using System.Windows.Media.Animation;
+using KoolChanger.ClientMvvm.Interfaces;
 using KoolChanger.ClientMvvm.Services;
 using KoolChanger.ClientMvvm.ViewModels;
 using KoolChanger.ClientMvvm.ViewModels.Dialogs;
@@ -9,7 +12,10 @@ using KoolChanger.ClientMvvm.Views.Windows;
 using KoolChanger.Services;
 using Microsoft.Extensions.DependencyInjection;
 
+
+
 #endregion
+
 
 namespace KoolChanger.ClientMvvm;
 
@@ -26,6 +32,10 @@ public partial class App : Application
 
     private void ConfigureServices(IServiceCollection services)
     {
+        services.AddSingleton<IConfigService, ConfigService>();
+        services.AddSingleton<IDataInitializationService, DataInitializationService>();
+        services.AddSingleton<IFilesystemService, FilesystemService>();
+        services.AddSingleton<ILoggingService, LoggingService>();
         services.AddSingleton<INavigationService, NavigationService>();
 
         services.AddSingleton<SkinService>();
@@ -37,22 +47,19 @@ public partial class App : Application
         services.AddTransient<CustomMessageBoxViewModel>();
         services.AddTransient<CustomSkinsViewModel>();
         services.AddTransient<SettingsViewModel>();
-
+       
         services.AddTransient<MainWindow>();
         services.AddTransient<CustomMessageBox>();
         services.AddTransient<CustomSkinsForm>();
         services.AddTransient<SettingsForm>();
 
+        services.AddSingleton<KoolService>();
 
         services.AddSingleton<ToolService>(serviceProvider =>
         {
             var mainVm = serviceProvider.GetRequiredService<MainViewModel>();
-
-            // ВАЖНО: Убедитесь, что GamePath уже инициализирован, когда DI-контейнер создает ToolService
-            // Это может быть проблематично, так как MainViewModel инициализирует GamePath в InitializeAsync.
-            var gamePath = mainVm.Config.GamePath;
-
-            return new ToolService(gamePath);
+            var config = serviceProvider.GetRequiredService<IConfigService>().LoadConfig();
+            return new ToolService(config.GamePath);
         });
     }
 
@@ -68,5 +75,7 @@ public partial class App : Application
         navigationService.NavigateTo<MainViewModel>();
 
         base.OnStartup(e);
+         
+      
     }
 }

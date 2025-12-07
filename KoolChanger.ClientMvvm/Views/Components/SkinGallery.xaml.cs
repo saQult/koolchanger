@@ -1,0 +1,11 @@
+﻿using System.Windows.Controls;
+
+namespace KoolChanger.ClientMvvm.Views.Components;
+
+public partial class SkinGallery : UserControl
+{
+    public SkinGallery()
+    {
+        InitializeComponent();
+    }
+}

@@ -2,22 +2,19 @@
 
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
-        <TargetFramework>net8.0-windows</TargetFramework>
+        <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <UseWPF>true</UseWPF>
+        <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
     </PropertyGroup>
 
     <ItemGroup>
-        <Folder Include="Configuration\"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0"/>
-        <PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.5"/>
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0"/>
-        <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135"/>
-        <PackageReference Include="WpfAnimatedGif" Version="2.0.2"/>
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+        <PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.5" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
+        <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
+        <PackageReference Include="WpfAnimatedGif" Version="2.0.2" />
     </ItemGroup>
 
     <ItemGroup>
@@ -44,7 +41,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\KoolChanger\KoolChanger.csproj"/>
+        <ProjectReference Include="..\KoolChanger\KoolChanger.csproj" />
     </ItemGroup>
 
 
@@ -56,34 +53,37 @@
 
 
     <ItemGroup>
-        <None Remove="Assets\trash.png"/>
-        <Resource Include="Assets\trash.png"/>
-        <None Remove="Assets\settings.png"/>
-        <Resource Include="Assets\settings.png"/>
-        <None Remove="Assets\searchicon.png"/>
-        <Resource Include="Assets\searchicon.png"/>
-        <None Remove="Assets\minimizeicon.png"/>
-        <Resource Include="Assets\minimizeicon.png"/>
-        <None Remove="Assets\logo.png"/>
-        <Resource Include="Assets\logo.png"/>
-        <None Remove="Assets\loading.gif"/>
-        <Resource Include="Assets\loading.gif"/>
-        <None Remove="Assets\icon.ico"/>
-        <Resource Include="Assets\icon.ico"/>
-        <None Remove="Assets\closeicon.png"/>
-        <Resource Include="Assets\closeicon.png"/>
-        <None Remove="Assets\champnone.jpg"/>
-        <Resource Include="Assets\champnone.jpg"/>
-        <None Remove="Assets\Fonts\Comfortaa-SemiBold.ttf"/>
-        <Resource Include="Assets\Fonts\Comfortaa-SemiBold.ttf"/>
-        <None Remove="Assets\Fonts\Comfortaa-Regular.ttf"/>
-        <Resource Include="Assets\Fonts\Comfortaa-Regular.ttf"/>
-        <None Remove="Assets\Fonts\Comfortaa-Medium.ttf"/>
-        <Resource Include="Assets\Fonts\Comfortaa-Medium.ttf"/>
-        <None Remove="Assets\Fonts\Comfortaa-Light.ttf"/>
-        <Resource Include="Assets\Fonts\Comfortaa-Light.ttf"/>
-        <None Remove="Assets\Fonts\Comfortaa-Bold.ttf"/>
-        <Resource Include="Assets\Fonts\Comfortaa-Bold.ttf"/>
+        <None Remove="Assets\trash.png" />
+        <Resource Include="Assets\trash.png" />
+        <None Remove="Assets\settings.png" />
+        <Resource Include="Assets\settings.png" />
+        <None Remove="Assets\searchicon.png" />
+        <Resource Include="Assets\searchicon.png" />
+        <None Remove="Assets\minimizeicon.png" />
+        <Resource Include="Assets\minimizeicon.png" />
+        <None Remove="Assets\logo.png" />
+        <Resource Include="Assets\logo.png" />
+        <None Remove="Assets\loading.gif" />
+        <Resource Include="Assets\loading.gif" />
+        <None Remove="Assets\icon.ico" />
+        <Resource Include="Assets\icon.ico" />
+        <None Remove="Assets\closeicon.png" />
+        <Resource Include="Assets\closeicon.png" />
+        <None Remove="Assets\champnone.jpg" />
+        <Resource Include="Assets\champnone.jpg" />
+        <None Remove="Assets\Fonts\Comfortaa-SemiBold.ttf" />
+        <Resource Include="Assets\Fonts\Comfortaa-SemiBold.ttf" />
+        <None Remove="Assets\Fonts\Comfortaa-Regular.ttf" />
+        <Resource Include="Assets\Fonts\Comfortaa-Regular.ttf" />
+        <None Remove="Assets\Fonts\Comfortaa-Medium.ttf" />
+        <Resource Include="Assets\Fonts\Comfortaa-Medium.ttf" />
+        <None Remove="Assets\Fonts\Comfortaa-Light.ttf" />
+        <Resource Include="Assets\Fonts\Comfortaa-Light.ttf" />
+        <None Remove="Assets\Fonts\Comfortaa-Bold.ttf" />
+        <Resource Include="Assets\Fonts\Comfortaa-Bold.ttf" />
     </ItemGroup>
+
+
+  
 
 </Project>

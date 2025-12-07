@@ -1,6 +1,7 @@
 ﻿#region
 
 using System.Windows.Input;
+using KoolChanger.ClientMvvm.Interfaces;
 using KoolChanger.ClientMvvm.Services;
 using KoolChanger.ClientMvvm.ViewModels.Dialogs;
 using KoolChanger.Helpers;

@@ -6,6 +6,7 @@
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:local="clr-namespace:KoolChanger.ClientMvvm"
         xmlns:vm="clr-namespace:KoolChanger.ClientMvvm.ViewModels"
+        xmlns:components="clr-namespace:KoolChanger.ClientMvvm.Views.Components"
         xmlns:dialogs="clr-namespace:KoolChanger.ClientMvvm.Views.Dialogs"
         mc:Ignorable="d"
         Title="KOOLChanger"
@@ -19,9 +20,7 @@
         KeyDown="CheckForCombinations"
         MouseDown="DragMove">
 
-    <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-    </Window.Resources>
+  
 
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Loaded">
@@ -68,55 +67,9 @@
                             </Border>
                         </Grid>
 
-                        <Grid Grid.Row="2">
-                            <ListBox ItemsSource="{Binding ChampionListItems}"
-                                     SelectedItem="{Binding SelectedChampionItem}"
-                                     Margin="10,-30,0,35"
-                                     Background="Transparent" Foreground="#f5dbff" FontSize="20"
-                                     BorderThickness="0" ScrollViewer.VerticalScrollBarVisibility="Auto">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal" Cursor="Hand">
-                                            <Ellipse Width="40" Height="40" Margin="0,0,10,0">
-                                                <Ellipse.Fill>
-                                                    <ImageBrush ImageSource="{Binding IconUrl}" Stretch="UniformToFill"
-                                                                Viewbox="0.1,0.1,0.8,0.8"
-                                                                ViewboxUnits="RelativeToBoundingBox" />
-                                                </Ellipse.Fill>
-                                            </Ellipse>
-                                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center"
-                                                       Foreground="White" FontWeight="SemiBold" />
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                                <ListBox.Resources>
-                                    <Style TargetType="ListBoxItem">
-                                        <Setter Property="Background" Value="Transparent" />
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="ListBoxItem">
-                                                    <Border x:Name="Bd" Padding="10" CornerRadius="5"
-                                                            Background="{TemplateBinding Background}">
-                                                        <ContentPresenter x:Name="contentPresenter"
-                                                                          TextElement.FontSize="20" />
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsSelected" Value="True">
-                                                            <Setter TargetName="Bd" Property="Background"
-                                                                    Value="#99000000" />
-                                                        </Trigger>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter TargetName="Bd" Property="Background"
-                                                                    Value="#66000000" />
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </ListBox.Resources>
-                            </ListBox>
-                        </Grid>
+                        
+                           <components:Sidebar Grid.Row="2" ></components:Sidebar>
+                       
                     </Grid>
 
                     <Grid Grid.Column="1">
@@ -154,130 +107,8 @@
                             </StackPanel>
                         </Grid>
 
-                        <ScrollViewer Grid.Row="1" Margin="10,0,0,0" VerticalScrollBarVisibility="Auto">
-                            <ItemsControl ItemsSource="{Binding DisplayedSkins}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <WrapPanel Orientation="Horizontal" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Grid Margin="5" Width="154" Height="280">
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="Auto" />
-                                            </Grid.RowDefinitions>
-
-                                            <Border Width="154" Height="280" CornerRadius="10" BorderThickness="1"
-                                                    ClipToBounds="True" Cursor="Hand">
-                                                <Border.InputBindings>
-                                                    <MouseBinding MouseAction="LeftClick"
-                                                                  Command="{Binding DataContext.SelectSkinCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                                  CommandParameter="{Binding}" />
-                                                </Border.InputBindings>
-
-                                                <Border.Style>
-                                                    <Style TargetType="Border">
-                                                        <Setter Property="BorderBrush" Value="#f5dbff" />
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                                <Setter Property="BorderBrush" Value="Lime" />
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Border.Style>
-
-                                                <Border.Background>
-                                                    <ImageBrush ImageSource="{Binding ImageUrl}"
-                                                                Stretch="UniformToFill" AlignmentX="Center"
-                                                                AlignmentY="Center">
-                                                        <ImageBrush.Transform>
-                                                            <ScaleTransform CenterX="0.5" CenterY="0.5" ScaleX="1.0"
-                                                                            ScaleY="1.0" />
-                                                        </ImageBrush.Transform>
-                                                    </ImageBrush>
-                                                </Border.Background>
-
-                                                <Grid>
-                                                    <Border Background="#80000000" VerticalAlignment="Top" Height="30"
-                                                            CornerRadius="10,10,0,0">
-                                                        <TextBlock Text="{Binding Name}" Foreground="White"
-                                                                   HorizontalAlignment="Center"
-                                                                   VerticalAlignment="Center" FontSize="14"
-                                                                   TextTrimming="CharacterEllipsis" Margin="5" />
-                                                    </Border>
-                                                </Grid>
-                                            </Border>
-                                            
-                                            <Border Width="130" Height="160" CornerRadius="10" Background="#C8000000"
-                                                    VerticalAlignment="Top" Margin="0,13,0,0"
-                                                    Visibility="{Binding ChromaPreview, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
-                                                <Image Source="{Binding ChromaPreview.ImageUrl}" Width="130" Height="200" Stretch="Uniform" VerticalAlignment="Center"/>
-                                            </Border>
-
-                                            <ItemsControl Grid.Row="1" ItemsSource="{Binding Children}"
-                                                          VerticalAlignment="Bottom" Margin="0,-60,0,10">
-                                                <ItemsControl.ItemsPanel>
-                                                    <ItemsPanelTemplate>
-                                                        <WrapPanel Orientation="Horizontal"
-                                                                   HorizontalAlignment="Center" />
-                                                    </ItemsPanelTemplate>
-                                                </ItemsControl.ItemsPanel>
-                                                <ItemsControl.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <Border Width="24" Height="24" CornerRadius="12" Margin="2"
-                                                                BorderThickness="2" Cursor="Hand">
-                                                            <i:Interaction.Triggers>
-                                                                <i:EventTrigger EventName="MouseEnter">
-                                                                    <i:InvokeCommandAction Command="{Binding DataContext.ShowChromaPreviewCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"/>
-                                                                </i:EventTrigger>
-                                                                <i:EventTrigger EventName="MouseLeave">
-                                                                    <i:InvokeCommandAction Command="{Binding DataContext.HideChromaPreviewCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"/>
-                                                                </i:EventTrigger>
-                                                            </i:Interaction.Triggers>
-                                                            <Border.InputBindings>
-                                                                <MouseBinding MouseAction="LeftClick"
-                                                                              Command="{Binding DataContext.SelectSkinCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                                              CommandParameter="{Binding}" />
-                                                            </Border.InputBindings>
-
-                                                            <Border.Style>
-                                                                <Style TargetType="Border">
-                                                                    <Setter Property="BorderBrush" Value="Transparent" />
-                                                                    <Style.Triggers>
-                                                                        <DataTrigger Binding="{Binding IsSelected}"
-                                                                                Value="True">
-                                                                            <Setter Property="BorderBrush"
-                                                                                    Value="White" />
-                                                                        </DataTrigger>
-                                                                    </Style.Triggers>
-                                                                </Style>
-                                                            </Border.Style>
-
-                                                            <Grid>
-                                                                <Ellipse Fill="{Binding Color}" Width="20" Height="20"
-                                                                         Visibility="{Binding IsChroma, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                                                <Grid
-                                                                    Visibility="{Binding IsForm, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                                    <Ellipse Fill="#505050" Width="20" Height="20" />
-                                                                    <TextBlock Text="{Binding Name}"
-                                                                               Foreground="#f5dbff" FontWeight="Bold"
-                                                                               FontSize="10"
-                                                                               HorizontalAlignment="Center"
-                                                                               VerticalAlignment="Center" />
-                                                                </Grid>
-                                                            </Grid>
-                                                        </Border>
-                                                    </DataTemplate>
-                                                </ItemsControl.ItemTemplate>
-                                            </ItemsControl>
-                                        </Grid>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
+                        <components:SkinGallery Grid.Row="1"/>
+                        
                     </Grid>
 
                     <Border Name="debugBorder" Grid.Column="2" Height="600" Width="350">

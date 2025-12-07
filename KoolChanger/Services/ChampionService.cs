@@ -12,6 +12,7 @@ public class ChampionService
     private readonly HttpClient _httpClient = new HttpClient();
     private readonly SkinService _skinService = new();
     public event Action<string>? OnDownloaded;
+    
     public async Task<List<Champion>> GetChampionsAsync()
     { 
         string json = await _httpClient.GetStringAsync(ChampionsSummaryEndpoint);
@@ -56,7 +57,10 @@ public class ChampionService
                 await File.WriteAllBytesAsync(output, imageData);
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
     }
     public async Task DownloadAllPreviews()
     {

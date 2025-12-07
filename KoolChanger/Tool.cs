@@ -3,25 +3,25 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Text.Json;
-
+using ManagedWrapper;
 namespace KoolChanger;
 public class Tool
 {
-    private readonly string _programPath;
+    
     private string _gamePath;
-
+    private ModTool _modTool;
     public event Action<string>? StatusChanged;
-
+    private readonly SemaphoreSlim _runOverlayLock = new(1, 1); // Позволяет только 1 потоку
+    private Task? _currentRunOverlayTask;
     private record ModInfo(string Author, string Name, string Description, string Version);
 
-    public Tool(string gamePath)
+    public Tool(string gamePath, ModTool modTool)
     {
-        _programPath = AppContext.BaseDirectory;
-        _gamePath = MakePath(gamePath);
+        _modTool = modTool;
+        _gamePath = gamePath;
         Log("Version: 1.0.0\n");
     }
 
-    private string MakePath(string path) => "\"" + path + "\"";
 
     private static ModInfo? GetModInfoFromZip(string zipPath)
     {
@@ -34,7 +34,7 @@ public class Tool
         if (entry == null)
             return null;
 
-         using var reader = new StreamReader(entry.Open());
+        using var reader = new StreamReader(entry.Open());
         var json = reader.ReadToEnd();
 
         var modInfo = JsonSerializer.Deserialize<ModInfo>(json);
@@ -45,7 +45,7 @@ public class Tool
     {
         try
         {
-            var logPath = Path.Combine(_programPath, "log.txt");
+            var logPath = Path.Combine(Directory.GetCurrentDirectory(), "log.txt");
             File.AppendAllText(logPath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {message}");
         }
         catch { }
@@ -63,6 +63,10 @@ public class Tool
         {
             _gamePath = Path.GetFullPath(path);
         }
+        else
+        {
+            StatusChanged?.Invoke($"League of Legends not found at {path}");
+        }
     }
 
     public void Import(string src, string name)
@@ -72,113 +76,109 @@ public class Tool
         var modInfo = GetModInfoFromZip(src);
         if (modInfo == null)
             return;
-        var path = Path.Combine(_programPath, "installed", name);
-        var args = new List<string>
-        {
-            "import",
-            MakePath(src),
-            MakePath(path),
-            "--game:" + _gamePath,
-            "--noTFT"
-        };
-
-        RunTool(args, true, (exitCode, proc) =>
-        {
-            StatusChanged?.Invoke("Import wad finished with code: " + exitCode);
-        });
+        var path = Path.Combine(Directory.GetCurrentDirectory(), "installed", name);
+        _modTool.Import( src, path, _gamePath, true);
     }
 
     public void SaveOverlay(string profileName, IEnumerable<string> mods, bool skipConflicts)
     {
-        var args = new List<string>
-        {
-            "mkoverlay",
-            MakePath(Path.Combine(_programPath, "installed")),
-            MakePath(Path.Combine(_programPath, "profiles", profileName)),
-            "--game:" + _gamePath,
-            "--mods:" + MakePath(string.Join('/', mods))
-        };
-        if (skipConflicts) args.Add("--ignoreConflict");
-        RunTool(args, false, (code, proc) =>
-        {
-            SetStatus("Overlay created with code: " + code);
-        });
-        File.WriteAllText(Path.Combine(_programPath, "profiles", profileName) + $"\\{profileName}.config", mods.Count().ToString());
+        _modTool.MkOverlay( Path.Combine(Directory.GetCurrentDirectory(), "installed"),
+                            (Path.Combine(Directory.GetCurrentDirectory(), "profiles", profileName)),
+                                _gamePath, 
+                            (string.Join('/', mods)),
+                            true,
+                            skipConflicts);
+        File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), "profiles", profileName) + $"\\{profileName}.config", mods.Count().ToString());
     }
 
-    public Process RunOverlay(string profileName)
+   public Task RunOverlay(string profileName)
     {
-        var args = new List<string>
+        // 1. Проверяем, запущен ли предыдущий
+        if (_currentRunOverlayTask != null && !_currentRunOverlayTask.IsCompleted)
         {
-            "runoverlay",
-            Path.Combine(_programPath, "profiles", profileName),
-            Path.Combine(_programPath, "profiles", profileName + ".config"),
-            "--game:" + _gamePath,
-        };
+            SetStatus("Stopping previous overlay instance...");
+            
+            // 2. Отменяем предыдущий вызов через ModTool::Cancel()
+            try 
+            {
+                _modTool.Cancel(); 
+            }
+            catch (Exception ex)
+            {
+                Log($"Error stopping previous overlay: {ex.Message}");
+            }
 
-        return RunTool(args, false, (code, proc) =>
+            // Ожидаем завершения предыдущей задачи
+            try
+            {
+                // Ждем некоторое время, чтобы C++ код успел корректно завершиться 
+                // и освободить ресурсы. 
+                _currentRunOverlayTask.Wait(TimeSpan.FromSeconds(5)); 
+            }
+            catch (Exception)
+            {
+                // Игнорируем исключения ожидания (например, OperationCanceledException),
+                // так как мы ожидаем, что задача будет отменена.
+            }
+
+            // Сбрасываем ссылку
+            _currentRunOverlayTask = null;
+        }
+
+        // 3. Запускаем новую задачу
+        var newRunTask = Task.Run(() => 
         {
-            SetStatus("Overlay run finished with code: " + code);
+            try
+            {
+                SetStatus($"Starting overlay for profile: {profileName}");
+
+                _modTool.RunOverlay(
+                    Path.Combine(Directory.GetCurrentDirectory(), "profiles", profileName),
+                    Path.Combine(Directory.GetCurrentDirectory(), "profiles", profileName + ".config"),
+                    _gamePath,
+                    "");
+                
+                Console.WriteLine("Overlay finished.");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                Log(e.Message);
+                SetStatus($"Overlay error: {e.Message}");
+            }
+            finally
+            {
+                // Если эта задача завершилась, и это текущая активная задача, сбросить ее.
+                // Это важно, чтобы избежать гонки, если новый вызов начался, пока этот завершался.
+                if (_currentRunOverlayTask.Id == Task.CurrentId) 
+                {
+                     _currentRunOverlayTask = null;
+                }
+            }
         });
+        
+        // 4. Сохраняем ссылку на новую задачу
+        _currentRunOverlayTask = newRunTask;
+
+        return newRunTask;
     }
-
-    private Process RunTool(List<string> args, bool waitForFinish, Action<int, Process> onFinish)
+    public void Stop()
     {
-        var process = new Process
+        if (_currentRunOverlayTask != null && !_currentRunOverlayTask.IsCompleted)
         {
-            StartInfo = new ProcessStartInfo
+            try 
             {
-                FileName = Path.Combine(_programPath, "csloltools", "mod-tools.exe"),
-                Arguments = string.Join(" ", args),
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true
-            },
-            EnableRaisingEvents = true
-        };
-
-        process.OutputDataReceived += (s, e) =>
-        {
-            if (!string.IsNullOrWhiteSpace(e.Data))
-            {
-                Log("[stdout] " + e.Data + "\n");
-                StatusChanged?.Invoke(e.Data.Trim());
+                _modTool.Cancel();
+                _currentRunOverlayTask.Wait(TimeSpan.FromSeconds(5)); 
             }
-        };
-
-        process.ErrorDataReceived += (s, e) =>
-        {
-            if (!string.IsNullOrWhiteSpace(e.Data))
+            catch (Exception ex)
             {
-                Log("[stderr] " + e.Data + "\n");
-                StatusChanged?.Invoke(e.Data.Trim());
+                Log($"Error stopping overlay: {ex.Message}");
             }
-        };
-
-        process.Exited += (s, e) =>
-        {
-            Log("Process exited with code: " + process.ExitCode + "\n");
-            onFinish?.Invoke(process.ExitCode, process);
-            process.Dispose();
-        };
-
-        try
-        {
-            Log("Starting process: " + process.StartInfo.FileName + " " + process.StartInfo.Arguments + "\n");
-            process.Start();
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
-            if (waitForFinish)
-                process.WaitForExit();
+            finally
+            {
+                _currentRunOverlayTask = null;
+            }
         }
-        catch (Exception ex)
-        {
-            Log("Process error: " + ex.Message + "\n");
-            StatusChanged?.Invoke(ex.Message);
-            onFinish?.Invoke(-1, process);
-        }
-
-        return process;
     }
 }

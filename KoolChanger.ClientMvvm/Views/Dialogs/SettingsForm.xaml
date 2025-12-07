@@ -14,7 +14,7 @@
         Height="300"
         Width="500"
         d:DataContext="{d:DesignInstance dialogs:SettingsViewModel}"
-        MouseLeftButtonDown="{Binding DragWindowCommand, Mode=OneWay}">
+        >
 
     <Window.Resources>
         <Style x:Key="MaterialPurpleButton" TargetType="Button">

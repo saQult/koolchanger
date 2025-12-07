@@ -1,10 +1,13 @@
 ﻿#region
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
+using KoolChanger.ClientMvvm.Interfaces;
 using KoolChanger.ClientMvvm.ViewModels;
 using KoolChanger.ClientMvvm.ViewModels.Dialogs;
-using KoolChanger.ClientMvvm.Views.Dialogs;
-using KoolChanger.Services;
+using KoolChanger.Services; // Для CustomSkinService, если он нужен
 using Microsoft.Extensions.DependencyInjection;
 
 #endregion
@@ -30,125 +33,101 @@ public class NavigationService : INavigationService
 
     public void NavigateTo<TViewModel>() where TViewModel : class
     {
-        var viewModelType = typeof(TViewModel);
-
-        if (!_mappings.TryGetValue(viewModelType, out var viewType))
-            throw new InvalidOperationException($"No registered View for ViewModel: {viewModelType.Name}.");
-
-        var viewModel = _serviceProvider.GetRequiredService(viewModelType);
-        var window = _serviceProvider.GetRequiredService(viewType) as Window;
-
-        if (window != null)
-        {
-            window.DataContext = viewModel;
-            window.Show();
-        }
+        InternalShow<TViewModel>(isDialog: false);
     }
 
     public void ShowDialog<TViewModel>() where TViewModel : class
     {
-        var viewModelType = typeof(TViewModel);
+        InternalShow<TViewModel>(isDialog: true);
+    }
 
-        if (viewModelType == typeof(CustomSkinsViewModel))
-        {
-            ShowCustomSkinsDialog();
-            return;
-        }
+    // Реализация конкретного метода для настроек
+    public void ShowSettings()
+    {
+        // Мы просто вызываем универсальный метод. 
+        // SettingsViewModel должна получать IConfigService через конструктор автоматически.
+        ShowDialog<SettingsViewModel>();
+    }
 
-        if (viewModelType == typeof(SettingsViewModel))
-        {
-            ShowSettingsDialog();
-            return;
-        }
+    // Реализация конкретного метода для кастомных скинов
+    public void ShowCustomSkins(CustomSkinService? customSkinService = null)
+    {
+        // Если CustomSkinsViewModel требует передачи параметра, которого нет в DI,
+        // нам пришлось бы использовать фабрику. 
+        // Но лучше зарегистрировать CustomSkinService как Singleton/Scoped в DI.
+        // Тогда этот метод тоже превращается просто в:
+        ShowDialog<CustomSkinsViewModel>();
+    }
 
-        if (!_mappings.TryGetValue(viewModelType, out var viewType))
-            throw new InvalidOperationException($"No registered View for ViewModel: {viewModelType.Name}.");
+    public CustomMessageBoxViewModel ShowCustomMessageBox(string header, string message)
+    {
+        // MessageBox - исключение, так как он принимает динамические строки (header, message)
+        var viewModel = new CustomMessageBoxViewModel(header, message, this);
 
-        var viewModel = _serviceProvider.GetRequiredService(viewModelType);
-        var window = _serviceProvider.GetRequiredService(viewType) as Window;
+        if (!_mappings.TryGetValue(typeof(CustomMessageBoxViewModel), out var viewType))
+            throw new InvalidOperationException($"No registered View found for ViewModel: {typeof(CustomMessageBoxViewModel).Name}");
 
-        if (window != null)
-        {
-            var activeWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
-            if (activeWindow != null && activeWindow != window) window.Owner = activeWindow;
+        // Получаем Window из DI (чтобы сработали стили и т.д., если оно там есть)
+        // Если Window не зарегистрировано в DI как Transient, можно использовать Activator.CreateInstance
+        var window = _serviceProvider.GetService(viewType) as Window;
+        
+        // Fallback если окно не зарегистрировано в DI, но есть в маппинге
+        if (window == null)
+            window = (Window)Activator.CreateInstance(viewType)!;
 
-            window.DataContext = viewModel;
-            window.ShowDialog();
-        }
+        ConfigureWindow(window, viewModel);
+        window.ShowDialog();
+
+        return viewModel;
     }
 
     public void CloseWindow(object viewModel)
     {
         foreach (Window window in Application.Current.Windows)
+        {
             if (window.DataContext == viewModel)
             {
                 window.Close();
                 break;
             }
+        }
     }
 
-    public CustomMessageBoxViewModel ShowCustomMessageBox(string header, string message)
+    // --- Private Helpers ---
+
+    private void InternalShow<TViewModel>(bool isDialog) where TViewModel : class
     {
-        var navService = _serviceProvider.GetRequiredService<INavigationService>();
-        var viewModel = new CustomMessageBoxViewModel(header, message, navService);
+        var viewModelType = typeof(TViewModel);
 
-        if (!_mappings.TryGetValue(typeof(CustomMessageBoxViewModel), out var viewType))
-            throw new InvalidOperationException(
-                $"No registered View found for ViewModel: {typeof(CustomMessageBoxViewModel).Name}");
+        if (!_mappings.TryGetValue(viewModelType, out var viewType))
+            throw new InvalidOperationException($"No registered View for ViewModel: {viewModelType.Name}.");
 
+        // 1. Получаем ViewModel из DI. Все зависимости (IConfigService, UpdateService и т.д.) внедрятся сами.
+        var viewModel = _serviceProvider.GetRequiredService<TViewModel>();
+
+        // 2. Получаем View из DI.
         var window = _serviceProvider.GetRequiredService(viewType) as Window;
 
         if (window != null)
         {
-            var activeWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
-            if (activeWindow != null && activeWindow != window) window.Owner = activeWindow;
+            ConfigureWindow(window, viewModel);
 
-            window.DataContext = viewModel;
-            window.ShowDialog();
+            if (isDialog)
+                window.ShowDialog();
+            else
+                window.Show();
+        }
+    }
 
-            return viewModel;
+    private void ConfigureWindow(Window window, object viewModel)
+    {
+        // Установка владельца
+        var activeWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+        if (activeWindow != null && activeWindow != window) 
+        {
+            window.Owner = activeWindow;
         }
 
-        throw new InvalidOperationException("Failed to open CustomMessageBox.");
-    }
-
-    private void ShowCustomSkinsDialog()
-    {
-        var toolService = _serviceProvider.GetRequiredService<ToolService>();
-        var navigationService = _serviceProvider.GetRequiredService<INavigationService>();
-
-        var viewModel = new CustomSkinsViewModel(toolService, navigationService);
-        var window = new CustomSkinsForm(toolService, navigationService);
-
-        var activeWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
-        if (activeWindow != null && activeWindow != window) window.Owner = activeWindow;
-
         window.DataContext = viewModel;
-        window.ShowDialog();
-    }
-
-    private void ShowSettingsDialog()
-    {
-        var mainViewModel = _serviceProvider.GetRequiredService<MainViewModel>();
-        var updateService = _serviceProvider.GetRequiredService<UpdateService>();
-        var skinService = _serviceProvider.GetRequiredService<SkinService>();
-        var championService = _serviceProvider.GetRequiredService<ChampionService>();
-        var navigationService = _serviceProvider.GetRequiredService<INavigationService>();
-
-        var viewModel = new SettingsViewModel(mainViewModel.Config.GamePath, updateService, skinService,
-            championService, navigationService);
-        viewModel.GamePathChanged += newPath =>
-        {
-            mainViewModel.Config.GamePath = newPath;
-            mainViewModel.SaveConfig();
-        };
-
-        var window = new SettingsForm();
-
-        var activeWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
-        if (activeWindow != null && activeWindow != window) window.Owner = activeWindow;
-
-        window.DataContext = viewModel;
-        window.ShowDialog();
     }
 }

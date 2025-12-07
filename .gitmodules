@@ -1,3 +1,9 @@
 [submodule "lcu-sharp"]
 	path = lcu-sharp
 	url = https://github.com/saQult/lcu-sharp.git
+[submodule "cslolmanager"]
+	path = cslolmanager
+	url = https://github.com/LeagueToolkit/cslol-manager
+[submodule "ritobin"]
+	path = ritobin
+	url = https://github.com/moonshadow565/ritobin
