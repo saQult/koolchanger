@@ -6,4 +6,5 @@ public class Skin
     public string Name { get; set; } = string.Empty;
     public string ImageUrl { get; set; } = string.Empty;
     public List<Chroma> Chromas { get; set; } = new();
+    public List<SkinForm> Forms { get; set; } = new();
 }

@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using static CSLOLTool.Services.ToolService;
 
 namespace CSLOLTool.Services;
 
@@ -19,7 +18,7 @@ public class ToolService
     }
     public Process Run(IEnumerable<string> mods)
     {
-        _tool.SaveOverlay("default", mods, false);
+        _tool.SaveOverlay("default", mods, true);
         return _tool.RunOverlay("default");
     }
     public void Import(string path, string name) => _tool.Import(path, name);

@@ -17,10 +17,4 @@
     <ProjectReference Include="..\lcu-sharp\LCUSharp\LCUSharp.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="LCUSharp">
-      <HintPath>..\..\..\..\Downloads\lcu-sharp-master\LCUSharp\bin\Debug\net5.0\publish\LCUSharp.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>

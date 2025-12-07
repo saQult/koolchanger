@@ -47,7 +47,7 @@ public class PartyService
     {
         _champions = champions;
         SelectedSkins = selectedSkins;
-        PartyServerUrl = partyServerUrl;
+        PartyServerUrl = "http://188.68.220.248:5000/lobbyhub";
     }
 
     public async Task<bool> EnableAsync(Dictionary<Champion, Skin> skins)

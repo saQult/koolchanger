@@ -1,8 +1,6 @@
-using System.Text.Json.Serialization;
 using KoolChanger.Backend.Models;
 using KoolChanger.Backend.Services;
 using Microsoft.AspNetCore.SignalR;
-using Newtonsoft.Json;
 
 namespace KoolChanger.Backend.Hubs;
 

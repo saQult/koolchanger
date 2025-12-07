@@ -1,17 +1,13 @@
 ﻿using CSLOLTool.Models;
 using CSLOLTool.Services;
 using KoolChanger.Helpers;
-using LCUSharp.Websocket;
-using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using System.IO;
-using System.Net.Http;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
@@ -29,8 +25,6 @@ public partial class MainWindow : Window
     private readonly ChampionService _championService = new();
     private readonly UpdateService _updateService = new();
     private ToolService _toolService = new("");
-    private LobbyService _lobbyService = new();
-    private LCUService _lcuService = new();
     private CustomSkinService _customSkinService;
     private PartyService? _partyService = null;
 
@@ -421,14 +415,11 @@ public partial class MainWindow : Window
         var champion = GetChampionBySkin(skin);
         if (champion == null)
             return false;
-        var skinId = Convert.ToInt32(skin.Id.ToString()
-            .Substring(champion.Id.ToString().Length,
-            skin.Id.ToString().Length - champion.Id.ToString().Length));
+        //var skinId = Convert.ToInt32(skin.Id.ToString()
+        //    .Substring(champion.Id.ToString().Length,
+        //    skin.Id.ToString().Length - champion.Id.ToString().Length));
 
-        if (skin is SkinForm skinForm)
-            return File.Exists(Path.Combine("skins", $"{champion.Id}", "special_forms", $"{skinId}", $"{skinForm.Stage}.fantome"));
-
-        bool result = File.Exists(Path.Combine("skins", $"{champion.Id}", $"{skinId}.fantome"));
+        bool result = File.Exists(Path.Combine("skins", $"{champion.Id}", $"{skin.Id}.fantome"));
         return result;
     }
 
@@ -621,8 +612,8 @@ public partial class MainWindow : Window
 
             if (skin.Chromas.Count > 0)
                 await AddChromasAsync(skin, selected, skinPanel);
-
-            AddSpecialForms(skin, selected, skinPanel);
+            if(skin.Forms.Count > 0)
+                AddSpecialForms(skin, selected, skinPanel);
 
             ImagePanel.Children.Add(skinPanel);
         }
@@ -747,11 +738,7 @@ public partial class MainWindow : Window
 
     private void AddSpecialForms(Skin skin, Champion selected, Grid skinPanel)
     {
-        var skinId = Convert.ToInt32(skin.Id.ToString().Substring(selected.Id.ToString().Length));
-        var specialFormsPath = Path.Combine("skins", $"{selected.Id}", "special_forms", $"{skinId}");
-
-        if (!Directory.Exists(specialFormsPath)) return;
-
+        var skinForm = skin as SkinForm;
         var formsPanel = new WrapPanel
         {
             Orientation = Orientation.Horizontal,
@@ -759,7 +746,6 @@ public partial class MainWindow : Window
             VerticalAlignment = VerticalAlignment.Bottom,
             Margin = new Thickness(5)
         };
-
         var formsPanelContainer = new Border
         {
             CornerRadius = new CornerRadius(10),
@@ -769,18 +755,11 @@ public partial class MainWindow : Window
             VerticalAlignment = VerticalAlignment.Bottom
         };
 
-        var sortedFormsFileList = Directory.GetFiles(specialFormsPath)
-            .OrderBy(x => int.Parse(Path.GetFileNameWithoutExtension(x)))
-            .ToList();
-
-        foreach (var file in sortedFormsFileList)
+        foreach (var form in skin.Forms)
         {
-            var name = Path.GetFileNameWithoutExtension(file);
-            var formImage = Path.Combine(AppContext.BaseDirectory, specialFormsPath, "models_image", $"{name}.png");
-
             var image = new Image
             {
-                Source = new BitmapImage(new Uri(formImage)),
+                Source = new BitmapImage(new Uri(form.ImageUrl)),
                 Width = 130,
                 Height = 200,
                 Stretch = Stretch.Uniform,
@@ -799,7 +778,7 @@ public partial class MainWindow : Window
                 Child = image
             };
 
-            var formGrid = CreateFormGrid(name);
+            var formGrid = CreateFormGrid(form.Stage.ToString());
 
             var circleBorder = new Border
             {
@@ -813,21 +792,12 @@ public partial class MainWindow : Window
             circleBorder.MouseDown += SelectCircle;
             circleBorder.MouseDown += async (s, _) =>
             {
-                SkinForm formSkin = new()
-                {
-                    Id = skin.Id,
-                    Name = skin.Name,
-                    ImageUrl = skin.ImageUrl,
-                    Chromas = skin.Chromas,
-                    Stage = name
-                };
 
-                _selectedSkins[selected] = formSkin;
+                _selectedSkins[selected] = form;
                 SaveSelectedSkins();
 
-                //await SendSkinDataToParty();
-                _partyService!.SelectedSkins[selected] = formSkin;
-                await _partyService.SendSkinDataToPartyAsync(skin);
+                _partyService!.SelectedSkins[selected] = form;
+                await _partyService.SendSkinDataToPartyAsync(form);
                 Run();
             };
 
@@ -982,28 +952,16 @@ public partial class MainWindow : Window
                     var skin = kvp.Value;
                     var champion = kvp.Key;
 
-                    var skinId = Convert.ToInt32(skin.Id.ToString()
-                        .Substring(champion.Id.ToString().Length,
-                        skin.Id.ToString().Length - champion.Id.ToString().Length));
+                    var skinPath = Path.Combine("skins", $"{champion.Id}", $"{skin.Id}.fantome");
 
-                    if (skin is SkinForm skinForm)
-                    {
-                        var skinPath = Path.Combine("skins", $"{champion.Id}", "special_forms", $"{skinId}", $"{skinForm.Stage}.fantome");
-                        if (Directory.Exists(Path.Combine("installed", $"{skin.Id}-{skinForm.Stage}")) == false)
-                            _toolService.Import(skinPath, $"{skin.Id}");
-                    }
-                    else
-                    {
-                        var skinPath = Path.Combine("skins", $"{champion.Id}", $"{skinId}.fantome");
+                    if (Directory.Exists(Path.Combine("installed", $"{skin.Id}")) == false)
+                        _toolService.Import(skinPath, $"{skin.Id}");
 
-                        if (Directory.Exists(Path.Combine("installed", $"{skin.Id}")) == false)
-                            _toolService.Import(skinPath, $"{skin.Id}");
+                    if (_toolProcess != null)
+                    {
+                        _toolProcess.Kill();
+                        _toolProcess.Dispose();
                     }
-                }
-                if (_toolProcess != null)
-                {
-                    _toolProcess.Kill();
-                    _toolProcess.Dispose();
                 }
             }
             catch { }

@@ -4,7 +4,7 @@ namespace CSLOLTool.Services;
 
 public class LobbyService
 {
-    public HubConnection CreateConnection(string url)
+    public HubConnection CreateConnection(string url = "http://188.68.220.248:5000/lobbyhub")
     {
         return new HubConnectionBuilder()
              .WithUrl(url)
