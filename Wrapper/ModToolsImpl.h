@@ -13,7 +13,7 @@
 #include <thread>
 #include <unordered_set>
 #include <msclr/marshal.h>
-
+#include <windows.h> 
 using namespace System;
 using namespace lol;
 

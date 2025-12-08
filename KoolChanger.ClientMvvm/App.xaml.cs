@@ -1,8 +1,5 @@
 ﻿#region
 
-using System.Configuration;
-using System.Windows;
-using System.Windows.Media.Animation;
 using KoolChanger.ClientMvvm.Interfaces;
 using KoolChanger.ClientMvvm.Services;
 using KoolChanger.ClientMvvm.ViewModels;
@@ -11,6 +8,12 @@ using KoolChanger.ClientMvvm.Views.Dialogs;
 using KoolChanger.ClientMvvm.Views.Windows;
 using KoolChanger.Services;
 using Microsoft.Extensions.DependencyInjection;
+using System.Configuration;
+using System.Diagnostics;
+using System.IO;
+using System.Reflection;
+using System.Windows;
+using System.Windows.Media.Animation;
 
 
 
@@ -25,6 +28,10 @@ public partial class App : Application
 
     public App()
     {
+        //string path = Path.Combine(new FileInfo(Environment.ProcessPath).Directory.FullName, "Wrapper.dll");
+        //var t = new FileInfo(path);
+        //Console.WriteLine(t.Exists);
+        //Assembly sampleDLL = Assembly.LoadFile(path);
         IServiceCollection services = new ServiceCollection();
         ConfigureServices(services);
         _serviceProvider = services.BuildServiceProvider();

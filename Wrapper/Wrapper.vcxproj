@@ -1,25 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Target Name="GenerateNativeLib" BeforeTargets="PrepareForBuild;Build" Outputs="$(IntermediateOutputPath)forced_build.stamp">
-    <Exec Command="cmd /c if not exist &quot;$(SolutionDir)cslolmanager\cslol-tools\build&quot; mkdir &quot;$(SolutionDir)cslolmanager\cslol-tools\build&quot;" />
-    <Exec Command="cmake &quot;$(SolutionDir)cslolmanager\cslol-tools&quot; -B &quot;$(SolutionDir)cslolmanager\cslol-tools\build&quot; -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -G &quot;Visual Studio 17 2022&quot; -A x64 -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON" />
-    <Exec Command="cmd /c if not exist &quot;$(SolutionDir)ritobin\ritobin_lib\build&quot; mkdir &quot;$(SolutionDir)ritobin\ritobin_lib\build&quot;" />
-    <Exec Command="cmake &quot;$(SolutionDir)ritobin\ritobin_lib&quot; -B &quot;$(SolutionDir)ritobin\ritobin_lib\build&quot; -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -G &quot;Visual Studio 17 2022&quot; -A x64 -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON" />
-    <MSBuild
-            Projects="$(SolutionDir)cslolmanager\cslol-tools\build\cslol-lib.vcxproj;
-                  $(SolutionDir)cslolmanager\cslol-tools\build\dep\fmt.vcxproj;
-                  $(SolutionDir)cslolmanager\cslol-tools\build\dep\libdeflate.vcxproj;
-                  $(SolutionDir)cslolmanager\cslol-tools\build\dep\zstd.vcxproj;
-                  $(SolutionDir)cslolmanager\cslol-tools\build\dep\xxhash.vcxproj;
-                  $(SolutionDir)cslolmanager\cslol-tools\build\_deps\miniz-build\miniz.vcxproj;
-                  $(SolutionDir)cslolmanager\cslol-tools\build\mod-tools.vcxproj;
-                  $(SolutionDir)cslolmanager\cslol-tools\build\wad-extract.vcxproj;
-                  $(SolutionDir)ritobin\ritobin_lib\build\ritobin_lib.vcxproj"
-            Targets="Build"
-            Properties="Configuration=$(Configuration);Platform=$(Platform)"
-            BuildInParallel="true" />
-    <Touch Files="$(IntermediateOutputPath)forced_build.stamp" AlwaysCreate="true" />
-  </Target>
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
@@ -35,49 +15,30 @@
     <EnableManagedPackageReferenceSupport>true</EnableManagedPackageReferenceSupport>
     <ProjectGuid>{D2C45D99-C5AA-6AC3-3770-DB03B9B6AAE1}</ProjectGuid>
     <Keyword>NetCoreCProj</Keyword>
-    <RootNamespace>Wrapper</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <RootNamespace>ManagedWrapper</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
     <TargetFramework>net8.0</TargetFramework>
+    <WindowsTargetPlatformMinVersion>8.0</WindowsTargetPlatformMinVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v145</PlatformToolset>
-    <CLRSupport>NetCore</CLRSupport>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v145</PlatformToolset>
-    <CLRSupport>NetCore</CLRSupport>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
     <CLRSupport>NetCore</CLRSupport>
-    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v145</PlatformToolset>
     <CLRSupport>NetCore</CLRSupport>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Label="Shared">
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -87,95 +48,82 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)ritobin\ritobin_lib\src;$(SolutionDir)cslolmanager\cslol-tools\lib;$(SolutionDir)cslolmanager\cslol-tools\build\_deps\fmtlog-src\fmt\include;$(SolutionDir)cslolmanager\cslol-tools\build\_deps\fmtlog-src;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)ritobin\ritobin_lib\src;$(SolutionDir)cslolmanager\cslol-tools\lib;$(SolutionDir)cslolmanager\cslol-tools\build\_deps\fmtlog-src;$(SolutionDir)cslolmanager\cslol-tools\build\_deps\fmtlog-src\fmt\include;$(IncludePath)</IncludePath>
     <ExternalIncludePath>$(VC_IncludePath);</ExternalIncludePath>
+    <CopyCppRuntimeToOutputDir>false</CopyCppRuntimeToOutputDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(SolutionDir)ritobin\ritobin_lib\src;$(SolutionDir)cslolmanager\cslol-tools\lib;$(SolutionDir)cslolmanager\cslol-tools\build\_deps\fmtlog-src;$(SolutionDir)cslolmanager\cslol-tools\build\_deps\fmtlog-src\fmt\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions);NOMINMAX;COM_NO_WINDOWS_SECTIONS;</PreprocessorDefinitions>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
-      <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <ForcedIncludeFiles>com_shim.h</ForcedIncludeFiles>
-      <AdditionalOptions></AdditionalOptions>
-    </ClCompile>
-    <Link>
-      <AdditionalLibraryDirectories>
-        $(SolutionDir)cslolmanager\cslol-tools\build\Debug;
-        $(SolutionDir)cslolmanager\cslol-tools\build\dep\Debug;
-        $(SolutionDir)ritobin\ritobin_lib\build\Debug;
-        $(SolutionDir)cslolmanager\cslol-tools\build\_deps\miniz-build\Debug;
-        $(SolutionDir)cslolmanager\cslol-tools\build\_deps\cslol-patcher-src;
-        %(AdditionalLibraryDirectories)
-      </AdditionalLibraryDirectories>
-      <AdditionalDependencies>
-        cslol-lib.lib;
-        ritobin_lib.lib;
-        fmt.lib;
-        zstd.lib;
-        libdeflate.lib;
-        xxhash.lib;
-        cslol-dll.lib;
-        miniz.lib;
-        %(AdditionalDependencies)
-      </AdditionalDependencies>
-    </Link>
-<!--    <PreBuildEvent>-->
-<!--      <Command>-->
-<!--        REM &#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45; cslolmanager\cslol-tools &#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;-->
-<!--        if not exist "$(SolutionDir)cslolmanager\cslol-tools\build" mkdir "$(SolutionDir)cslolmanager\cslol-tools\build"-->
-<!--        cmake "$(SolutionDir)cslolmanager\cslol-tools" -B "$(SolutionDir)cslolmanager\cslol-tools\build" -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -G "Visual Studio 17 2022" -A x64 -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON-->
-
-<!--        REM &#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45; ritobin\ritobin_lib &#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;-->
-<!--        if not exist "$(SolutionDir)ritobin\ritobin_lib\build" mkdir "$(SolutionDir)ritobin\ritobin_lib\build"-->
-<!--        cmake "$(SolutionDir)ritobin\ritobin_lib" -B "$(SolutionDir)ritobin\ritobin_lib\build" -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -G "Visual Studio 17 2022" -A x64 -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON-->
-<!--      </Command>-->
-<!--    </PreBuildEvent>-->
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
-      <AdditionalDependencies />
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <LanguageStandard>stdcpp20</LanguageStandard>
-      <LanguageStandard_C>stdc17</LanguageStandard_C>
-    </ClCompile>
-    <Link>
-      <AdditionalDependencies />
+      <AdditionalDependencies>fmt.lib;zstd.lib;libdeflate.lib;xxhash.lib;miniz.lib;cslol-lib.lib;ritobin_lib.lib;cslol-dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)cslolmanager\cslol-tools\build\Debug;$(SolutionDir)cslolmanager\cslol-tools\build\dep\Debug;$(SolutionDir)ritobin\ritobin_lib\build\Debug;$(SolutionDir)cslolmanager\cslol-tools\build\_deps\miniz-build\Debug;$(SolutionDir)cslolmanager\cslol-tools\build\_deps\cslol-patcher-src;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <SubSystem>
+      </SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
-      <AdditionalDependencies />
+      <AdditionalDependencies>fmt.lib;zstd.lib;libdeflate.lib;xxhash.lib;miniz.lib;cslol-lib.lib;ritobin_lib.lib;cslol-dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>
+      </SubSystem>
+      <AdditionalLibraryDirectories>$(SolutionDir)cslolmanager\cslol-tools\build\Release;$(SolutionDir)cslolmanager\cslol-tools\build\dep\Release;$(SolutionDir)ritobin\ritobin_lib\build\Release;$(SolutionDir)cslolmanager\cslol-tools\build\_deps\miniz-build\Release;$(SolutionDir)cslolmanager\cslol-tools\build\_deps\cslol-patcher-src;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="argparse.hpp" />
-    <ClInclude Include="com_shim.h" />
-    <ClInclude Include="ModToolsImpl.h" />
-    <ClInclude Include="RitoBinImpl.h" />
     <ClInclude Include="ManagedWrapper.h" />
+    <ClInclude Include="RitoBinImpl.h" />
+    <ClInclude Include="ModToolsImpl.h" />
+    <ClInclude Include="argparse.hpp" />
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="Resource.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="RitoBinImpl.cpp" />
     <ClCompile Include="ManagedWrapper.cpp" />
+    <ClCompile Include="AssemblyInfo.cpp" />
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="app.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="app.ico" />
+  </ItemGroup>
+  <Target Name="GenerateNativeLib" BeforeTargets="PrepareForBuild;Build" Outputs="$(IntermediateOutputPath)forced_build.stamp">
+    <Exec Command="cmd /c if not exist &quot;$(SolutionDir)cslolmanager\cslol-tools\build&quot; mkdir &quot;$(SolutionDir)cslolmanager\cslol-tools\build&quot;" />
+    <Exec Command="cmake &quot;$(SolutionDir)cslolmanager\cslol-tools&quot; -B &quot;$(SolutionDir)cslolmanager\cslol-tools\build&quot; -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -G &quot;Visual Studio 18 2026&quot; -A x64 -T &quot;host=x64&quot; -DCMAKE_CXX_STANDARD=20 -DCMAKE_CXX_STANDARD_REQUIRED=ON" />
+    <Exec Command="cmd /c if not exist &quot;$(SolutionDir)ritobin\ritobin_lib\build&quot; mkdir &quot;$(SolutionDir)ritobin\ritobin_lib\build&quot;" />
+    <Exec Command="cmake &quot;$(SolutionDir)ritobin\ritobin_lib&quot; -B &quot;$(SolutionDir)ritobin\ritobin_lib\build&quot; -G &quot;Visual Studio 18 2026&quot; -A x64 -T &quot;host=x64&quot; -DCMAKE_CXX_STANDARD=20 -DCMAKE_CXX_STANDARD_REQUIRED=ON" />
+    <MSBuild Projects="$(SolutionDir)cslolmanager\cslol-tools\build\dep\fmt.vcxproj" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform)" BuildInParallel="true" />
+    <MSBuild Projects="$(SolutionDir)cslolmanager\cslol-tools\build\dep\libdeflate.vcxproj" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform)" BuildInParallel="true" />
+    <MSBuild Projects="$(SolutionDir)cslolmanager\cslol-tools\build\dep\zstd.vcxproj" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform)" BuildInParallel="true" />
+    <MSBuild Projects="$(SolutionDir)cslolmanager\cslol-tools\build\dep\xxhash.vcxproj" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform)" BuildInParallel="true" />
+    <MSBuild Projects="$(SolutionDir)cslolmanager\cslol-tools\build\_deps\miniz-build\miniz.vcxproj" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform)" BuildInParallel="true" />
+    <MSBuild Projects="$(SolutionDir)cslolmanager\cslol-tools\build\cslol-lib.vcxproj" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform)" BuildInParallel="true" />
+    <MSBuild Projects="$(SolutionDir)cslolmanager\cslol-tools\build\mod-tools.vcxproj" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform)" BuildInParallel="true" />
+    <MSBuild Projects="$(SolutionDir)cslolmanager\cslol-tools\build\wad-extract.vcxproj" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform)" BuildInParallel="true" />
+    <MSBuild Projects="$(SolutionDir)ritobin\ritobin_lib\build\ritobin_lib.vcxproj" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform)" BuildInParallel="true" />
+  </Target>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

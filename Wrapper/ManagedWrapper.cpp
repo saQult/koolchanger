@@ -1,4 +1,5 @@
-﻿#include "ManagedWrapper.h"
+﻿#include "pch.h"
+#include "ManagedWrapper.h"
 
 #include <complex>
 
@@ -9,7 +10,7 @@
 #include <fmtlog.h>
 
 #include "RitoBinImpl.h"
-
+#include <windows.h> 
 using namespace System;
 
 namespace ManagedWrapper

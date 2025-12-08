@@ -1,7 +1,8 @@
 ﻿#pragma once
+
 #include <atomic>
 #include <memory>
-
+#include <windows.h> 
 
 using namespace System;
 
