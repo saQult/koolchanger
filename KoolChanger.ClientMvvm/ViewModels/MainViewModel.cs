@@ -382,7 +382,7 @@ public class MainViewModel : ObservableObject
         var items = new ObservableCollection<ChampionListItem>();
         foreach (var champion in _allChampions)
         {
-            var iconPath = Path.Combine(AppContext.BaseDirectory, "assets", "champions", $"{champion.Id}.png");
+            var iconPath = Path.Combine(new FileInfo(Environment.ProcessPath).DirectoryName, "assets", "champions", $"{champion.Id}.png");
             items.Add(new ChampionListItem(iconPath, champion.Name));
         }
         ChampionListItems = items;
@@ -403,7 +403,7 @@ public class MainViewModel : ObservableObject
         {
             // ИСПРАВЛЕНИЕ: Замена c.IconUrl на конструирование пути
             
-            var iconPath = Path.Combine(AppContext.BaseDirectory, "assets", "champions", $"{c.Id}.png");
+            var iconPath = Path.Combine(new FileInfo(Environment.ProcessPath).DirectoryName, "assets", "champions", $"{c.Id}.png");
             list.Add(new ChampionListItem(iconPath, c.Name));
         }
         ChampionListItems = list;

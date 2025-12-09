@@ -1,11 +1,11 @@
-﻿#include <cstdlib>
+﻿#pragma once
+
+#include <cstdlib>
 #include <ritobin/bin_io.hpp>
 #include <ritobin/bin_unhash.hpp>
 #include <optional>
 #include <filesystem>
 #include <iostream>
-
-#include "argparse.hpp"
 
 #ifdef WIN32
 #include <fcntl.h>
@@ -23,6 +23,10 @@ using ritobin::Bin;
 using ritobin::BinUnhasher;
 using ritobin::io::DynamicFormat;
 namespace fss = std::filesystem;
+
+// --- ИЗМЕНЕНИЕ 1: Добавляем глобальную статическую переменную ---
+// Она будет хранить загруженные хэши между вызовами функций.
+static std::optional<BinUnhasher> g_unhasher = std::nullopt;
 
 static DynamicFormat const* get_format(std::string const& name, std::string_view data, std::string const& file_name) {
     if (!name.empty()) {
@@ -52,63 +56,8 @@ struct Args {
     std::string output_dir = {};
     std::string input_format = {};
     std::string output_format = {};
-    std::optional<BinUnhasher> unhasher = {};
+    
     Args(){}
-    Args(int argc, char** argv) {
-        argparse::ArgumentParser program("ritobin");
-        program.add_argument("-k", "--keep-hashed")
-                .help("do not run unhasher")
-                .default_value(false)
-                .implicit_value(true);
-        program.add_argument("-r", "--recursive")
-                .help("run on directory")
-                .default_value(false)
-                .implicit_value(true);
-        program.add_argument("-v", "--verbose")
-                .help("log more")
-                .default_value(false)
-                .implicit_value(true);
-        program.add_argument("input")
-                .help("input file or directory")
-                .required();
-        program.add_argument("output")
-                .help("output file or directory")
-                .default_value(std::string(""));
-        program.add_argument("-i", "--input-format")
-                .default_value(std::string(""))
-                .help("format of input file");
-        program.add_argument("-o", "--output-format")
-                .default_value(std::string(""))
-                .help("format of output file");
-        program.add_argument("-d", "--dir-hashes")
-                .default_value((fss::path(argv[0]).parent_path() / "hashes").generic_string())
-                .help("directory containing hashes");
-        try {
-            program.parse_args(argc, argv);
-            dir =  program.get<std::string>("--dir-hashes");
-            keep_hashed = program.get<bool>("--keep-hashed");
-            recursive = program.get<bool>("--recursive");
-            log = program.get<bool>("--verbose");
-            input_format = program.get<std::string>("--input-format");
-            output_format = program.get<std::string>("--output-format");
-            if (recursive) {
-                input_dir = program.get<std::string>("input");
-                output_dir = program.get<std::string>("output");
-            } else {
-                input_file = program.get<std::string>("input");
-                output_file = program.get<std::string>("output");
-            }
-        } catch (const std::runtime_error& err) {
-            std::cerr << err.what() << std::endl;
-            std::cerr << program << std::endl;
-            std::cerr << "Formats:" << std::endl;
-            for (auto format: ritobin::io::DynamicFormat::list()) {
-                std::cerr << "\t- " << format->name() << std::endl;
-            }
-            exit(-1);
-        }
-        unhasher = std::optional<BinUnhasher>(std::nullopt);
-    }
 
     template<char M>
     FILE* open_file(std::string const& name) {
@@ -162,27 +111,44 @@ struct Args {
         }
     }
 
+    // --- ИЗМЕНЕНИЕ 3: Логика загрузки хэшей ---
     void unhash(Bin& bin) {
         if (!keep_hashed) {
-            if (!unhasher) {
+            // Проверяем глобальную переменную g_unhasher, а не локальную
+            if (!g_unhasher.has_value()) {
                 if (log) {
-                    std::cerr << "Loading hashes..." << std::endl;
+                    std::cerr << "Loading hashes (Initial Load)..." << std::endl;
                 }
-                auto& uh = unhasher.emplace();
+                
+                // Инициализируем глобальный объект
+                auto& uh = g_unhasher.emplace();
+                
                 if (dir.empty()) {
                     dir = ".";
                 }
+                // Загружаем файлы только если g_unhasher был пуст
                 uh.load_fnv1a_CDTB(dir + "/hashes.binentries.txt");
                 uh.load_fnv1a_CDTB(dir + "/hashes.binhashes.txt");
                 uh.load_fnv1a_CDTB(dir + "/hashes.bintypes.txt");
                 uh.load_fnv1a_CDTB(dir + "/hashes.binfields.txt");
-                uh.load_xxh64_CDTB(dir + "/hashes.game.txt");
+                uh.load_xxh64_CDTB(dir + "/hashes.game.txt.0");
+                uh.load_xxh64_CDTB(dir + "/hashes.game.txt.1");
                 uh.load_xxh64_CDTB(dir + "/hashes.lcu.txt");
+                
+                if (log) {
+                    std::cerr << "Hashes loaded successfully." << std::endl;
+                }
+            } else {
+                if (log) {
+                    std::cerr << "Using cached hashes." << std::endl;
+                }
             }
+
             if (log) {
                 std::cerr << "Unashing..." << std::endl;
             }
-            (*unhasher).unhash_bin(bin);
+            // Используем глобальный экземпляр
+            g_unhasher->unhash_bin(bin);
         }
     }
 
@@ -275,15 +241,3 @@ struct Args {
     }
 };
 
-
-
-// int main(int argc, char** argv) {
-//     try {
-//         auto args = Args(argc, argv);
-//         args.run();
-//         return 0;
-//     } catch (const std::runtime_error& err) {
-//         std::cerr << err.what() << std::endl;
-//         return -1;
-//     }
-// }

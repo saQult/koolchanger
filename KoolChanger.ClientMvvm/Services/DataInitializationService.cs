@@ -44,7 +44,7 @@ public class DataInitializationService : IDataInitializationService
 
     private async Task DownloadSplashesIfNeeded()
     {
-        var splashesPath = Path.Combine(AppContext.BaseDirectory, "assets", "champions", "splashes");
+        var splashesPath = Path.Combine(new FileInfo(Environment.ProcessPath).DirectoryName, "assets", "champions", "splashes");
         if (Directory.GetFiles(splashesPath).Length == 0)
         {
             // Здесь можно использовать DialogService, если он есть, или просто выполнить действие
@@ -159,7 +159,7 @@ public class DataInitializationService : IDataInitializationService
             {
                 Id = skin.Id,
                 Name = skin.Name,
-                ImageUrl = Path.Combine(AppContext.BaseDirectory, "assets", "champions", "splashes", $"{skin.Id}.png"),
+                ImageUrl = Path.Combine(new FileInfo(Environment.ProcessPath).DirectoryName, "assets", "champions", "splashes", $"{skin.Id}.png"),
                 Model = skin,
                 Champion = selectedChamp,
                 IsSelected = IsSkinSelected(selectedSkins, selectedChamp, skin.Id)
@@ -175,7 +175,7 @@ public class DataInitializationService : IDataInitializationService
             {
                 foreach (var chroma in skin.Chromas)
                 {
-                    var chromaPath = Path.Combine(AppContext.BaseDirectory, "assets", "champions", "splashes", $"{chroma.Id}.png");
+                    var chromaPath = Path.Combine(new FileInfo(Environment.ProcessPath).DirectoryName, "assets", "champions", "splashes", $"{chroma.Id}.png");
                     if (!File.Exists(chromaPath))
                     {
                         await _championService.DownloadImageAsync(chroma.ImageUrl, chromaPath);
@@ -216,7 +216,7 @@ public class DataInitializationService : IDataInitializationService
                     foreach (var file in sortedForms)
                     {
                         var name = Path.GetFileNameWithoutExtension(file);
-                        var formImage = Path.Combine(AppContext.BaseDirectory, specialFormsPath, "models_image", $"{name}.png");
+                        var formImage = Path.Combine(new FileInfo(Environment.ProcessPath).DirectoryName, specialFormsPath, "models_image", $"{name}.png");
 
                         SkinForm formSkinModel = new()
                         {
@@ -249,7 +249,7 @@ public class DataInitializationService : IDataInitializationService
 
     private async Task EnsureSkinPreviewAsync(Skin skin)
     {
-        var path = Path.Combine(AppContext.BaseDirectory, "assets", "champions", "splashes", $"{skin.Id}.png");
+        var path = Path.Combine(new FileInfo(Environment.ProcessPath).DirectoryName, "assets", "champions", "splashes", $"{skin.Id}.png");
         if (!File.Exists(path))
         {
             await _championService.DownloadImageAsync(skin.ImageUrl, path);

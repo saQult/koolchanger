@@ -82,7 +82,7 @@ public class ChampionService
                 {
                     try
                     {
-                        var skinImagePath = Path.Combine(AppContext.BaseDirectory, "assets\\champions\\splashes\\", skin.Id + ".png");
+                        var skinImagePath = Path.Combine(new FileInfo(Environment.ProcessPath).DirectoryName, "assets\\champions\\splashes\\", skin.Id + ".png");
                         OnDownloaded?.Invoke($"[{Interlocked.Increment(ref done)}/{total}] Downloading image of " + skin.Name);
                         await DownloadImageAsync(skin.ImageUrl, skinImagePath);
                     }
@@ -99,7 +99,7 @@ public class ChampionService
                     {
                         try
                         {
-                            var chromaImagePath = Path.Combine(AppContext.BaseDirectory, "assets\\champions\\splashes\\", chroma.Id + ".png");
+                            var chromaImagePath = Path.Combine(new FileInfo(Environment.ProcessPath).DirectoryName, "assets\\champions\\splashes\\", chroma.Id + ".png");
                             OnDownloaded?.Invoke($"[{Interlocked.Increment(ref done)}/{total}] Downloading chroma of " + skin.Name);
                             await DownloadImageAsync(chroma.ImageUrl, chromaImagePath);
                         }

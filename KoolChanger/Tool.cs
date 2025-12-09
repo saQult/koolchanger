@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Text.Json;
-using ManagedWrapper;
+using KoolWrapper;
 namespace KoolChanger;
 public class Tool
 {

@@ -1,0 +1,33 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+    <Target Name="BuildCSLolTools" DependsOnTargets="PrepareNativeDirs">
+        <Exec Command="cmake &quot;$(SolutionDir)cslolmanager\cslol-tools&quot; -B &quot;$(SolutionDir)cslolmanager\cslol-tools\build&quot; -A x64 -T host=x64 -DCMAKE_CXX_STANDARD=20 -DCMAKE_CXX_STANDARD_REQUIRED=ON" />
+        <MSBuild Projects="$(SolutionDir)cslolmanager\cslol-tools\build\ALL_BUILD.vcxproj"
+                 Properties="Configuration=$(Configuration);Platform=x64;CLRSupport=FALSE"
+                 BuildInParallel="false" />
+    </Target>
+
+    <Target Name="BuildRitoBin" DependsOnTargets="PrepareNativeDirs;BuildCSLolTools">
+        <Exec Command="cmake &quot;$(SolutionDir)ritobin\ritobin_lib&quot; -B &quot;$(SolutionDir)ritobin\ritobin_lib\build&quot; -A x64 -T host=x64 -DCMAKE_CXX_STANDARD=20 -DCMAKE_CXX_STANDARD_REQUIRED=ON" />
+        <MSBuild Projects="$(SolutionDir)ritobin\ritobin_lib\build\ALL_BUILD.vcxproj"
+                 Properties="Configuration=$(Configuration);Platform=x64;CLRSupport=FALSE"
+                 BuildInParallel="false" />
+    </Target>
+
+    <Target Name="PrepareNativeDirs">
+        <MakeDir Directories="$(SolutionDir)cslolmanager\cslol-tools\build" Condition="!Exists('$(SolutionDir)cslolmanager\cslol-tools\build')" />
+        <MakeDir Directories="$(SolutionDir)ritobin\ritobin_lib\build" Condition="!Exists('$(SolutionDir)ritobin\ritobin_lib\build')" />
+    </Target>
+
+    <Target Name="BuildNativeDependencies" DependsOnTargets="BuildCSLolTools;BuildRitoBin" />
+    <Target Name="CleanNativeDependencies"
+            AfterTargets="Clean">
+
+        <Message Text="Cleaning CMake build directories..." Importance="high"/>
+        <RemoveDir Directories="$(SolutionDir)cslolmanager\cslol-tools\build"
+                   Condition="Exists('$(SolutionDir)cslolmanager\cslol-tools\build')" />
+        <RemoveDir Directories="$(SolutionDir)ritobin\ritobin_lib\build"
+                   Condition="Exists('$(SolutionDir)ritobin\ritobin_lib\build')" />
+    </Target>
+
+</Project>

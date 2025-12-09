@@ -1,6 +1,6 @@
 ﻿// ToolService.cs
 
-using ManagedWrapper;
+using KoolWrapper;
 // using static KoolChanger.Services.ToolService; // Убрать, если это ошибка компиляции
 
 namespace KoolChanger.Services;

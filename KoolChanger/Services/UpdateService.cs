@@ -3,10 +3,10 @@
 using System.Text.RegularExpressions;
 using KoolChanger.Helpers;
 using KoolChanger.Models;
-using ManagedWrapper;
+using KoolWrapper;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-
+using KoolWrapper;
 #endregion
 
 namespace KoolChanger.Services;
@@ -22,8 +22,7 @@ public class UpdateService
     private readonly SkinService _skinService = new();
     private readonly WadExtractor _extractor = new();
     private readonly RitoBin _ritoBin = new();
-
-    // Directory constants for clarity
+    // Directory constants for clarity 
     private const string TempDirName = "KoolChanger.tmp";
     private const string DataDir = "data";
     private const string CharactersDir = "characters";
@@ -41,7 +40,7 @@ public class UpdateService
     /// <summary>
     /// Base application directory path where hash files are stored.
     /// </summary>
-    private static string BaseAppPath => AppContext.BaseDirectory;
+    private static string BaseAppPath => new FileInfo(Environment.ProcessPath).DirectoryName;
 
 
     /// <summary>
@@ -99,7 +98,7 @@ public class UpdateService
             var wadPath = Path.Combine(leaguePath, "DATA", "FINAL", "Champions", champion.Name + ".wad.client");
             var hashPath = Path.Combine(BaseAppPath, HashesDir, HashesGameFile);
             
-            _extractor.Extract(wadPath, championTempPath, hashPath);
+            _extractor.extract(wadPath, championTempPath, hashPath);
 
             // 2. Find and process extracted skins
             var charactersRoot = Path.Combine(championTempPath, DataDir, CharactersDir);
