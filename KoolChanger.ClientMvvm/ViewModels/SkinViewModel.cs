@@ -26,6 +26,7 @@ public class SkinViewModel : ObservableObject
     public bool IsChroma { get; set; }
     public bool IsForm { get; set; }
     public bool IsChromaVisible { get; set; } = false;
+    public bool HasChromas { get; set; } = false;
     public Skin Model { get; set; } = null!; 
     public Champion Champion { get; set; } = null!;
     public SkinViewModel? Parent { get; set; }

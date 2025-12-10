@@ -24,8 +24,6 @@ using ritobin::BinUnhasher;
 using ritobin::io::DynamicFormat;
 namespace fss = std::filesystem;
 
-// --- ИЗМЕНЕНИЕ 1: Добавляем глобальную статическую переменную ---
-// Она будет хранить загруженные хэши между вызовами функций.
 static std::optional<BinUnhasher> g_unhasher = std::nullopt;
 
 static DynamicFormat const* get_format(std::string const& name, std::string_view data, std::string const& file_name) {
@@ -111,22 +109,18 @@ struct Args {
         }
     }
 
-    // --- ИЗМЕНЕНИЕ 3: Логика загрузки хэшей ---
     void unhash(Bin& bin) {
         if (!keep_hashed) {
-            // Проверяем глобальную переменную g_unhasher, а не локальную
             if (!g_unhasher.has_value()) {
                 if (log) {
                     std::cerr << "Loading hashes (Initial Load)..." << std::endl;
                 }
                 
-                // Инициализируем глобальный объект
                 auto& uh = g_unhasher.emplace();
                 
                 if (dir.empty()) {
                     dir = ".";
                 }
-                // Загружаем файлы только если g_unhasher был пуст
                 uh.load_fnv1a_CDTB(dir + "/hashes.binentries.txt");
                 uh.load_fnv1a_CDTB(dir + "/hashes.binhashes.txt");
                 uh.load_fnv1a_CDTB(dir + "/hashes.bintypes.txt");
@@ -146,7 +140,6 @@ struct Args {
             if (log) {
                 std::cerr << "Unashing..." << std::endl;
             }
-            // Используем глобальный экземпляр
             g_unhasher->unhash_bin(bin, 2000);
         }
     }

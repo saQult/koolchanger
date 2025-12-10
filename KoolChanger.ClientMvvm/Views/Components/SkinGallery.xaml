@@ -177,74 +177,91 @@
                                 Stretch="Uniform" />
                         </Border>
 
-                        <ItemsControl
+                        <Border
                             Grid.Row="1"
-                            Margin="0,-60,0,10"
+                            Margin="10,-90,10,10"
                             VerticalAlignment="Bottom"
-                            ItemsSource="{Binding Children}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <WrapPanel HorizontalAlignment="Center" Orientation="Horizontal" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border
-                                        Width="24"
-                                        Height="24"
-                                        Margin="2"
-                                        BorderThickness="2"
-                                        CornerRadius="12"
-                                        Cursor="Hand">
-                                        <i:Interaction.Triggers>
-                                            <i:EventTrigger EventName="MouseEnter">
-                                                <i:InvokeCommandAction Command="{Binding ShowChromaPreviewCommand}" CommandParameter="{Binding}" />
-                                            </i:EventTrigger>
-                                            <i:EventTrigger EventName="MouseLeave">
-                                                <i:InvokeCommandAction Command="{Binding HideChromaPreviewCommand}" />
-                                            </i:EventTrigger>
-                                        </i:Interaction.Triggers>
-                                        <Border.InputBindings>
-                                            <MouseBinding
-                                                Command="{Binding DataContext.SelectSkinCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                CommandParameter="{Binding}"
-                                                MouseAction="LeftClick" />
-                                        </Border.InputBindings>
+                            Background="#961E1E1E"
+                            CornerRadius="10">
 
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="BorderBrush" Value="Transparent" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                        <Setter Property="BorderBrush" Value="White" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <Grid>
-                                            <Ellipse
-                                                Width="20"
-                                                Height="20"
-                                                Fill="{Binding Color}"
-                                                Visibility="{Binding IsChroma, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                            <Grid Visibility="{Binding IsForm, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <ItemsControl
+                                Margin="0"
+                                VerticalAlignment="Bottom"
+                                ItemsSource="{Binding Children}"
+                                Visibility="{Binding HasChromas, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel
+                                            Margin="5"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Bottom"
+                                            Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border
+                                            Width="16"
+                                            Height="16"
+                                            Margin="2"
+                                            BorderThickness="2"
+                                            CornerRadius="16"
+                                            Cursor="Hand">
+                                            <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="MouseEnter">
+                                                    <i:InvokeCommandAction Command="{Binding ShowChromaPreviewCommand}" CommandParameter="{Binding}" />
+                                                </i:EventTrigger>
+                                                <i:EventTrigger EventName="MouseLeave">
+                                                    <i:InvokeCommandAction Command="{Binding HideChromaPreviewCommand}" />
+                                                </i:EventTrigger>
+                                            </i:Interaction.Triggers>
+
+                                            <Border.InputBindings>
+                                                <MouseBinding
+                                                    Command="{Binding DataContext.SelectSkinCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}"
+                                                    MouseAction="LeftClick" />
+                                            </Border.InputBindings>
+
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="BorderBrush" Value="Transparent" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                            <Setter Property="BorderBrush" Value="White" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+
+                                            <Grid>
                                                 <Ellipse
-                                                    Width="20"
-                                                    Height="20"
-                                                    Fill="#505050" />
-                                                <TextBlock
-                                                    HorizontalAlignment="Center"
-                                                    VerticalAlignment="Center"
-                                                    FontSize="10"
-                                                    FontWeight="Bold"
-                                                    Foreground="#f5dbff"
-                                                    Text="{Binding Name}" />
+                                                    Width="12"
+                                                    Height="12"
+                                                    Fill="{Binding Color}"
+                                                    Visibility="{Binding IsChroma, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                                                <Grid Visibility="{Binding IsForm, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                    <Ellipse
+                                                        Width="20"
+                                                        Height="20"
+                                                        Fill="#505050" />
+                                                    <TextBlock
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center"
+                                                        FontSize="10"
+                                                        FontWeight="Bold"
+                                                        Foreground="#f5dbff"
+                                                        Text="{Binding Name}" />
+                                                </Grid>
                                             </Grid>
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Border>
+
                     </Grid>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>

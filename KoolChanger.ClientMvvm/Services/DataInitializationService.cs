@@ -163,6 +163,7 @@ public class DataInitializationService : IDataInitializationService
 
             if (skin.Chromas.Count > 0)
             {
+                skinVm.HasChromas = true;
                 var parentSkinVm = skinVm;
 
                 foreach (var chroma in skin.Chromas)

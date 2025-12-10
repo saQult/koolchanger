@@ -428,11 +428,6 @@ public class MainViewModel : ObservableObject
 
     private void FilterChampions()
     {
-        if (string.IsNullOrWhiteSpace(SearchText))
-        {
-            return;
-        }
-
         var query = SearchText.ToLower();
         var filtered = _allChampions.Where(c => c.Name.ToLower().Contains(query));
         

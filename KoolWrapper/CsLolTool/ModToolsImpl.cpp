@@ -2,8 +2,7 @@
 #include "ModToolsImpl.h"
 
 
-hash::Dict ModToolsImpl::m_hashDict{}; // ← ОБЯЗАТЕЛЬНО
-std::mutex g_hashMutex;
+hash::Dict ModToolsImpl::m_hashDict{};
 
 static bool FILTER_NONE(wad::Index::Map::const_reference i) noexcept { return false; }
 
@@ -17,7 +16,7 @@ static bool FILTER_TFT(wad::Index::Map::const_reference i) noexcept
 
 void ModToolsImpl::InitHashDict(const fs::path& hashdictPath)
 {
-    if (m_hashLoaded) return; // загружено ранее 
+    if (m_hashLoaded) return;
     std::cout << "Loading hashdict: " << hashdictPath << std::endl;
     if (!m_hashDict.load(hashdictPath))
         throw std::runtime_error("Failed to load hashdict.");
@@ -108,19 +107,14 @@ void ModToolsImpl::mod_import(fs::path src, fs::path dst, fs::path game, bool no
     lol_throw_if(dst.empty());
 
     logi("Creating tmp directory");
-    // Убедимся, что dst - это чистый путь к папке (без конечных слешей)
     dst = dst.lexically_normal();
 
-    // Получаем имя конечной папки ("266001")
     fs::path final_dir_name = dst.filename();
 
-    // Создаем имя временной папки: "266001.tmp"
     fs::path tmp_name_suffix = final_dir_name.generic_string() + ".tmp";
 
-    // Получаем родительскую папку: "C:/.../installed"
     fs::path parent_dir = dst.parent_path();
 
-    // Объединяем: "C:/.../installed/266001.tmp"
     fs::path temp_dir_path = parent_dir / tmp_name_suffix;
     try
     {

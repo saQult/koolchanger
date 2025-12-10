@@ -12,7 +12,6 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <!--  Путь подправь под фактический  -->
                 <ResourceDictionary Source="/KoolChanger.ClientMvvm;component/Views/Styles/SidebarStyles.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
