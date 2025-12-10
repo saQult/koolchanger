@@ -89,6 +89,11 @@
         <HashesFiles Include="..\DataDragon\hashes\**\*.*" Exclude="..\DataDragon\hashes\**\hashes.game.txt.*" />
     </ItemGroup>
 
+
+    <ItemGroup>
+      <Folder Include="Views\Styles\" />
+    </ItemGroup>
+
     <Target Name="CopyAndMergeHashes" AfterTargets="Build;Publish">
         <!-- Папка назначения: для publish используется $(PublishDir), для обычной сборки $(OutputPath) -->
         <PropertyGroup>
@@ -107,9 +112,7 @@
             <Output TaskParameter="Lines" ItemName="GameHashLines1" />
         </ReadLinesFromFile>
 
-        <WriteLinesToFile File="$(HashesOutputDir)\hashes.game.txt"
-                          Lines="@(GameHashLines0);@(GameHashLines1)"
-                          Overwrite="true" />
+        <WriteLinesToFile File="$(HashesOutputDir)\hashes.game.txt" Lines="@(GameHashLines0);@(GameHashLines1)" Overwrite="true" />
     </Target>
 
 

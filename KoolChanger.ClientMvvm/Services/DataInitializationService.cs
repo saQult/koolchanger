@@ -139,20 +139,13 @@ public class DataInitializationService : IDataInitializationService
         await Task.WhenAll(tasks);
     }
 
-    // Основная логика построения списка скинов для UI
-    // public Task InitializeDataAsync(Config config)
-    // {
-    //     throw new NotImplementedException();
-    // }
-
     public async Task<List<SkinViewModel>> LoadChampionSkinsAsync(Champion selectedChamp, Dictionary<Champion, Skin> selectedSkins)
     {
         var resultSkins = new List<SkinViewModel>();
 
-        // Пропускаем дефолтный скин (Skip(1)), как в оригинале
         foreach (var skin in selectedChamp.Skins.Skip(1))
         {
-            // 1. Ensure preview exists
+            Console.WriteLine(skin.Name);
             await EnsureSkinPreviewAsync(skin);
 
             var skinVm = new SkinViewModel
@@ -165,14 +158,13 @@ public class DataInitializationService : IDataInitializationService
                 IsSelected = IsSkinSelected(selectedSkins, selectedChamp, skin.Id)
             };
 
-            // Setup local logic for hover preview (requires SkinViewModel logic)
-            // Note: Commands should ideally be set in VM or be static, but here is okay for initialization
-            skinVm.ShowChromaPreviewCommand = new RelayCommand<SkinViewModel>(p => skinVm.ChromaPreview = p);
-            skinVm.HideChromaPreviewCommand = new RelayCommand(() => skinVm.ChromaPreview = null);
+            //skinVm.ShowChromaPreviewCommand = new RelayCommand<SkinViewModel>(p => skinVm.ChromaPreview = p);
+            //skinVm.HideChromaPreviewCommand = new RelayCommand(() => skinVm.ChromaPreview = null);
 
-            // 2. Handle Chromas
             if (skin.Chromas.Count > 0)
             {
+                var parentSkinVm = skinVm;
+
                 foreach (var chroma in skin.Chromas)
                 {
                     var chromaPath = Path.Combine(new FileInfo(Environment.ProcessPath).DirectoryName, "assets", "champions", "splashes", $"{chroma.Id}.png");
@@ -181,7 +173,7 @@ public class DataInitializationService : IDataInitializationService
                         await _championService.DownloadImageAsync(chroma.ImageUrl, chromaPath);
                     }
 
-                    skinVm.Children.Add(new SkinViewModel
+                    var chromaVm = new SkinViewModel
                     {
                         Id = chroma.Id,
                         Name = chroma.Name,
@@ -190,12 +182,14 @@ public class DataInitializationService : IDataInitializationService
                         Model = chroma,
                         Champion = selectedChamp,
                         IsSelected = IsSkinSelected(selectedSkins, selectedChamp, chroma.Id),
-                        IsChroma = true
-                    });
+                        IsChroma = true,
+                        Parent = parentSkinVm
+                    };
+
+                    parentSkinVm.Children.Add(chromaVm);
                 }
             }
 
-            // 3. Handle Special Forms (DJ Sona, Elementalist Lux, etc.)
             var skinIdStr = skin.Id.ToString();
             var champIdStr = selectedChamp.Id.ToString();
             

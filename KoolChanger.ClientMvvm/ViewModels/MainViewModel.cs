@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq; // Добавлен, чтобы убедиться, что LINQ-методы доступны
-using System.Threading.Tasks;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -13,44 +9,35 @@ using KoolChanger.ClientMvvm.Interfaces;
 using KoolChanger.ClientMvvm.ViewModels.Dialogs;
 using KoolChanger.Models;
 using KoolChanger.Services;
-// Обратите внимание: using KoolChanger.ClientMvvm.Helpers; удален, так как он,
-// вероятно, больше не нужен после рефакторинга.
-// using KoolChanger.ClientMvvm.Services; удален, так как он не требуется в ViewModel.
 
 
 namespace KoolChanger.ClientMvvm.ViewModels;
 
 public class MainViewModel : ObservableObject
 {
-    // --- Внедренные сервисы ---
     private readonly INavigationService _navigationService;
     private readonly IConfigService _configService;
     private readonly IFilesystemService _filesystemService;
     private readonly ILoggingService _loggingService;
     private readonly IDataInitializationService _dataInitService;
 
-    // --- Существующие сервисы ---
     private readonly ChampionService _championService;
     private readonly UpdateService _updateService;
     private readonly KoolService _koolService;
 
-    // --- Локальные сервисы и инструменты ---
     private ToolService? _toolService;
     private PartyService? _partyService;
     private CustomSkinService? _customSkinService;
-    private Process _toolProcess = new();
 
-    // --- Состояние данных ---
     private List<Champion> _allChampions = new();
     private Dictionary<Champion, Skin> _selectedSkins = new();
     private Dictionary<Champion, Skin> _savedSelectedSkins = new(); // Для Party Mode
     private Config Config { get; set; } = new();
 
-    // --- Коллекции для View ---
     private ObservableCollection<ChampionListItem> _championListItems = new();
     private ObservableCollection<SkinViewModel> _displayedSkins = new();
+    private Dictionary<Champion, ObservableCollection<SkinViewModel>> _allSkins = new();
 
-    // --- Поля свойств ---
     private string _busyText = "Initializing...";
     private string _debugText = "";
     private bool _isBusy;
@@ -62,7 +49,6 @@ public class MainViewModel : ObservableObject
     private ChampionListItem? _selectedChampionItem;
     private string _members = "";
 
-    // --- Конструктор ---
     public MainViewModel(
         ChampionService championService,
         UpdateService updateService,
@@ -73,7 +59,6 @@ public class MainViewModel : ObservableObject
         ILoggingService loggingService,
         IDataInitializationService dataInitService)
     {
-        // Присваивание зависимостей
         _championService = championService;
         _updateService = updateService;
         _navigationService = navigationService;
@@ -83,18 +68,14 @@ public class MainViewModel : ObservableObject
         _loggingService = loggingService;
         _dataInitService = dataInitService;
 
-        // Первоначальная настройка
-        _koolService.Super();
         PreloaderViewModel = new PreloaderViewModel();
 
-        // Подписки на события
         _loggingService.OnLog += LogToDebugText;
         _dataInitService.OnUpdating += data => BusyText = data;
         _updateService.OnUpdating += message => StatusText  = message;
         _updateService.OnUpdating += LogToDebugText;
         
         
-        // Инициализация команд
         OpenSettingsCommand = new RelayCommand(OpenSettings);
         OpenCustomSkinsCommand = new RelayCommand(OpenCustomSkins);
         TogglePartyModeCommand = new AsyncRelayCommand(TogglePartyModeAsync);
@@ -103,10 +84,8 @@ public class MainViewModel : ObservableObject
         TogglePreloaderCommand = new RelayCommand<bool>(TogglePreloader);
     }
 
-    // --- Свойства ViewModels ---
     public PreloaderViewModel PreloaderViewModel { get; }
 
-    // --- Публичные свойства ---
     public bool IsBusy
     {
         get => _isBusy;
@@ -184,7 +163,6 @@ public class MainViewModel : ObservableObject
         {
             if (SetProperty(ref _selectedChampionItem, value))
             {
-                // Запускаем асинхронную задачу выбора чемпиона без блокировки сеттера
                 _ = OnChampionSelectedAsync();
             }
         }
@@ -196,7 +174,6 @@ public class MainViewModel : ObservableObject
         set => SetProperty(ref _displayedSkins, value);
     }
 
-    // --- Команды ---
     public ICommand OpenSettingsCommand { get; }
     public ICommand OpenCustomSkinsCommand { get; }
     public IAsyncRelayCommand TogglePartyModeCommand { get; }
@@ -204,36 +181,27 @@ public class MainViewModel : ObservableObject
     public IAsyncRelayCommand LoadedCommand { get; }
     public ICommand TogglePreloaderCommand { get; }
 
-    // --- Логика Инициализации ---
     private async Task InitializeAsync()
     {
-        // Ждем, пока UI поток освободится для корректной работы биндингов
         await Task.Yield();
         IsBusy = true;
 
-        // 1. Инициализация файловой системы
         BusyText = "Initializing folders and files...";
         await _filesystemService.InitializeFoldersAndFilesAsync();
 
-        // 2. Загрузка конфигурации
         Config = _configService.LoadConfig();
 
-        // 3. Загрузка данных чемпионов и ассетов
         BusyText = "Loading champion data and assets...";
         await _dataInitService.InitializeDataAsync(Config);
         _allChampions = _dataInitService.AllChampions;
 
-        // 4. Восстановление выбранных скинов из конфига
         _selectedSkins = _configService.LoadSelectedSkins(_allChampions);
 
-        // 5. Проверка пути к игре и сохранение конфига
         _configService.InitializeGamePath(Config);
         _configService.SaveConfig(Config);
 
-        // 6. Загрузка списка чемпионов в UI
         LoadChampionListBoxItems();
 
-        // 7. Инициализация ToolService
         _toolService = new ToolService(Config.GamePath);
         _toolService.OverlayRunned += data =>
         {
@@ -252,7 +220,6 @@ public class MainViewModel : ObservableObject
 
         StatusText = "Please, select any skin";
 
-        // Если путь к игре корректен и есть выбранные скины, запускаем инструмент
         if (!string.IsNullOrEmpty(Config.GamePath) && _selectedSkins.Count > 0)
             RunTool();
 
@@ -266,23 +233,23 @@ public class MainViewModel : ObservableObject
 
         RegisterPartyService();
         LoadChampionListBoxItems();
+
+        foreach (var champion in _allChampions)
+        {
+            _allSkins.Add(
+                champion, 
+                new ObservableCollection<SkinViewModel>(await _dataInitService.LoadChampionSkinsAsync(champion, _selectedSkins)));
+        }
     }
 
-    // --- Логика Выбора ---
     private async Task OnChampionSelectedAsync()
     {
         if (SelectedChampionItem == null) return;
 
         var selectedChamp = _allChampions.FirstOrDefault(c => c.Name == SelectedChampionItem.Name);
         if (selectedChamp == null) return;
-
-        DisplayedSkins.Clear();
-
-        // Загружаем скины через сервис данных
-        var skins = await _dataInitService.LoadChampionSkinsAsync(selectedChamp, _selectedSkins);
         
-        // Обновляем коллекцию UI
-        DisplayedSkins = new ObservableCollection<SkinViewModel>(skins);
+        DisplayedSkins = _allSkins.FirstOrDefault(x => x.Key.Id == selectedChamp.Id).Value;
     }
 
     private void SelectSkin(SkinViewModel? vm)

@@ -71,7 +71,8 @@
             </Setter.Value>
         </Setter>
     </Style>
-    <Style TargetType="ScrollBar">
+    
+    <!--<Style TargetType="ScrollBar">
         <Setter Property="Width" Value="12" />
         <Setter Property="Margin" Value="10,0,0,10" />
         <Setter Property="Template">
@@ -195,6 +196,6 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
-    </Style>
+    </Style>-->
     
 </ResourceDictionary>
