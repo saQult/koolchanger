@@ -109,7 +109,66 @@
                                 Cursor="Hand"
                                 FontSize="20"
                                 Foreground="#f5dbff"
-                                IsChecked="{Binding IsPartyModeEnabled, Mode=OneWay}" />
+                                IsChecked="{Binding IsPartyModeEnabled, Mode=OneWay}">
+                                <CheckBox.Template>
+                                    <ControlTemplate TargetType="CheckBox">
+                                        <Border
+                                            x:Name="border"
+                                            Padding="12,6"
+                                            Background="#66000000"
+                                            BorderBrush="#f5dbff"
+                                            BorderThickness="1"
+                                            CornerRadius="4">
+                                            <Grid>
+                                                <Border
+                                                    x:Name="RippleEffect"
+                                                    Background="#20f5dbff"
+                                                    CornerRadius="4"
+                                                    Opacity="0" />
+                                                <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                                                    <Rectangle
+                                                        x:Name="CheckMark"
+                                                        Width="16"
+                                                        Height="16"
+                                                        Margin="0,0,8,0"
+                                                        Stroke="#f5dbff"
+                                                        StrokeThickness="2" />
+                                                    <ContentPresenter VerticalAlignment="Center" RecognizesAccessKey="True" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="border" Property="Background" Value="#10f5dbff" />
+                                                <Setter TargetName="border" Property="BorderBrush" Value="#f5dbff" />
+                                            </Trigger>
+
+                                            <Trigger Property="IsPressed" Value="True">
+                                                <Setter TargetName="RippleEffect" Property="Opacity" Value="1" />
+                                                <Setter TargetName="RippleEffect" Property="Background" Value="#30f5dbff" />
+                                            </Trigger>
+
+                                            <Trigger Property="IsChecked" Value="True">
+                                                <Setter TargetName="CheckMark" Property="Fill" Value="#f5dbff" />
+                                            </Trigger>
+
+                                            <EventTrigger RoutedEvent="CheckBox.Click">
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation
+                                                            Storyboard.TargetName="RippleEffect"
+                                                            Storyboard.TargetProperty="Opacity"
+                                                            From="0.3"
+                                                            To="0"
+                                                            Duration="0:0:0.5" />
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </CheckBox.Template>
+                            </CheckBox>
 
                             <Button
                                 Grid.Column="1"
@@ -122,7 +181,60 @@
                                 Content="Custom skins"
                                 Cursor="Hand"
                                 FontSize="20"
-                                Foreground="#f5dbff" />
+                                Foreground="#f5dbff">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border
+                                            x:Name="border"
+                                            Padding="12,6"
+                                            Background="#66000000"
+                                            BorderBrush="#f5dbff"
+                                            BorderThickness="1"
+                                            CornerRadius="4">
+                                            <Grid>
+                                                <Border
+                                                    x:Name="RippleEffect"
+                                                    Background="#20f5dbff"
+                                                    CornerRadius="4"
+                                                    Opacity="0" />
+                                                <ContentPresenter
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
+                                                    RecognizesAccessKey="True" />
+                                            </Grid>
+                                        </Border>
+
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="border" Property="Background" Value="#10f5dbff" />
+                                                <Setter TargetName="border" Property="BorderBrush" Value="#f5dbff" />
+                                            </Trigger>
+
+                                            <Trigger Property="IsPressed" Value="True">
+                                                <Setter TargetName="RippleEffect" Property="Opacity" Value="1" />
+                                                <Setter TargetName="RippleEffect" Property="Background" Value="#30f5dbff" />
+                                            </Trigger>
+
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter Property="Opacity" Value="0.5" />
+                                            </Trigger>
+
+                                            <EventTrigger RoutedEvent="Button.Click">
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation
+                                                            Storyboard.TargetName="RippleEffect"
+                                                            Storyboard.TargetProperty="Opacity"
+                                                            From="0.3"
+                                                            To="0"
+                                                            Duration="0:0:0.5" />
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
 
                             <StackPanel
                                 Grid.Column="2"

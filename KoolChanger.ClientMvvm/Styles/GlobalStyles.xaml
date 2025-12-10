@@ -77,26 +77,37 @@
         </Setter>
     </Style>
 
-    <!--<Style TargetType="ScrollBar">
+    <Style TargetType="ScrollBar">
         <Setter Property="Width" Value="12" />
         <Setter Property="Margin" Value="10,0,0,10" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ScrollBar">
-                    <Grid>
-                        <Border Background="#66333333" CornerRadius="6">
-                            <Track Name="PART_Track" IsDirectionReversed="True">
-                                <Track.Thumb>
-                                    <Thumb>
-                                        <Thumb.Template>
-                                            <ControlTemplate TargetType="Thumb">
-                                                <Border Background="#f5dbff" CornerRadius="6" Height="20" />
-                                            </ControlTemplate>
-                                        </Thumb.Template>
-                                    </Thumb>
-                                </Track.Thumb>
-                            </Track>
-                        </Border>
+                    <Grid Background="Transparent">
+                        <Border Background="#66333333" CornerRadius="6" />
+
+                        <Track
+                            x:Name="PART_Track"
+                            IsDirectionReversed="True"
+                            Maximum="{TemplateBinding Maximum}"
+                            Minimum="{TemplateBinding Minimum}"
+                            Orientation="{TemplateBinding Orientation}"
+                            ViewportSize="{TemplateBinding ViewportSize}"
+                            Value="{TemplateBinding Value}">
+                            <Track.Thumb>
+                                <Thumb>
+                                    <Thumb.Template>
+                                        <ControlTemplate TargetType="Thumb">
+                                            <Border
+                                                MinHeight="20"
+                                                Margin="2"
+                                                Background="#f5dbff"
+                                                CornerRadius="6" />
+                                        </ControlTemplate>
+                                    </Thumb.Template>
+                                </Thumb>
+                            </Track.Thumb>
+                        </Track>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
@@ -127,14 +138,15 @@
             <Setter.Value>
                 <ControlTemplate TargetType="CheckBox">
                     <Grid Margin="10,0">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Rectangle x:Name="CheckMark"
-                                       Width="20" Height="20"
-                                       Stroke="#f5dbff"
-                                       StrokeThickness="2"
-                                       Margin="0,0,8,0" />
-                            <ContentPresenter VerticalAlignment="Center"
-                                              RecognizesAccessKey="True" />
+                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                            <Rectangle
+                                x:Name="CheckMark"
+                                Width="20"
+                                Height="20"
+                                Margin="0,0,8,0"
+                                Stroke="#f5dbff"
+                                StrokeThickness="2" />
+                            <ContentPresenter VerticalAlignment="Center" RecognizesAccessKey="True" />
                         </StackPanel>
                     </Grid>
                     <ControlTemplate.Triggers>
@@ -170,10 +182,13 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ListBoxItem">
-                    <Border x:Name="Bd" Padding="10" CornerRadius="5"
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}">
+                    <Border
+                        x:Name="Bd"
+                        Padding="10"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="5">
                         <ContentPresenter x:Name="contentPresenter" TextElement.FontSize="20" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -181,18 +196,22 @@
                             <Trigger.EnterActions>
                                 <BeginStoryboard>
                                     <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="contentPresenter"
-                                                         Storyboard.TargetProperty="(TextElement.FontSize)"
-                                                         To="22" Duration="0:0:0.2" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="contentPresenter"
+                                            Storyboard.TargetProperty="(TextElement.FontSize)"
+                                            To="22"
+                                            Duration="0:0:0.2" />
                                     </Storyboard>
                                 </BeginStoryboard>
                             </Trigger.EnterActions>
                             <Trigger.ExitActions>
                                 <BeginStoryboard>
                                     <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="contentPresenter"
-                                                         Storyboard.TargetProperty="(TextElement.FontSize)"
-                                                         To="20" Duration="0:0:0.2" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="contentPresenter"
+                                            Storyboard.TargetProperty="(TextElement.FontSize)"
+                                            To="20"
+                                            Duration="0:0:0.2" />
                                     </Storyboard>
                                 </BeginStoryboard>
                             </Trigger.ExitActions>
@@ -201,6 +220,6 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
-    </Style>-->
+    </Style>
 
 </ResourceDictionary>
