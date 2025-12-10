@@ -1,5 +1,6 @@
 ﻿#region
 
+using System.IO.Compression;
 using System.Text.RegularExpressions;
 using KoolChanger.Helpers;
 using KoolChanger.Models;
@@ -20,8 +21,9 @@ public class UpdateService
 
     private readonly ChampionService _championService = new();
     private readonly SkinService _skinService = new();
-    private readonly WadExtractor _extractor = new();
+
     private readonly RitoBin _ritoBin = new();
+
     // Directory constants for clarity 
     private const string TempDirName = "KoolChanger.tmp";
     private const string DataDir = "data";
@@ -31,8 +33,8 @@ public class UpdateService
     private const string HashesGameFile = "hashes.game.txt";
     private const string Skin0Json = "skin0.json";
     private const string Skin0Bin = "skin0.bin";
-    
-    
+
+
     private static readonly Dictionary<string, string> ChampionNormalize = new()
     {
         { "Xin Zhao", "XinZhao" },
@@ -55,14 +57,14 @@ public class UpdateService
         { "RenataGlasc", "Renata" },
         { "Nunu&Willump", "Nunu" }
     };
-    
-    
-    
+
+
+
     /// <summary>
     /// Base temporary directory path used for extraction and processing.
     /// </summary>
     private static string BaseTempPath => Path.Combine(Path.GetTempPath(), TempDirName);
-    
+
     /// <summary>
     /// Base application directory path where hash files are stored.
     /// </summary>
@@ -76,7 +78,7 @@ public class UpdateService
     {
         OnUpdating?.Invoke("Starting skin generation process...");
         Directory.CreateDirectory(BaseTempPath);
-        
+
         try
         {
             // 1. Fetch initial data
@@ -86,10 +88,10 @@ public class UpdateService
 
             // 2. Prepare and run concurrent processing tasks
             OnUpdating?.Invoke($"Preparing tasks for {gameSkins.Count} champions...");
-            
+
             var processingTasks = gameSkins.Select(ProcessChampionSkinsAsync).ToList();
             await Task.WhenAll(processingTasks);
-            
+
             OnUpdating?.Invoke("All champions processed successfully!");
             Console.WriteLine("Completed!");
         }
@@ -114,22 +116,22 @@ public class UpdateService
         champion.Name = NormalizeChampionName(champion.Name);
         OnUpdating?.Invoke($"Processing {champion.Name}...");
         var championTempPath = Path.Combine(BaseTempPath, champion.Name + ".extracted");
-        
+
         try
         {
             // 1. Extract WAD file
             OnUpdating?.Invoke($"Extracting WAD for {champion.Name}...");
-            var leaguePath = RiotPathDetector.GetLeaguePath() ?? 
+            var leaguePath = RiotPathDetector.GetLeaguePath() ??
                              throw new InvalidOperationException("League of Legends path not found.");
-                             
+
             var wadPath = Path.Combine(leaguePath, "DATA", "FINAL", "Champions", champion.Name + ".wad.client");
             var hashPath = Path.Combine(BaseAppPath, HashesDir, HashesGameFile);
-            
-            _extractor.extract(wadPath, championTempPath, hashPath);
+
+            WadExtractor.extract(wadPath, championTempPath, hashPath);
 
             // 2. Find and process extracted skins
             var charactersRoot = Path.Combine(championTempPath, DataDir, CharactersDir);
-            
+
             if (!Directory.Exists(charactersRoot))
             {
                 OnUpdating?.Invoke($"Warning: No character data found for {champion.Name} at {charactersRoot}");
@@ -138,9 +140,9 @@ public class UpdateService
 
             var skinProcessingTasks = Directory.GetDirectories(charactersRoot)
                 .Select(d => new DirectoryInfo(d).Name) // Character folder names (e.g., 'Aatrox')
-                .SelectMany(characterName => 
+                .SelectMany(characterName =>
                     GetSkinBinPaths(charactersRoot, characterName)
-                    .Select(skinBinPath => ProcessSingleSkinAsync(champion, characterName, skinBinPath))
+                        .Select(skinBinPath => ProcessSingleSkinAsync(champion, characterName, skinBinPath))
                 ).ToList();
 
             await Task.WhenAll(skinProcessingTasks);
@@ -153,15 +155,15 @@ public class UpdateService
             // throw; 
         }
     }
-    
+
     /// <summary>
     /// Gets all .bin skin files within a character's skins directory.
     /// </summary>
     private static IEnumerable<string> GetSkinBinPaths(string charactersRoot, string characterName)
     {
         var skinsFolder = Path.Combine(charactersRoot, characterName, SkinsDir);
-        return Directory.Exists(skinsFolder) 
-            ? Directory.GetFiles(skinsFolder, "*.bin") 
+        return Directory.Exists(skinsFolder)
+            ? Directory.GetFiles(skinsFolder, "*.bin")
             : Enumerable.Empty<string>();
     }
 
@@ -201,15 +203,82 @@ public class UpdateService
 
             // 4. Convert JSON back to BIN
             _ritoBin.ConvertJsonToBin(targetJsonPath, targetBinPath, hashesPath);
+
+            // 5. Delete JSON file
+            if (File.Exists(targetJsonPath))
+                File.Delete(targetJsonPath);
+
+            // 6. Pack BINs back into WAD
+            var wadOutputPath = Path.Combine(championCompletedPath, $"{skinFileName}");
+            WadExtractor.pack(wadOutputPath, ""); // предполагаем, что метод pack принимает папку и путь для WAD
+
+            
+            JObject info = new JObject
+            {
+                ["Author"] = "Kobzar and Nylish",
+                ["Description"] = "Imported using RitoSkin",
+                ["Heart"] = "",
+                ["Home"] = "",
+                ["Name"] = $"{characterName} {skinFileName}", // Или имя реального скина
+                ["Version"] = "1.0.0"
+            };
+
+            CreateSkinArchive(
+                champion.Name,
+                skinFileName,
+                Path.ChangeExtension(wadOutputPath, "wad.client"),
+                info);
+            
+            OnUpdating?.Invoke($"Skin {characterName}/{skinFileName} packed into WAD.");
         }
         catch (Exception ex)
         {
-            OnUpdating?.Invoke($"Error modifying skin {characterName}/{skinFileName}: {ex.Message}");
-            // Log or handle the single skin failure without stopping the entire batch
+            OnUpdating?.Invoke($"Error processing skin {characterName}/{skinFileName}: {ex.Message}");
         }
     }
+    
 
-    /// <summary>
+    private void CreateSkinArchive(
+        string championName,
+        string skinFileName,        // skin20
+        string wadFilePath,         // путь к skin20.wad.client
+        JObject infoJson            // ГОТОВЫЙ info.json
+    )
+    {
+        string archiveName = $"{skinFileName}.zip";
+
+        string destBase = Path.Combine(new FileInfo(Environment.ProcessPath).DirectoryName, "skins", championName);
+        Directory.CreateDirectory(destBase);
+
+        string archivePath = Path.Combine(destBase, archiveName);
+
+        string temp = Path.Combine(Path.GetTempPath(), $"KC_ARCHIVE_{Guid.NewGuid()}");
+        string metaDir = Path.Combine(temp, "META");
+        string wadDir  = Path.Combine(temp, "WAD");
+
+        Directory.CreateDirectory(metaDir);
+        Directory.CreateDirectory(wadDir);
+
+        // Сохраняем info.json как есть
+        File.WriteAllText(
+            Path.Combine(metaDir, "info.json"),
+            infoJson.ToString(Newtonsoft.Json.Formatting.Indented)
+        );
+
+        // Копируем WAD
+        File.Copy(wadFilePath, Path.Combine(wadDir, $"{championName}.wad.client"), true);
+            
+        // Создаём архив
+        if (File.Exists(archivePath))
+            File.Delete(archivePath);
+
+        ZipFile.CreateFromDirectory(temp, archivePath, CompressionLevel.Optimal, false);
+
+        Directory.Delete(temp, true);
+    }
+
+
+/// <summary>
     /// Modifies the critical paths within the skin's JSON structure.
     /// </summary>
     private static void ModifySkinJson(JObject parsedJson, string newSkinKey, string newResourcesKey)

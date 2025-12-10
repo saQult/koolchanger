@@ -35,7 +35,8 @@ namespace KoolWrapper
     public ref class WadExtractor sealed
     {
     public:
-        void extract(String^ wadPath, String^ outputPath, String^ hashdictPath);
+        static void extract(String^ wadPath, String^ outputPath, String^ hashdictPath);
+        static void pack(String^ srcPath, String^ dstPath);
     };
 
     public ref class ModTool sealed

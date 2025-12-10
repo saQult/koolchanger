@@ -14,17 +14,13 @@ static bool FILTER_TFT(wad::Index::Map::const_reference i) noexcept
         if (name == i.first) return true;
     return false;
 }
+
 void ModToolsImpl::InitHashDict(const fs::path& hashdictPath)
 {
-    std::lock_guard<std::mutex> lock(g_hashMutex); // <-- блокировка
-
-    if (m_hashLoaded) return;
-
+    if (m_hashLoaded) return; // загружено ранее 
     std::cout << "Loading hashdict: " << hashdictPath << std::endl;
-
     if (!m_hashDict.load(hashdictPath))
         throw std::runtime_error("Failed to load hashdict.");
-
     m_hashLoaded = true;
 }
 
@@ -52,8 +48,41 @@ void ModToolsImpl::wad_exctract(const fs::path& src, fs::path dst)
             data.write_to_dir(name, dst, &m_hashDict); // используем кэш
         }
     }
-    catch (std::exception& ex) {
+    catch (std::exception& ex)
+    {
         std::cout << "Extraction failed" << std::endl;
+        std::cout << ex.what() << std::endl;
+        std::cout << "src: " << src << " dst: " << dst << std::endl;
+    }
+}
+
+void ModToolsImpl::wad_pack(const fs::path& src, fs::path dst)
+{
+    try
+    {
+        if (dst.empty())
+        {
+            if (const auto filename = src.generic_string(); filename.ends_with(".wad"))
+            {
+                dst = filename + ".client";
+            }
+            else
+            {
+                dst = filename + ".wad.client";
+            }
+        }
+        auto archive = wad::Archive{};
+        for (const auto& entry : fs::recursive_directory_iterator(src))
+        {
+            if (!entry.is_regular_file()) continue;
+            auto path = entry.path();
+            archive.add_from_directory(path, src);
+        }
+        archive.write_to_file(dst);
+    }
+    catch (std::exception& ex)
+    {
+        std::cout << "Pack failed" << std::endl;
         std::cout << ex.what() << std::endl;
         std::cout << "src: " << src << " dst: " << dst << std::endl;
     }
@@ -140,7 +169,7 @@ void ModToolsImpl::mod_import(fs::path src, fs::path dst, fs::path game, bool no
 }
 
 void ModToolsImpl::mod_mkoverlay(fs::path src, fs::path dst, fs::path game, fs::names mods, bool noTFT,
-    bool ignoreConflict)
+                                 bool ignoreConflict)
 {
     lol_trace_func(lol_trace_var("{}", src), lol_trace_var("{}", dst), lol_trace_var("{}", game));
     lol_throw_if(src.empty());
@@ -200,7 +229,7 @@ void ModToolsImpl::mod_mkoverlay(fs::path src, fs::path dst, fs::path game, fs::
     overlay_index.cleanup_in_directory(dst);
 }
 
-void ModToolsImpl::mod_addwad(fs::path src, fs::path dst, fs::path game, bool noTFT, bool removeUNK)
+void ModToolsImpl::mod_addwad(fs::path src, fs::path dst, fs::path game, const bool noTFT, const bool removeUNK)
 {
     lol_trace_func(lol_trace_var("{}", src), lol_trace_var("{}", dst), lol_trace_var("{}", game));
     lol_throw_if(src.empty());
@@ -225,7 +254,7 @@ void ModToolsImpl::mod_addwad(fs::path src, fs::path dst, fs::path game, bool no
         game_index.remove_filter(noTFT ? FILTER_TFT : FILTER_NONE);
 
         logi("Rebasing");
-        auto base = game_index.find_by_mount_name_or_overlap(mounted.name(), mounted.archive);
+        const auto base = game_index.find_by_mount_name_or_overlap(mounted.name(), mounted.archive);
         lol_throw_if_msg(!base, "Failed to find base wad for: {}", mounted.name());
         if (removeUNK)
         {
@@ -254,7 +283,7 @@ void ModToolsImpl::mod_addwad(fs::path src, fs::path dst, fs::path game, bool no
     mounted.archive.write_to_file(dst / "WAD" / mounted.relpath);
 }
 
-void ModToolsImpl::mod_copy(fs::path src, fs::path dst, fs::path game, bool noTFT)
+void ModToolsImpl::mod_copy(fs::path src, fs::path dst, fs::path game, const bool noTFT)
 {
     lol_trace_func(lol_trace_var("{}", src), lol_trace_var("{}", dst), lol_trace_var("{}", game));
     lol_throw_if(src.empty());
@@ -311,7 +340,7 @@ void ModToolsImpl::mod_copy(fs::path src, fs::path dst, fs::path game, bool noTF
 }
 
 void ModToolsImpl::mod_runoverlay(const fs::path& overlay, const fs::path& config_file, const fs::path& game,
-    const fs::names& opts, std::shared_ptr<std::atomic_bool> cancelToken)
+                                  const fs::names& opts, std::shared_ptr<std::atomic_bool> cancelToken)
 {
     auto old_msg = patcher::M_DONE;
 

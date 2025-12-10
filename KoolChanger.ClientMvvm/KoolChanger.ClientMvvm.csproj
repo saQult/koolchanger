@@ -51,14 +51,7 @@
         </None>
     </ItemGroup>
 
-
-    <ItemGroup>
-        <Reference Include="WpfAnimatedGif">
-            <HintPath>..\..\..\.nuget\packages\wpfanimatedgif\2.0.2\lib\netcoreapp3.0\WpfAnimatedGif.dll</HintPath>
-        </Reference>
-    </ItemGroup>
-
-
+    
     <ItemGroup>
         <None Remove="Assets\trash.png" />
         <Resource Include="Assets\trash.png" />
@@ -91,6 +84,33 @@
     </ItemGroup>
 
 
+    <ItemGroup>
+        <!-- Берём все файлы из hashes, кроме hashesh.game.txt.0 и .1 -->
+        <HashesFiles Include="..\DataDragon\hashes\**\*.*" Exclude="..\DataDragon\hashes\**\hashes.game.txt.*" />
+    </ItemGroup>
+
+    <Target Name="CopyAndMergeHashes" AfterTargets="Build;Publish">
+        <!-- Папка назначения: для publish используется $(PublishDir), для обычной сборки $(OutputPath) -->
+        <PropertyGroup>
+            <HashesOutputDir Condition=" '$(PublishDir)' != '' ">$(PublishDir)\hashes</HashesOutputDir>
+            <HashesOutputDir Condition=" '$(PublishDir)' == '' ">$(OutputPath)\hashes</HashesOutputDir>
+        </PropertyGroup>
+
+        <!-- Копируем остальные файлы -->
+        <Copy SourceFiles="@(HashesFiles)" DestinationFolder="$(HashesOutputDir)" />
+
+        <!-- Склеиваем файлы hashesh.game.txt.0 и .1 -->
+        <ReadLinesFromFile File="..\DataDragon\hashes\lol\hashes.game.txt.0">
+            <Output TaskParameter="Lines" ItemName="GameHashLines0" />
+        </ReadLinesFromFile>
+        <ReadLinesFromFile File="..\DataDragon\hashes\lol\hashes.game.txt.1">
+            <Output TaskParameter="Lines" ItemName="GameHashLines1" />
+        </ReadLinesFromFile>
+
+        <WriteLinesToFile File="$(HashesOutputDir)\hashes.game.txt"
+                          Lines="@(GameHashLines0);@(GameHashLines1)"
+                          Overwrite="true" />
+    </Target>
 
 
 </Project>

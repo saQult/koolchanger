@@ -131,8 +131,7 @@ struct Args {
                 uh.load_fnv1a_CDTB(dir + "/hashes.binhashes.txt");
                 uh.load_fnv1a_CDTB(dir + "/hashes.bintypes.txt");
                 uh.load_fnv1a_CDTB(dir + "/hashes.binfields.txt");
-                uh.load_xxh64_CDTB(dir + "/hashes.game.txt.0");
-                uh.load_xxh64_CDTB(dir + "/hashes.game.txt.1");
+                uh.load_xxh64_CDTB(dir + "/hashes.game.txt");
                 uh.load_xxh64_CDTB(dir + "/hashes.lcu.txt");
                 
                 if (log) {
@@ -148,7 +147,7 @@ struct Args {
                 std::cerr << "Unashing..." << std::endl;
             }
             // Используем глобальный экземпляр
-            g_unhasher->unhash_bin(bin);
+            g_unhasher->unhash_bin(bin, 2000);
         }
     }
 

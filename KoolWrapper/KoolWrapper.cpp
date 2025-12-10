@@ -14,6 +14,14 @@ void KoolWrapper::WadExtractor::extract(String^ wadPath, String^ outputPath, Str
     ModToolsImpl::wad_exctract(nativeWadPath, nativeOutputPath);
 }
 
+void KoolWrapper::WadExtractor::pack(String^ srcPath, String^ dstPath)
+{
+    const auto nativeSrcPath = to_wstring(srcPath);
+    const auto nativeDstPath = to_wstring(dstPath);
+    ModToolsImpl::wad_pack(nativeSrcPath, nativeDstPath);
+    
+}
+
 KoolWrapper::ModTool::ModTool()
 {
     m_nativeContext = new ModToolNativeContext();

@@ -55,25 +55,26 @@ public class FilesystemService : IFilesystemService
 
     public bool IsSkinDownloaded(Champion champion, Skin skin)
     {
-        if (champion == null || skin == null) return false;
+        if (champion == null || skin == null) 
+            return false;
 
         var champIdStr = champion.Id.ToString();
         var skinIdStr = skin.Id.ToString();
 
-        // Логика вычисления короткого ID скина (как в оригинальной VM)
-        if (!skinIdStr.StartsWith(champIdStr)) return false;
-        
-        var skinIdShort = Convert.ToInt32(skinIdStr.Substring(champIdStr.Length));
+        // Проверка что skin.Id начинается с champion.Id
+        if (!skinIdStr.StartsWith(champIdStr))
+            return false;
 
-        if (skin is SkinForm skinForm)
-        {
-            var path = Path.Combine("skins", $"{champion.Id}", "special_forms", $"{skinIdShort}", $"{skinForm.Stage}.fantome");
-            return File.Exists(path);
-        }
-        else
-        {
-            var path = Path.Combine("skins", $"{champion.Id}", $"{skinIdShort}.fantome");
-            return File.Exists(path);
-        }
+        // skinIdShort = XX в skinXX.zip
+        if (!int.TryParse(skinIdStr.Substring(champIdStr.Length), out int skinIdShort))
+            return false;
+
+        var championFolder = Path.Combine("Skins", champion.Name);
+
+        string skinFile = $"skin{skinIdShort}.zip";
+
+        var finalPath = Path.Combine(championFolder, skinFile);
+
+        return File.Exists(finalPath);
     }
 }

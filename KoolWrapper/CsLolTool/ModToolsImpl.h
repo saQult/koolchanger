@@ -21,6 +21,7 @@ class ModToolsImpl
 public:
     static void InitHashDict(const fs::path& hashdictPath);    static bool is_wad(const fs::path& path);
     static void wad_exctract(const fs::path& src, fs::path dst);
+    static void wad_pack(const fs::path& src, fs::path dst);
     static void mod_import(fs::path src, fs::path dst, fs::path game, bool noTFT);
     static void mod_mkoverlay(fs::path src, fs::path dst, fs::path game, fs::names mods, bool noTFT,bool ignoreConflict);
     static void mod_addwad(fs::path src, fs::path dst, fs::path game, bool noTFT, bool removeUNK);

@@ -17,5 +17,14 @@
         <Exec Command="msbuild &quot;$(SolutionDir)ritobin\ritobin_lib\build\ALL_BUILD.vcxproj&quot; /p:Configuration=$(Configuration) /p:Platform=x64 /p:CLRSupport=FALSE" />
 
     </Target>
+    <Target Name="CleanNativeDependencies"
+            AfterTargets="Clean">
+
+        <Message Text="Cleaning CMake build directories..." Importance="high"/>
+        <RemoveDir Directories="$(SolutionDir)cslolmanager\cslol-tools\build"
+                   Condition="Exists('$(SolutionDir)cslolmanager\cslol-tools\build')" />
+        <RemoveDir Directories="$(SolutionDir)ritobin\ritobin_lib\build"
+                   Condition="Exists('$(SolutionDir)ritobin\ritobin_lib\build')" />
+    </Target>
 
 </Project>

@@ -7,3 +7,6 @@
 [submodule "ritobin"]
 	path = ritobin
 	url = https://github.com/moonshadow565/ritobin
+[submodule "DataDragon"]
+	path = DataDragon
+	url = https://github.com/CommunityDragon/Data.git

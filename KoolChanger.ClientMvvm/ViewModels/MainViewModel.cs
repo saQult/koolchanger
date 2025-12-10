@@ -322,62 +322,130 @@ public class MainViewModel : ObservableObject
 
     // --- Логика Запуска Инструмента ---
     private void RunTool()
+{
+    if (_toolService == null) return;
+
+    Task.Run(async () =>
     {
-        if (_toolService == null) return;
-
-        Task.Run(async () =>
+        try
         {
-            try
+            foreach (var (champion, skin) in _selectedSkins)
             {
-                foreach (var (champion, skin) in _selectedSkins)
-                {
-                    // Логика вычисления путей и импорта (можно вынести в Helper, но оставим тут для целостности логики инструмента)
-                    var skinIdStr = skin.Id.ToString();
-                    var champIdStr = champion.Id.ToString();
-                    
-                    // Убеждаемся, что skinId вычисляется корректно, как в оригинале
-                    var skinId = Convert.ToInt32(skinIdStr.Substring(champIdStr.Length, skinIdStr.Length - champIdStr.Length));
+                var champIdStr = champion.Id.ToString();
+                var skinIdStr = skin.Id.ToString();
 
-                    if (skin is SkinForm skinForm)
+                // вычисление короткого ID
+                if (!skinIdStr.StartsWith(champIdStr))
+                    continue;
+
+                var skinIdShort = Convert.ToInt32(skinIdStr.Substring(champIdStr.Length));
+
+                // Папка чемпиона
+                var championFolder = Path.Combine("Skins", champion.Name);
+
+                // Путь к ZIP
+                string zipPath = Path.Combine(championFolder, $"skin{skinIdShort}.zip");
+
+                // Папка, куда устанавливаем
+                var installPath = Path.Combine("installed", skin.Id.ToString());
+
+                if (!Directory.Exists(installPath))
+                {
+                    if (File.Exists(zipPath))
                     {
-                        var skinPath = Path.Combine("skins", $"{champion.Id}", "special_forms", $"{skinId}", $"{skinForm.Stage}.fantome");
-                        var installPath = Path.Combine("installed", $"{skin.Id}-{skinForm.Stage}");
-                        
-                        if (!Directory.Exists(installPath))
-                            _toolService.Import(skinPath, $"{skin.Id}");
+                        _toolService.Import(zipPath, skin.Id.ToString());
                     }
                     else
                     {
-                        var skinPath = Path.Combine("skins", $"{champion.Id}", $"{skinId}.fantome");
-                        var installPath = Path.Combine("installed", $"{skin.Id}");
-
-                        if (!Directory.Exists(installPath))
-                            _toolService.Import(skinPath, $"{skin.Id}");
+                        _loggingService.Log($"Zip not found: {zipPath}");
                     }
                 }
-                // Собираем список для запуска
-                var selected = _selectedSkins.Values.Select(x => x.Id.ToString()).ToList();
-                
-                if (_customSkinService != null)
-                {
-                    selected.AddRange(_customSkinService.ImportedSkins.Where(x => x.Enabled).Select(x => x.Name));
-                }
-                
-                // Запускаем
-                foreach (var a in selected)
-                {
-                    _loggingService.Log($"running with {a}");
-                }
-                
-               
-                await _toolService.Run(selected.Where(x => Directory.Exists(Path.Combine("installed", x))));
             }
-            catch (Exception ex)
+
+            // сбор включённых
+            var selected = _selectedSkins.Values
+                .Select(x => x.Id.ToString())
+                .ToList();
+
+            if (_customSkinService != null)
             {
-                _loggingService.Log("Run Error: " + ex.Message);
+                selected.AddRange(_customSkinService
+                    .ImportedSkins
+                    .Where(x => x.Enabled)
+                    .Select(x => x.Name));
             }
-        });
-    }
+
+            foreach (var id in selected)
+                _loggingService.Log($"running with {id}");
+
+            await _toolService.Run(
+                selected.Where(x => Directory.Exists(Path.Combine("installed", x)))
+            );
+        }
+        catch (Exception ex)
+        {
+            _loggingService.Log("Run Error: " + ex.Message);
+        }
+    });
+}
+
+    // private void RunTool()
+    // {
+    //     if (_toolService == null) return;
+    //
+    //     Task.Run(async () =>
+    //     {
+    //         try
+    //         {
+    //             foreach (var (champion, skin) in _selectedSkins)
+    //             {
+    //                 // Логика вычисления путей и импорта (можно вынести в Helper, но оставим тут для целостности логики инструмента)
+    //                 var skinIdStr = skin.Id.ToString();
+    //                 var champIdStr = champion.Id.ToString();
+    //                 
+    //                 // Убеждаемся, что skinId вычисляется корректно, как в оригинале
+    //                 var skinId = Convert.ToInt32(skinIdStr.Substring(champIdStr.Length, skinIdStr.Length - champIdStr.Length));
+    //
+    //                 if (skin is SkinForm skinForm)
+    //                 {
+    //                     var skinPath = Path.Combine("skins", $"{champion.Id}", "special_forms", $"{skinId}", $"{skinForm.Stage}.fantome");
+    //                     var installPath = Path.Combine("installed", $"{skin.Id}-{skinForm.Stage}");
+    //                     
+    //                     if (!Directory.Exists(installPath))
+    //                         _toolService.Import(skinPath, $"{skin.Id}");
+    //                 }
+    //                 else
+    //                 {
+    //                     var skinPath = Path.Combine("skins", $"{champion.Id}", $"{skinId}.fantome");
+    //                     var installPath = Path.Combine("installed", $"{skin.Id}");
+    //
+    //                     if (!Directory.Exists(installPath))
+    //                         _toolService.Import(skinPath, $"{skin.Id}");
+    //                 }
+    //             }
+    //             // Собираем список для запуска
+    //             var selected = _selectedSkins.Values.Select(x => x.Id.ToString()).ToList();
+    //             
+    //             if (_customSkinService != null)
+    //             {
+    //                 selected.AddRange(_customSkinService.ImportedSkins.Where(x => x.Enabled).Select(x => x.Name));
+    //             }
+    //             
+    //             // Запускаем
+    //             foreach (var a in selected)
+    //             {
+    //                 _loggingService.Log($"running with {a}");
+    //             }
+    //             
+    //            
+    //             await _toolService.Run(selected.Where(x => Directory.Exists(Path.Combine("installed", x))));
+    //         }
+    //         catch (Exception ex)
+    //         {
+    //             _loggingService.Log("Run Error: " + ex.Message);
+    //         }
+    //     });
+    // }
 
     // --- Вспомогательные Методы ---
     private void LoadChampionListBoxItems()
