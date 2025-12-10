@@ -90,7 +90,10 @@ public class MainViewModel : ObservableObject
         // Подписки на события
         _loggingService.OnLog += LogToDebugText;
         _dataInitService.OnUpdating += data => BusyText = data;
-
+        _updateService.OnUpdating += message => StatusText  = message;
+        _updateService.OnUpdating += LogToDebugText;
+        
+        
         // Инициализация команд
         OpenSettingsCommand = new RelayCommand(OpenSettings);
         OpenCustomSkinsCommand = new RelayCommand(OpenCustomSkins);
@@ -411,7 +414,9 @@ public class MainViewModel : ObservableObject
 
     private void LogToDebugText(string msg)
     {
-        DebugText = msg + "\n" + DebugText;
+        // TODO: remove this shit later, too much in dubug logs
+        if(!msg.Contains("Modifying skin"))
+            DebugText = DateTime.Now + " " + msg + "\n" + DebugText;
     }
 
     private void OpenSettings()

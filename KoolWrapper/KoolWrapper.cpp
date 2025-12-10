@@ -11,7 +11,6 @@ void KoolWrapper::WadExtractor::extract(String^ wadPath, String^ outputPath, Str
     const auto nativeOutputPath = to_wstring(outputPath);
     const auto nativeHashdictPath = to_wstring(hashdictPath);
     ModToolsImpl::InitHashDict(nativeHashdictPath);
-    
     ModToolsImpl::wad_exctract(nativeWadPath, nativeOutputPath);
 }
 
@@ -123,5 +122,4 @@ void KoolWrapper::RitoBin::ConvertJsonToBin(String^ srcPath, String^ dstPath, St
     args.output_file = std::string(nativeDstPath.begin(), nativeDstPath.end());
     args.dir = std::string(nativeDirHashes.begin(), nativeDirHashes.end());
     args.run();
-    std::cout << args.output_file;
 }

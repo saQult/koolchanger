@@ -61,7 +61,15 @@ public partial class MainWindow : Window
 
     private void DragMove(object sender, MouseButtonEventArgs e)
     {
-        if (e.ChangedButton == MouseButton.Left) DragMove();
+        try
+        {
+            if (e.ChangedButton == MouseButton.Left) DragMove();
+
+        }
+        catch (Exception)
+        {
+            // ignored
+        }
     }
 
     private void Minimize_Click(object sender, MouseButtonEventArgs e)

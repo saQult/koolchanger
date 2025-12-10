@@ -36,7 +36,7 @@ public class SettingsViewModel : ObservableObject
 
         CloseCommand = new RelayCommand(() => navigationService.CloseWindow(this));
         SelectGameFolderCommand = new RelayCommand(SelectGameFolder);
-        DownloadSkinsCommand = new RelayCommand(async void () => await DownloadSkins(), () => CanExecute());
+        DownloadSkinsCommand = new RelayCommand(() => StartGenerating(navigationService), CanExecute);
         GetChampionDataCommand = new RelayCommand(async void () => await GetChampionData(), () => CanExecute());
         DownloadSkinsPreviewCommand =
             new RelayCommand(async void () => await DownloadSkinsPreview(), () => CanExecute());
@@ -81,6 +81,14 @@ public class SettingsViewModel : ObservableObject
         await _updateService.GenerateSkins();
         Status = "Finished downloading skins";
         IsBusy = false;
+    }
+    private void StartGenerating(INavigationService nav)
+    {
+        // Закрываем окно сразу
+        nav.CloseWindow(this);
+
+        // Убираем await — процесс идёт в фоне
+        Task.Run(() => _updateService.GenerateSkins());
     }
 
     private async Task GetChampionData()

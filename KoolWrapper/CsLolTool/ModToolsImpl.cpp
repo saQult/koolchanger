@@ -3,6 +3,7 @@
 
 
 hash::Dict ModToolsImpl::m_hashDict{}; // ← ОБЯЗАТЕЛЬНО
+std::mutex g_hashMutex;
 
 static bool FILTER_NONE(wad::Index::Map::const_reference i) noexcept { return false; }
 
@@ -15,7 +16,9 @@ static bool FILTER_TFT(wad::Index::Map::const_reference i) noexcept
 }
 void ModToolsImpl::InitHashDict(const fs::path& hashdictPath)
 {
-    if (m_hashLoaded) return; // загружено ранее
+    std::lock_guard<std::mutex> lock(g_hashMutex); // <-- блокировка
+
+    if (m_hashLoaded) return;
 
     std::cout << "Loading hashdict: " << hashdictPath << std::endl;
 
@@ -49,8 +52,10 @@ void ModToolsImpl::wad_exctract(const fs::path& src, fs::path dst)
             data.write_to_dir(name, dst, &m_hashDict); // используем кэш
         }
     }
-    catch (...) {
+    catch (std::exception& ex) {
         std::cout << "Extraction failed" << std::endl;
+        std::cout << ex.what() << std::endl;
+        std::cout << "src: " << src << " dst: " << dst << std::endl;
     }
 }
 

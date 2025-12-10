@@ -32,6 +32,32 @@ public class UpdateService
     private const string Skin0Json = "skin0.json";
     private const string Skin0Bin = "skin0.bin";
     
+    
+    private static readonly Dictionary<string, string> ChampionNormalize = new()
+    {
+        { "Xin Zhao", "XinZhao" },
+        { "Kai'Sa", "Kaisa" },
+        { "Vel'Koz", "Velkoz" },
+        { "Kha'Zix", "Khazix" },
+        { "Cho'Gath", "Chogath" },
+        { "Rek'Sai", "Reksai" },
+        { "Bel'Veth", "Belveth" },
+        { "Kog'Maw", "Kogmaw" },
+        { "Jarvan IV", "JarvanIV" },
+        { "Master Yi", "MasterYi" },
+        { "Miss Fortune", "MissFortune" },
+        { "Lee Sin", "LeeSin" },
+        { "Tahm Kench", "TahmKench" },
+        { "Twisted Fate", "TwistedFate" },
+        { "Aurelion Sol", "AurelionSol" },
+        { "Dr. Mundo", "DrMundo" },
+        { "Wukong", "MonkeyKing" },
+        { "RenataGlasc", "Renata" },
+        { "Nunu&Willump", "Nunu" }
+    };
+    
+    
+    
     /// <summary>
     /// Base temporary directory path used for extraction and processing.
     /// </summary>
@@ -85,6 +111,7 @@ public class UpdateService
     /// </summary>
     private async Task ProcessChampionSkinsAsync(Champion champion)
     {
+        champion.Name = NormalizeChampionName(champion.Name);
         OnUpdating?.Invoke($"Processing {champion.Name}...");
         var championTempPath = Path.Combine(BaseTempPath, champion.Name + ".extracted");
         
@@ -218,9 +245,16 @@ public class UpdateService
                 resourceResolverEntry["value"] = newResourcesKey;
             }
         }
+        
+        
     }
-
-
+    private static string NormalizeChampionName(string name)
+    {
+        return ChampionNormalize.TryGetValue(name, out var fixedName)
+            ? fixedName
+            : name.Replace(" ", "").Replace("'", "").Replace(".", "");
+    }
+    
     // The NameRules class has been kept as a private nested utility class for path sanitization.
     // Since it's not currently used in the refactored GenerateSkins, I'm keeping it as-is 
     // but without any modifications as the original intent was not clear.
@@ -245,4 +279,6 @@ public class UpdateService
             return s;
         }
     }
+    
+    
 }

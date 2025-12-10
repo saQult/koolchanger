@@ -189,14 +189,9 @@ struct Args {
 
     void run_once() {
         try {
-             std::cerr << "In: " << input_file << std::endl;
-            std::cerr << "Out: " << output_file << std::endl;
             auto bin = Bin{};
-            std::cout << "Bin created!"<< std::endl;
             read(bin);
-            std::cout << "read complited" << std::endl;
             write(bin);
-            std::cout << "Success ended processing"<< std::endl;
         } catch (const std::runtime_error& err) {
             std::cerr << "In: " << input_file << std::endl;
             std::cerr << "Out: " << output_file << std::endl;
