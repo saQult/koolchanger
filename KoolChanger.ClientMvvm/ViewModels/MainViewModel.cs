@@ -228,7 +228,7 @@ public class MainViewModel : ObservableObject
 
         if (_filesystemService.IsFirstRun())
         {
-            // Логика первого запуска (если есть)
+            // implement pls
         }
 
         RegisterPartyService();
@@ -256,7 +256,6 @@ public class MainViewModel : ObservableObject
     {
         if (vm == null) return;
 
-        // Проверяем наличие файлов скина
         if (!_filesystemService.IsSkinDownloaded(vm.Champion, vm.Model))
         {
             _navigationService.ShowCustomMessageBox("Error!",
@@ -264,7 +263,6 @@ public class MainViewModel : ObservableObject
             return;
         }
 
-        // Обновляем визуальное выделение
         foreach (var s in DisplayedSkins)
         {
             s.IsSelected = false;
@@ -273,11 +271,9 @@ public class MainViewModel : ObservableObject
 
         vm.IsSelected = true;
 
-        // Сохраняем выбор
         _selectedSkins[vm.Champion] = vm.Model;
         _configService.SaveSelectedSkins(Config, _selectedSkins);
 
-        // Отправляем данные в Party Mode
         if (_partyService != null && IsPartyModeEnabled)
         {
             _partyService.SelectedSkins[vm.Champion] = vm.Model;
@@ -287,7 +283,6 @@ public class MainViewModel : ObservableObject
         RunTool();
     }
 
-    // --- Логика Запуска Инструмента ---
     private void RunTool()
 {
     if (_toolService == null) return;
@@ -301,19 +296,15 @@ public class MainViewModel : ObservableObject
                 var champIdStr = champion.Id.ToString();
                 var skinIdStr = skin.Id.ToString();
 
-                // вычисление короткого ID
                 if (!skinIdStr.StartsWith(champIdStr))
                     continue;
 
                 var skinIdShort = Convert.ToInt32(skinIdStr.Substring(champIdStr.Length));
 
-                // Папка чемпиона
                 var championFolder = Path.Combine("Skins", champion.Name);
 
-                // Путь к ZIP
                 string zipPath = Path.Combine(championFolder, $"skin{skinIdShort}.zip");
 
-                // Папка, куда устанавливаем
                 var installPath = Path.Combine("installed", skin.Id.ToString());
 
                 if (!Directory.Exists(installPath))
@@ -329,7 +320,6 @@ public class MainViewModel : ObservableObject
                 }
             }
 
-            // сбор включённых
             var selected = _selectedSkins.Values
                 .Select(x => x.Id.ToString())
                 .ToList();

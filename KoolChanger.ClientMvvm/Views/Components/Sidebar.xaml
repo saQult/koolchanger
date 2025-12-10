@@ -19,6 +19,7 @@
 
     <ListBox
         ItemsSource="{Binding ChampionListItems}"
+        PreviewMouseWheel="SidebarList_PreviewMouseWheel"
         SelectedItem="{Binding SelectedChampionItem}"
         Style="{StaticResource SidebarListBoxStyle}">
         <ListBox.Resources>

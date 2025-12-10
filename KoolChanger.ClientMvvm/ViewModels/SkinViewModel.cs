@@ -25,7 +25,6 @@ public class SkinViewModel : ObservableObject
     public string Color { get; set; } = "#FFFFFF";
     public bool IsChroma { get; set; }
     public bool IsForm { get; set; }
-    public bool IsChromaVisible { get; set; } = false;
     public bool HasChromas { get; set; } = false;
     public Skin Model { get; set; } = null!; 
     public Champion Champion { get; set; } = null!;
@@ -50,13 +49,11 @@ public class SkinViewModel : ObservableObject
     {
         if (Parent == null || chroma == null) return;
         Parent.ChromaPreview = chroma;
-        Parent.ChromaPreview.IsChromaVisible = false;
     }
 
     private void HideChromaPreview()
     {
         if (Parent == null) return;
-        Parent.ChromaPreview.IsChromaVisible = true;
         Parent.ChromaPreview = null;
     }
     public ObservableCollection<SkinViewModel> Children { get; set; } = new();

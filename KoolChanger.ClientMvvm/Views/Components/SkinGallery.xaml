@@ -168,7 +168,7 @@
                             VerticalAlignment="Top"
                             Background="#C8000000"
                             CornerRadius="10"
-                            Visibility="{Binding ChromaPreview.IsChromaVisible, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
+                            Visibility="{Binding ChromaPreview, Converter={StaticResource NullVisibilityConverter}}">
                             <Image
                                 Width="130"
                                 Height="200"
