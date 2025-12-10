@@ -1,3 +1,13 @@
+# Todo for devs
+1. Pack skins with wad which created in tmp dir and delete tmp dir
+2. Rewrite skin search algorithm because we have new skin structure
+
+Chroma inherits skin in ctor, we can do this:
+   ``` c#
+   Chaimpion.Id + skin.Id
+   ```
+3. Fix broken chromas preview in mvvm, i think, i forget to change binding from last recode
+
 # 😎 KOOLChanger
 A skin changer for **League of Legends**, allowing you to use **skins** and **chromas**
 
