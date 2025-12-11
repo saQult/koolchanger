@@ -326,6 +326,7 @@ public class MainViewModel : ObservableObject
 
             if (_customSkinService != null)
             {
+                _customSkinService.GetSkins();
                 selected.AddRange(_customSkinService
                     .ImportedSkins
                     .Where(x => x.Enabled)
@@ -345,66 +346,6 @@ public class MainViewModel : ObservableObject
         }
     });
 }
-
-    // private void RunTool()
-    // {
-    //     if (_toolService == null) return;
-    //
-    //     Task.Run(async () =>
-    //     {
-    //         try
-    //         {
-    //             foreach (var (champion, skin) in _selectedSkins)
-    //             {
-    //                 // Логика вычисления путей и импорта (можно вынести в Helper, но оставим тут для целостности логики инструмента)
-    //                 var skinIdStr = skin.Id.ToString();
-    //                 var champIdStr = champion.Id.ToString();
-    //                 
-    //                 // Убеждаемся, что skinId вычисляется корректно, как в оригинале
-    //                 var skinId = Convert.ToInt32(skinIdStr.Substring(champIdStr.Length, skinIdStr.Length - champIdStr.Length));
-    //
-    //                 if (skin is SkinForm skinForm)
-    //                 {
-    //                     var skinPath = Path.Combine("skins", $"{champion.Id}", "special_forms", $"{skinId}", $"{skinForm.Stage}.fantome");
-    //                     var installPath = Path.Combine("installed", $"{skin.Id}-{skinForm.Stage}");
-    //                     
-    //                     if (!Directory.Exists(installPath))
-    //                         _toolService.Import(skinPath, $"{skin.Id}");
-    //                 }
-    //                 else
-    //                 {
-    //                     var skinPath = Path.Combine("skins", $"{champion.Id}", $"{skinId}.fantome");
-    //                     var installPath = Path.Combine("installed", $"{skin.Id}");
-    //
-    //                     if (!Directory.Exists(installPath))
-    //                         _toolService.Import(skinPath, $"{skin.Id}");
-    //                 }
-    //             }
-    //             // Собираем список для запуска
-    //             var selected = _selectedSkins.Values.Select(x => x.Id.ToString()).ToList();
-    //             
-    //             if (_customSkinService != null)
-    //             {
-    //                 selected.AddRange(_customSkinService.ImportedSkins.Where(x => x.Enabled).Select(x => x.Name));
-    //             }
-    //             
-    //             // Запускаем
-    //             foreach (var a in selected)
-    //             {
-    //                 _loggingService.Log($"running with {a}");
-    //             }
-    //             
-    //            
-    //             await _toolService.Run(selected.Where(x => Directory.Exists(Path.Combine("installed", x))));
-    //         }
-    //         catch (Exception ex)
-    //         {
-    //             _loggingService.Log("Run Error: " + ex.Message);
-    //         }
-    //     });
-    // }
-
-    // --- Вспомогательные Методы ---
     private void LoadChampionListBoxItems()
     {
         var items = new ObservableCollection<ChampionListItem>();
@@ -446,7 +387,29 @@ public class MainViewModel : ObservableObject
 
     private void OpenCustomSkins()
     {
+        var oldEnabledCustomSkins = _customSkinService!
+            .ImportedSkins
+            .Where(x => x.Enabled)
+            .OrderBy(x => x.Name)
+            .Select(x => x.Name)
+            .ToList();
+
         _navigationService.ShowDialog<CustomSkinsViewModel>();
+
+        _customSkinService.GetSkins();
+        var newEnabledCustomSkins = _customSkinService!
+            .ImportedSkins
+            .Where(x => x.Enabled)
+            .OrderBy(x => x.Name)
+            .Select(x => x.Name)
+            .ToList();
+
+        var hasChanges = !oldEnabledCustomSkins.SequenceEqual(newEnabledCustomSkins);
+
+        if (!hasChanges)
+            return;
+
+        RunTool();
     }
 
     private void TogglePreloader(bool show)

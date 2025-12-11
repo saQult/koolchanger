@@ -20,35 +20,28 @@ namespace KoolChanger.ClientMvvm.ViewModels.Dialogs;
 
 public class CustomSkinsViewModel : ObservableObject
 {
-    // --- Поля и Сервисы
     private readonly CustomSkinService _customSkinService;
     private readonly INavigationService _navigationService;
     private readonly ICollectionView _view;
 
     private string _busyText = string.Empty;
 
-    // --- Свойства для привязки (Busy Indicator)
     private bool _isBusy;
 
     private string _searchText = string.Empty;
-
-    // --- Конструктор
     public CustomSkinsViewModel(ToolService toolService, INavigationService navigationService)
     {
         _navigationService = navigationService;
         _customSkinService = new CustomSkinService(toolService);
 
-        // Инициализация коллекций и фильтрации
         foreach (var s in _customSkinService.ImportedSkins)
             SkinListboxItems.Add(new CustomSkinListBoxItem(s));
 
-        // View для фильтрации данных (остается в VM)
         _view = CollectionViewSource.GetDefaultView(SkinListboxItems);
         _view.Filter = FilterSkins;
 
-        // Инициализация команд
         CloseCommand = new RelayCommand(() => _navigationService.CloseWindow(this));
-        DropCommand = new AsyncRelayCommand<string[]>(ExecuteDropAsync);
+        DropCommand = new AsyncRelayCommand<string[]>(ExecuteDropAsync!);
         DeleteSkinCommand = new RelayCommand<CustomSkinListBoxItem>(ExecuteDeleteSkin);
         ToggleSkinEnabledCommand = new RelayCommand<CustomSkinListBoxItem>(ExecuteToggleSkinEnabled);
     }
@@ -65,7 +58,6 @@ public class CustomSkinsViewModel : ObservableObject
         set => SetProperty(ref _busyText, value);
     }
 
-    // --- Свойства для привязки (List & Search)
     public ObservableCollection<CustomSkinListBoxItem> SkinListboxItems { get; } = new();
 
     public string SearchText
@@ -79,14 +71,12 @@ public class CustomSkinsViewModel : ObservableObject
         }
     }
 
-    // --- Команды
     public ICommand CloseCommand { get; }
     public ICommand DropCommand { get; }
     public ICommand DeleteSkinCommand { get; }
     public ICommand ToggleSkinEnabledCommand { get; }
 
-    // --- Методы команд
-
+    
     private async Task ExecuteDropAsync(string[] files)
     {
         if (files is null || files.Length == 0) return;
@@ -147,7 +137,6 @@ public class CustomSkinsViewModel : ObservableObject
         _customSkinService.SaveSkins();
     }
 
-    // --- Метод фильтрации
     private bool FilterSkins(object obj)
     {
         if (string.IsNullOrWhiteSpace(SearchText))
@@ -160,8 +149,6 @@ public class CustomSkinsViewModel : ObservableObject
     }
 }
 
-// CustomSkinListBoxItem остается здесь или в отдельном файле, 
-// так как это модель элемента представления, связанная с INotifyPropertyChanged
 public class CustomSkinListBoxItem : INotifyPropertyChanged
 {
     private bool _enabled;
