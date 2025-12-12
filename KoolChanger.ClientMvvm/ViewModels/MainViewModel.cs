@@ -254,7 +254,7 @@ public class MainViewModel : ObservableObject
     private async Task OnChampionSelectedAsync()
     {
         if (SelectedChampionItem == null) return;
-
+        
         var selectedChamp = _allChampions.FirstOrDefault(c => c.Name == SelectedChampionItem.Name);
         if (selectedChamp == null) return;
         

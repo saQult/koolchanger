@@ -77,12 +77,12 @@ public class Tool
         if (modInfo == null)
             return;
         var path = Path.Combine(Directory.GetCurrentDirectory(), "installed", name);
-        _modTool.Import( src, path, _gamePath, true);
+        ModTool.Import( src, path, _gamePath, true);
     }
 
     public void SaveOverlay(string profileName, IEnumerable<string> mods, bool skipConflicts)
     {
-        _modTool.MkOverlay( Path.Combine(Directory.GetCurrentDirectory(), "installed"),
+        ModTool.MkOverlay( Path.Combine(Directory.GetCurrentDirectory(), "installed"),
                             (Path.Combine(Directory.GetCurrentDirectory(), "profiles", profileName)),
                                 _gamePath, 
                             (string.Join('/', mods)),

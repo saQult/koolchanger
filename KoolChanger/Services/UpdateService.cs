@@ -161,7 +161,7 @@ public class UpdateService
 
         try
         {
-            _ritoBin.ConvertBintoJson(skinBinPath, targetJsonPath, hashesPath);
+            RitoBin.ConvertBintoJson(skinBinPath, targetJsonPath, hashesPath);
 
             var parsedJson = JObject.Parse(await File.ReadAllTextAsync(targetJsonPath));
             ModifySkinJson(parsedJson, newSkinKey, newResourcesKey);
@@ -169,7 +169,7 @@ public class UpdateService
             var modifiedJson = JsonConvert.SerializeObject(parsedJson, Formatting.Indented);
             await File.WriteAllTextAsync(targetJsonPath, modifiedJson);
 
-            _ritoBin.ConvertJsonToBin(targetJsonPath, targetBinPath, hashesPath);
+            RitoBin.ConvertJsonToBin(targetJsonPath, targetBinPath, hashesPath);
 
             if (File.Exists(targetJsonPath))
                 File.Delete(targetJsonPath);

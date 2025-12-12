@@ -4,6 +4,22 @@
 #include "RitoBin/RitoBinImpl.h"
 
 
+std::wstring KoolWrapper::to_wstring(String^ s)
+{
+    if (s == nullptr) return L"";
+
+    IntPtr ptr = Marshal::StringToHGlobalUni(s);
+    std::wstring wstr(static_cast<wchar_t*>(ptr.ToPointer()));
+    Marshal::FreeHGlobal(ptr);
+
+    return wstr;
+}
+
+std::string KoolWrapper::wstring_to_utf8(const std::wstring& wstr)
+{
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> conv;
+    return conv.to_bytes(wstr);
+}
 
 void KoolWrapper::WadExtractor::extract(String^ wadPath, String^ outputPath, String^ hashdictPath)
 {
@@ -19,7 +35,6 @@ void KoolWrapper::WadExtractor::pack(String^ srcPath, String^ dstPath)
     const auto nativeSrcPath = to_wstring(srcPath);
     const auto nativeDstPath = to_wstring(dstPath);
     ModToolsImpl::wad_pack(nativeSrcPath, nativeDstPath);
-    
 }
 
 KoolWrapper::ModTool::ModTool()
@@ -63,7 +78,7 @@ void KoolWrapper::ModTool::Cancel()
     }
 }
 
-void KoolWrapper::ModTool::Import(String^ src, String^ dst, String^ gamePath, bool noTFT)
+void KoolWrapper::ModTool::Import(String^ src, String^ dst, String^ gamePath, const bool noTFT)
 {
     const auto nativeSource = to_wstring(src);
     const auto nativeDestination = to_wstring(dst);
@@ -71,14 +86,15 @@ void KoolWrapper::ModTool::Import(String^ src, String^ dst, String^ gamePath, bo
     ModToolsImpl::mod_import(nativeSource, nativeDestination, nativeGamePath, noTFT);
 }
 
-void KoolWrapper::ModTool::MkOverlay(String^ src, String^ dst, String^ gamePath, String^ mods, bool noTFT,
-    bool IgnoreConflicts)
+void KoolWrapper::ModTool::MkOverlay(String^ src, String^ dst, String^ gamePath, String^ mods, const bool noTFT,
+                                     const bool IgnoreConflicts)
 {
     const auto nativeSource = to_wstring(src);
     const auto nativeDestination = to_wstring(dst);
     const auto nativeGamePath = to_wstring(gamePath);
     const auto nativeModsPath = to_wstring(mods);
-    ModToolsImpl::mod_mkoverlay(nativeSource, nativeDestination, nativeGamePath, nativeModsPath, noTFT, IgnoreConflicts);
+    ModToolsImpl::mod_mkoverlay(nativeSource, nativeDestination, nativeGamePath, nativeModsPath, noTFT,
+                                IgnoreConflicts);
 }
 
 void KoolWrapper::ModTool::RunOverlay(String^ overlayPath, String^ configPath, String^ gamePath, String^ opts)
@@ -92,12 +108,12 @@ void KoolWrapper::ModTool::RunOverlay(String^ overlayPath, String^ configPath, S
 
 
     ModToolsImpl::mod_runoverlay(nativeOverlayPath, nativeConfigPath, nativeGamePath, nativeOptsPath,
-                   m_nativeContext->cancellationToken);
+                                 m_nativeContext->cancellationToken);
     m_nativeContext->cancellationToken.reset();
 }
 
 void KoolWrapper::RitoBin::ConvertBintoJson(String^ srcPath, String^ dstPath, String^ dirHashes)
-{ 
+{
     const auto nativeSrcPath = to_wstring(srcPath);
     auto nativeDstPath = to_wstring(dstPath);
     const auto nativeDirHashes = to_wstring(dirHashes);
