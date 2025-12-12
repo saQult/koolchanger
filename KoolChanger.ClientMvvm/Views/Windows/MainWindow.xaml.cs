@@ -25,11 +25,10 @@ public partial class MainWindow : Window
 
             if (DataContext is MainViewModel vm)
             {
-                _preloader = new Preloader
+                _preloader = new Preloader(vm.PreloaderViewModel)
                 {
                     Owner = this,
-                    WindowStartupLocation = WindowStartupLocation.CenterOwner,
-                    DataContext = vm.PreloaderViewModel
+                    WindowStartupLocation = WindowStartupLocation.CenterOwner
                 };
 
                 vm.PropertyChanged += (sender, args) =>

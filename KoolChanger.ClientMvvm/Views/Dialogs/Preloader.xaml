@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:gif="http://wpfanimatedgif.codeplex.com"
-        xmlns:viewModels="clr-namespace:KoolChanger.ClientMvvm.ViewModels.Dialogs"
         mc:Ignorable="d"
         AllowsTransparency="True"
         ShowInTaskbar="False"
@@ -13,9 +12,6 @@
         WindowStyle="None"
         ResizeMode="NoResize"
         Title="Preloader" Height="200" Width="400">
-    <Window.DataContext>
-        <viewModels:PreloaderViewModel />
-    </Window.DataContext>
     <Border CornerRadius="20"
             Background="#99000000"
             BorderThickness="0">

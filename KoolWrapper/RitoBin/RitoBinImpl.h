@@ -140,7 +140,7 @@ struct Args {
             if (log) {
                 std::cerr << "Unashing..." << std::endl;
             }
-            g_unhasher->unhash_bin(bin, 2000);
+            g_unhasher->unhash_bin(bin, MAXINT);
         }
     }
 

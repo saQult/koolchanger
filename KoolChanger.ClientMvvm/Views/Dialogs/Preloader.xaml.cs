@@ -1,5 +1,6 @@
 ﻿#region
 
+using System;
 using System.Windows;
 using KoolChanger.ClientMvvm.ViewModels.Dialogs;
 
@@ -9,10 +10,12 @@ namespace KoolChanger.ClientMvvm.Views.Dialogs;
 
 public partial class Preloader : Window
 {
-    public Preloader()
+    public Preloader(PreloaderViewModel viewModel)
     {
         InitializeComponent();
-        ViewModel = (PreloaderViewModel)DataContext;
+
+        ViewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
+        DataContext = ViewModel;
     }
 
     public PreloaderViewModel ViewModel { get; }

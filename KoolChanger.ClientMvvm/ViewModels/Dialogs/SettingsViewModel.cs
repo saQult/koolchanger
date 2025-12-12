@@ -1,7 +1,6 @@
 ﻿#region
 
 using System.IO;
-using System.Windows.Forms;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -17,22 +16,29 @@ namespace KoolChanger.ClientMvvm.ViewModels.Dialogs;
 public class SettingsViewModel : ObservableObject
 {
     private readonly ChampionService _championService;
+    private readonly IFolderBrowserService _folderBrowserService;
     private readonly SkinService _skinService;
 
     private readonly UpdateService _updateService;
 
-    private string _gamePath;
+    private string _gamePath = string.Empty;
 
     private bool _isBusy;
-    private string _status;
+    private string _status = string.Empty;
 
-    public SettingsViewModel(IConfigService configService, UpdateService updateService, SkinService skinService,
-        ChampionService championService, INavigationService navigationService)
+    public SettingsViewModel(
+        IConfigService configService,
+        UpdateService updateService,
+        SkinService skinService,
+        ChampionService championService,
+        INavigationService navigationService,
+        IFolderBrowserService folderBrowserService)
     {
         _gamePath = configService.LoadConfig().GamePath;
         _updateService = updateService;
         _skinService = skinService;
         _championService = championService;
+        _folderBrowserService = folderBrowserService;
 
         CloseCommand = new RelayCommand(() => navigationService.CloseWindow(this));
         SelectGameFolderCommand = new RelayCommand(SelectGameFolder);
@@ -111,12 +117,9 @@ public class SettingsViewModel : ObservableObject
 
     private void SelectGameFolder()
     {
-        using var dialog = new FolderBrowserDialog();
-        dialog.Description = "Select the folder where League of Legends is installed";
-        dialog.UseDescriptionForTitle = true;
-        if (dialog.ShowDialog() == DialogResult.OK)
+        if (_folderBrowserService.TrySelectFolder(out var path) && !string.IsNullOrWhiteSpace(path))
         {
-            _gamePath = dialog.SelectedPath;
+            _gamePath = path;
             GamePathChanged?.Invoke(_gamePath);
         }
     }

@@ -20,6 +20,9 @@ public class MainViewModel : ObservableObject
     private readonly IFilesystemService _filesystemService;
     private readonly ILoggingService _loggingService;
     private readonly IDataInitializationService _dataInitService;
+    private readonly IToolServiceFactory _toolServiceFactory;
+    private readonly ICustomSkinServiceFactory _customSkinServiceFactory;
+    private readonly IPartyServiceFactory _partyServiceFactory;
 
     private readonly ChampionService _championService;
     private readonly UpdateService _updateService;
@@ -57,7 +60,10 @@ public class MainViewModel : ObservableObject
         IConfigService configService,
         IFilesystemService filesystemService,
         ILoggingService loggingService,
-        IDataInitializationService dataInitService)
+        IDataInitializationService dataInitService,
+        IToolServiceFactory toolServiceFactory,
+        ICustomSkinServiceFactory customSkinServiceFactory,
+        IPartyServiceFactory partyServiceFactory)
     {
         _championService = championService;
         _updateService = updateService;
@@ -67,6 +73,9 @@ public class MainViewModel : ObservableObject
         _filesystemService = filesystemService;
         _loggingService = loggingService;
         _dataInitService = dataInitService;
+        _toolServiceFactory = toolServiceFactory;
+        _customSkinServiceFactory = customSkinServiceFactory;
+        _partyServiceFactory = partyServiceFactory;
 
         PreloaderViewModel = new PreloaderViewModel();
 
@@ -202,7 +211,7 @@ public class MainViewModel : ObservableObject
 
         LoadChampionListBoxItems();
 
-        _toolService = new ToolService(Config.GamePath);
+        _toolService = _toolServiceFactory.Create(Config.GamePath);
         _toolService.OverlayRunned += data =>
         {
             var tooltip = data switch
@@ -216,7 +225,7 @@ public class MainViewModel : ObservableObject
             _loggingService.Log(data);
         };
 
-        _customSkinService = new CustomSkinService(_toolService);
+        _customSkinService = _customSkinServiceFactory.Create(_toolService);
 
         StatusText = "Please, select any skin";
 
@@ -451,7 +460,7 @@ public class MainViewModel : ObservableObject
     {
         if (_partyService != null) return;
 
-        _partyService = new PartyService(_allChampions, _selectedSkins, Config.PartyModeUrl);
+        _partyService = _partyServiceFactory.Create(_allChampions, _selectedSkins, Config.PartyModeUrl);
         _partyService.OnLog += _loggingService.Log;
         _partyService.OnError += msg => _navigationService.ShowCustomMessageBox("Error!", msg);
         

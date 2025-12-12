@@ -145,7 +145,6 @@ public class DataInitializationService : IDataInitializationService
 
         foreach (var skin in selectedChamp.Skins.Skip(1))
         {
-            Console.WriteLine(skin.Name);
             await EnsureSkinPreviewAsync(skin);
 
             var skinVm = new SkinViewModel

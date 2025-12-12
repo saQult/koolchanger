@@ -2,9 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using KoolChanger.Models;
 using System.Collections.ObjectModel;
-using System.Windows.Controls;
 using System.Windows.Input;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace KoolChanger.ClientMvvm.ViewModels;
 

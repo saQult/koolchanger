@@ -44,6 +44,10 @@ public partial class App : Application
         services.AddSingleton<IFilesystemService, FilesystemService>();
         services.AddSingleton<ILoggingService, LoggingService>();
         services.AddSingleton<INavigationService, NavigationService>();
+        services.AddSingleton<IFolderBrowserService, FolderBrowserService>();
+        services.AddSingleton<IToolServiceFactory, ToolServiceFactory>();
+        services.AddSingleton<ICustomSkinServiceFactory, CustomSkinServiceFactory>();
+        services.AddSingleton<IPartyServiceFactory, PartyServiceFactory>();
 
         services.AddSingleton<SkinService>();
         services.AddSingleton<ChampionService>();
@@ -62,12 +66,6 @@ public partial class App : Application
 
         services.AddSingleton<KoolService>();
 
-        services.AddSingleton<ToolService>(serviceProvider =>
-        {
-            var mainVm = serviceProvider.GetRequiredService<MainViewModel>();
-            var config = serviceProvider.GetRequiredService<IConfigService>().LoadConfig();
-            return new ToolService(config.GamePath);
-        });
     }
 
     protected override void OnStartup(StartupEventArgs e)

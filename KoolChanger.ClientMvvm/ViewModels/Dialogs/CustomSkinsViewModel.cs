@@ -29,10 +29,16 @@ public class CustomSkinsViewModel : ObservableObject
     private bool _isBusy;
 
     private string _searchText = string.Empty;
-    public CustomSkinsViewModel(ToolService toolService, INavigationService navigationService)
+    public CustomSkinsViewModel(
+        IToolServiceFactory toolServiceFactory,
+        ICustomSkinServiceFactory customSkinServiceFactory,
+        IConfigService configService,
+        INavigationService navigationService)
     {
         _navigationService = navigationService;
-        _customSkinService = new CustomSkinService(toolService);
+        var config = configService.LoadConfig();
+        var toolService = toolServiceFactory.Create(config.GamePath);
+        _customSkinService = customSkinServiceFactory.Create(toolService);
 
         foreach (var s in _customSkinService.ImportedSkins)
             SkinListboxItems.Add(new CustomSkinListBoxItem(s));
