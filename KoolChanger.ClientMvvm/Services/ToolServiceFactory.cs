@@ -1,9 +1,5 @@
-#region
-
 using KoolChanger.ClientMvvm.Interfaces;
 using KoolChanger.Services;
-
-#endregion
 
 namespace KoolChanger.ClientMvvm.Services;
 

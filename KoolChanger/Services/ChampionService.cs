@@ -12,10 +12,11 @@ public class ChampionService
     private readonly HttpClient _httpClient = new HttpClient();
     private readonly SkinService _skinService = new();
     public event Action<string>? OnDownloaded;
+    public event Action<string>? OnError;
     
     public async Task<List<Champion>> GetChampionsAsync()
-    { 
-        string json = await _httpClient.GetStringAsync(ChampionsSummaryEndpoint);
+    {
+        var json = await _httpClient.GetStringAsync(ChampionsSummaryEndpoint);
 
         using var document = JsonDocument.Parse(json);
         var root = document.RootElement;

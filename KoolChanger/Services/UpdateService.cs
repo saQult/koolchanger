@@ -1,13 +1,12 @@
 ﻿#region
 
 using System.IO.Compression;
-using System.Text.RegularExpressions;
 using KoolChanger.Helpers;
 using KoolChanger.Models;
 using KoolWrapper;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using KoolWrapper;
+
 #endregion
 
 namespace KoolChanger.Services;
@@ -278,32 +277,5 @@ public class UpdateService
         return ChampionNormalize.TryGetValue(name, out var fixedName)
             ? fixedName
             : name.Replace(" ", "").Replace("'", "").Replace(".", "");
-    }
-    
-    // The NameRules class has been kept as a private nested utility class for path sanitization.
-    // Since it's not currently used in the refactored GenerateSkins, I'm keeping it as-is 
-    // but without any modifications as the original intent was not clear.
-    private static class NameRules
-    {
-        private static readonly Regex RX_WIN_FORBIDDEN = new(@"[\\/:*?""<>|]+", RegexOptions.Compiled);
-        private static readonly Regex RX_NON_WORD = new(@"[^A-Za-z0-9_\-\s]+", RegexOptions.Compiled);
-        private static readonly Regex RX_SPACES = new(@"\s+", RegexOptions.Compiled);
-        private static readonly Regex RX_TRIM_EDGES = new(@"^[_\-]+|[_\-]+$", RegexOptions.Compiled);
-
-        public static string SanitizeForPath(string name, string fallback = "item")
-        {
-            if (string.IsNullOrWhiteSpace(name)) return fallback;
-
-            var s = RX_WIN_FORBIDDEN.Replace(name, " ");
-            s = RX_NON_WORD.Replace(s, " ");
-            s = RX_SPACES.Replace(s, "_");
-            s = RX_TRIM_EDGES.Replace(s, "");
-
-            if (string.IsNullOrEmpty(s)) s = fallback;
-
-            return s;
-        }
-    }
-    
-    
+    }    
 }

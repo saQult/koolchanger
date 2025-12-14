@@ -67,7 +67,6 @@ public partial class MainWindow : Window
         }
         catch (Exception)
         {
-            // ignored
         }
     }
 

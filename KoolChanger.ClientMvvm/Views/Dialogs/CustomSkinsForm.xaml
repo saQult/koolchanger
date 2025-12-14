@@ -98,17 +98,46 @@
             <Image Source="pack://application:,,,/Assets/closeicon.png"
                    Width="20" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="10"
                    Cursor="Hand" MouseDown="Close" />
-
+            <Label Grid.Row="0" Margin="0,5,0,0" 
+                   Foreground="#f5dbff" 
+                   VerticalAlignment="Top" 
+                   HorizontalAlignment="Center" 
+                   FontWeight="Bold"
+                   FontSize="20"
+                   Content="Drag and drop your skins here!"/>
 
             <Grid Grid.Row="1" Margin="30,35">
                 <Border Background="#993C3C3C" CornerRadius="6">
                     <StackPanel Orientation="Horizontal">
                         <Image Source="pack://application:,,,/assets/searchicon.png" Margin="3" />
-                        <TextBox x:Name="searchTextBox" Width="240" FontSize="18" Padding="4"
+                        <TextBox x:Name="searchTextBox" Width="500" FontSize="18" Padding="4"
                                  FontFamily="Comfortaa" Background="Transparent" BorderBrush="Transparent"
                                  Foreground="#99F5DBFF" SelectionBrush="#66FFFFFF"
                                  Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}">
                             <TextBox.Resources>
+                                <Style TargetType="{x:Type Border}">
+                                    <Setter Property="CornerRadius" Value="6" />
+                                </Style>
+                                <Style TargetType="{x:Type TextBox}">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="{x:Type TextBox}">
+                                                <Border x:Name="border" Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}">
+                                                    <ScrollViewer x:Name="PART_ContentHost" Focusable="false"
+                                                  HorizontalScrollBarVisibility="Hidden"
+                                                  VerticalScrollBarVisibility="Hidden" />
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsFocused" Value="True">
+                                                        <Setter TargetName="border" Property="BorderBrush" Value="Transparent" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
                             </TextBox.Resources>
                         </TextBox>
                     </StackPanel>

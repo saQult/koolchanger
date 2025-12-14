@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using KoolChanger.ClientMvvm.Helpers;
 using KoolChanger.ClientMvvm.Interfaces;
-using KoolChanger.Helpers; // Для RiotPathDetector
+using KoolChanger.Helpers;
 using KoolChanger.Models;
 using Newtonsoft.Json;
 
@@ -40,13 +37,11 @@ public class ConfigService : IConfigService
         }
         catch (Exception)
         {
-            // Логирование ошибки сохранения, если нужно
         }
     }
 
     public void SaveSelectedSkins(Config config, Dictionary<Champion, Skin> selectedSkins)
     {
-        // Конвертируем Dictionary<Champion, Skin> в Dictionary<string, Skin> для JSON
         config.SelectedSkins = selectedSkins.ToDictionary(k => k.Key.Name, v => v.Value);
         SaveConfig(config);
     }
@@ -55,7 +50,6 @@ public class ConfigService : IConfigService
     {
         var config = LoadConfig();
         
-        // Восстанавливаем связь между строковым именем чемпиона и объектом Champion
         return config.SelectedSkins
             .Select(pair =>
             {

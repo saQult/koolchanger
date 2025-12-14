@@ -28,10 +28,6 @@ public partial class App : Application
 
     public App()
     {
-        //string path = Path.Combine(new FileInfo(Environment.ProcessPath).Directory.FullName, "Wrapper.dll");
-        //var t = new FileInfo(path);
-        //Console.WriteLine(t.Exists);
-        //Assembly sampleDLL = Assembly.LoadFile(path);
         IServiceCollection services = new ServiceCollection();
         ConfigureServices(services);
         _serviceProvider = services.BuildServiceProvider();
@@ -63,9 +59,6 @@ public partial class App : Application
         services.AddTransient<CustomMessageBox>();
         services.AddTransient<CustomSkinsForm>();
         services.AddTransient<SettingsForm>();
-
-        services.AddSingleton<KoolService>();
-
     }
 
     protected override void OnStartup(StartupEventArgs e)

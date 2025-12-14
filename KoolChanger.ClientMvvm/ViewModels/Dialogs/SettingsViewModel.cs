@@ -81,19 +81,10 @@ public class SettingsViewModel : ObservableObject
         return !IsBusy;
     }
 
-    private async Task DownloadSkins()
-    {
-        IsBusy = true;
-        await _updateService.GenerateSkins();
-        Status = "Finished downloading skins";
-        IsBusy = false;
-    }
     private void StartGenerating(INavigationService nav)
     {
-        // Закрываем окно сразу
         nav.CloseWindow(this);
 
-        // Убираем await — процесс идёт в фоне
         Task.Run(() => _updateService.GenerateSkins());
     }
 

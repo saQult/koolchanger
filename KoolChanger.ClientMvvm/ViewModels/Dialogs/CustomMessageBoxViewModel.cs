@@ -3,7 +3,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KoolChanger.ClientMvvm.Interfaces;
-using KoolChanger.ClientMvvm.Services;
 
 #endregion
 

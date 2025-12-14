@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Threading.Tasks;
+﻿using System.IO;
 using KoolChanger.ClientMvvm.Interfaces;
 using KoolChanger.Models;
 
@@ -61,11 +59,9 @@ public class FilesystemService : IFilesystemService
         var champIdStr = champion.Id.ToString();
         var skinIdStr = skin.Id.ToString();
 
-        // Проверка что skin.Id начинается с champion.Id
         if (!skinIdStr.StartsWith(champIdStr))
             return false;
 
-        // skinIdShort = XX в skinXX.zip
         if (!int.TryParse(skinIdStr.Substring(champIdStr.Length), out int skinIdShort))
             return false;
 

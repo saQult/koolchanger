@@ -8,11 +8,8 @@ using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KoolChanger.ClientMvvm.Interfaces;
-using KoolChanger.ClientMvvm.Services;
 using KoolChanger.Models;
 using KoolChanger.Services;
-// INavigationService
-// CustomSkin
 
 #endregion
 
@@ -72,7 +69,6 @@ public class CustomSkinsViewModel : ObservableObject
         set
         {
             if (SetProperty(ref _searchText, value))
-                // Логика фильтрации теперь находится здесь, в ViewModel
                 _view.Refresh();
         }
     }

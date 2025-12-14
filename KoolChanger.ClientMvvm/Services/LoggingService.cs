@@ -9,7 +9,6 @@ public class LoggingService : ILoggingService
 
     public void Log(string message)
     {
-        // Можно добавить timestamp или запись в файл здесь, если нужно
         var formattedMessage = $"[{DateTime.Now:HH:mm:ss}] {message}";
         OnLog?.Invoke(formattedMessage);
     }

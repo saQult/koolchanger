@@ -24,9 +24,7 @@ public class MainViewModel : ObservableObject
     private readonly ICustomSkinServiceFactory _customSkinServiceFactory;
     private readonly IPartyServiceFactory _partyServiceFactory;
 
-    private readonly ChampionService _championService;
     private readonly UpdateService _updateService;
-    private readonly KoolService _koolService;
 
     private ToolService? _toolService;
     private PartyService? _partyService;
@@ -34,7 +32,7 @@ public class MainViewModel : ObservableObject
 
     private List<Champion> _allChampions = new();
     private Dictionary<Champion, Skin> _selectedSkins = new();
-    private Dictionary<Champion, Skin> _savedSelectedSkins = new(); // Для Party Mode
+    private Dictionary<Champion, Skin> _savedSelectedSkins = new();
     private Config Config { get; set; } = new();
 
     private ObservableCollection<ChampionListItem> _championListItems = new();
@@ -55,7 +53,6 @@ public class MainViewModel : ObservableObject
     public MainViewModel(
         ChampionService championService,
         UpdateService updateService,
-        KoolService koolService,
         INavigationService navigationService,
         IConfigService configService,
         IFilesystemService filesystemService,
@@ -65,10 +62,8 @@ public class MainViewModel : ObservableObject
         ICustomSkinServiceFactory customSkinServiceFactory,
         IPartyServiceFactory partyServiceFactory)
     {
-        _championService = championService;
         _updateService = updateService;
         _navigationService = navigationService;
-        _koolService = koolService;
         _configService = configService;
         _filesystemService = filesystemService;
         _loggingService = loggingService;
@@ -374,8 +369,6 @@ public class MainViewModel : ObservableObject
         var list = new ObservableCollection<ChampionListItem>();
         foreach (var c in filtered)
         {
-            // ИСПРАВЛЕНИЕ: Замена c.IconUrl на конструирование пути
-            
             var iconPath = Path.Combine(new FileInfo(Environment.ProcessPath).DirectoryName, "assets", "champions", $"{c.Id}.png");
             list.Add(new ChampionListItem(iconPath, c.Name));
         }
@@ -425,7 +418,6 @@ public class MainViewModel : ObservableObject
     {
     }
 
-    // --- Party Mode ---
     private async Task TogglePartyModeAsync()
     {
         if (IsPartyModeEnabled)
@@ -452,7 +444,6 @@ public class MainViewModel : ObservableObject
 
             IsBusy = false;
         }
-        // Переключаем флаг
         IsPartyModeEnabled = !IsPartyModeEnabled;
     }
 
@@ -469,14 +460,12 @@ public class MainViewModel : ObservableObject
             try
             {
                 _loggingService.Log("Recieved skin: " + skin.Name);
-                // Используем .Any() для поиска чемпиона по скину
                 var recievedChampion = _allChampions.FirstOrDefault(c => c.Skins.Any(x => x.Id == skin.Id));
                 
                 if (recievedChampion != null)
                 {
                     _selectedSkins[recievedChampion] = skin;
                     
-                    // Обновляем UI в главном потоке
                     System.Windows.Application.Current.Dispatcher.Invoke(() => 
                     {
                          if (SelectedChampionItem != null && SelectedChampionItem.Name == recievedChampion.Name)
