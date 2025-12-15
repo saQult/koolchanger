@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.0.11222.15
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KoolChanger", "KoolChanger\KoolChanger.csproj", "{433BAF46-0EAC-400E-A13F-6BE593B5A7EC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KoolChanger.Core", "KoolChanger.Core\KoolChanger.Core.csproj", "{433BAF46-0EAC-400E-A13F-6BE593B5A7EC}"
 	ProjectSection(ProjectDependencies) = postProject
 		{661B8628-BEC8-C424-975E-F69EE2281947} = {661B8628-BEC8-C424-975E-F69EE2281947}
 	EndProjectSection
@@ -17,7 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Элементы решен
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KoolChanger.ClientMvvm", "KoolChanger.ClientMvvm\KoolChanger.ClientMvvm.csproj", "{9668522D-2F37-4D40-BCB9-9056B8CF9FC3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KoolChanger.Client", "KoolChanger.Client\KoolChanger.Client.csproj", "{9668522D-2F37-4D40-BCB9-9056B8CF9FC3}"
 	ProjectSection(ProjectDependencies) = postProject
 		{433BAF46-0EAC-400E-A13F-6BE593B5A7EC} = {433BAF46-0EAC-400E-A13F-6BE593B5A7EC}
 	EndProjectSection
