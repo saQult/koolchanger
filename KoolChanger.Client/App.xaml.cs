@@ -59,6 +59,7 @@ public partial class App : Application
 
         services.AddTransient<SettingsPage>();
         services.AddTransient<SkinsPage>();
+        services.AddTransient<CustomSkinsPage>();
     }
 
     protected override void OnStartup(StartupEventArgs e)
@@ -73,6 +74,8 @@ public partial class App : Application
 
         navigationService.RegisterPage<SettingsViewModel, SettingsPage>();
         navigationService.RegisterPage<SkinsPageViewModel, SkinsPage>();
+        navigationService.RegisterPage<CustomSkinsViewModel, CustomSkinsPage>();
+
 
         navigationService.NavigateTo<TestViewModel>();
 

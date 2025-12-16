@@ -41,30 +41,33 @@ namespace KoolChanger.Core.Services
             }
             catch { }
         }
-        public CustomSkin FromFile(string path)
+        public CustomSkin? FromFile(string path)
         {
             string infoPath = "META/info.json";
-
-            using (ZipArchive archive = ZipFile.OpenRead(path))
+            try
             {
-                var entry = archive.GetEntry(infoPath);
-                if (entry != null)
+                using (ZipArchive archive = ZipFile.OpenRead(path))
                 {
-                    using (var stream = entry.Open())
-                    using (var reader = new StreamReader(stream))
+                    var entry = archive.GetEntry(infoPath);
+                    if (entry != null)
                     {
-                        string json = reader.ReadToEnd();
-                        var skin = JsonConvert.DeserializeObject<CustomSkin>(json);
-                        if (skin == null)
-                            throw new Exception("Wrong META with custom skin: " + path);
-                        return skin;
+                        using (var stream = entry.Open())
+                        using (var reader = new StreamReader(stream))
+                        {
+                            string json = reader.ReadToEnd();
+                            var skin = JsonConvert.DeserializeObject<CustomSkin>(json);
+                            if (skin == null)
+                                throw new Exception("Wrong META with custom skin: " + path);
+                            return skin;
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception("Wrong META with custom skin: " + path);
                     }
                 }
-                else
-                {
-                    throw new Exception("Wrong META with custom skin: " + path);
-                }
-            }
+            } catch (Exception) { return null; }
+            
         }
     }
 }

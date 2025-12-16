@@ -15,6 +15,8 @@
         ResizeMode="CanResize"
         WindowStartupLocation="CenterScreen"
         Icon="pack://application:,,,/Assets/icon.ico"
+        MinWidth="1000"
+        MinHeight="445"
         Title="TestWindow" Height="730" Width="1330">
     <Window.Resources>
         <HierarchicalDataTemplate DataType="{x:Type models:NavItem}" ItemsSource="{Binding Children}">
@@ -51,10 +53,10 @@
                 </Border>
 
 
-                
+
             </Grid>
         </Border>        
-        
+
         <Border Grid.Column="0" Grid.Row="1"
                 Background="#AA000000" Padding="10"  BorderThickness="0" CornerRadius="0,0,0,10">
             <DockPanel LastChildFill="True">
@@ -65,19 +67,28 @@
                           Foreground="#EAEAEA">
 
                     <TreeView.ItemContainerStyle>
-                        <Style TargetType="TreeViewItem">
+                        <Style TargetType="{x:Type TreeViewItem}">
+                            <Style.Resources>
+                                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#f5dbff" />
+                                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent" />
+                            </Style.Resources>
                             <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
                             <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
                             <Setter Property="Margin" Value="0,2"/>
+                            <Setter Property="Cursor" Value="Hand"/>
                             <Setter Property="Padding" Value="6,4"/>
                             <Setter Property="Background" Value="Transparent"/>
                             <Setter Property="Foreground" Value="#f5dbff"/>
+                            <Setter Property="FontSize" Value="22"/>
                             <Setter Property="FontWeight" Value="Bold"/>
-                            <Setter Property="FontSize" Value="18"/>
                             <EventSetter Event="MouseLeftButtonUp" Handler="TreeViewItem_MouseLeftButtonUp"/>
                             <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsLeaf}" Value="True">
+                                    <Setter Property="FontWeight" Value="Normal"/>
+                                    <Setter Property="FontSize" Value="18"/>
+                                </DataTrigger>
                                 <Trigger Property="IsSelected" Value="True">
-                                    <Setter Property="Background" Value="#2AFFFFFF"/>
+                                    <Setter Property="Background" Value="Transparent"/>
                                 </Trigger>
                             </Style.Triggers>
                         </Style>
