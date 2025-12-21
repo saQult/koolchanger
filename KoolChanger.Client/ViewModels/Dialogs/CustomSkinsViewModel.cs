@@ -94,7 +94,8 @@ public class CustomSkinsViewModel : ObservableObject
                 await Task.Run(() =>
                 {
                     var skin = _customSkinService.FromFile(file);
-
+                    if (skin == null)
+                        return;
                     if (_customSkinService.ImportedSkins.Any(s => s.Name == skin.Name))
                         return;
 
@@ -163,9 +164,9 @@ public class CustomSkinListBoxItem : INotifyPropertyChanged
         skin.Author = string.IsNullOrEmpty(skin.Author) ? "unknown" : skin.Author;
 
         var headerText = $"v{skin.Version} by {skin.Author}";
-        headerText = headerText.Length > 30 ? headerText[..30] + "..." : headerText;
+        //headerText = headerText.Length > 30 ? headerText[..30] + "..." : headerText;
 
-        var bottomText = skin.Description.Length > 30 ? skin.Description[..30] + "..." : skin.Description;
+        var bottomText = skin.Description;// skin.Description.Length > 30 ? skin.Description[..30] + "..." : ;
 
         Text = string.IsNullOrEmpty(bottomText) ? headerText : headerText + Environment.NewLine + bottomText;
 

@@ -67,6 +67,8 @@ public partial class TestViewModel : ObservableObject
         {
             case "skins-by-champion":
                 _navigationService.NavigateToPage<SkinsPageViewModel>(); break;
+            case "skins-custom":
+                _navigationService.NavigateToPage<CustomSkinsViewModel>(); break;
             case "settings":
                 _navigationService.NavigateToPage<SettingsViewModel>(); break;
         }
