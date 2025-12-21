@@ -21,6 +21,8 @@ public class ToolService : IDisposable
     {
         _modTool = new ModTool();
         _tool = new Tool(gamePath, _modTool);
+        
+        ModTool.SetLogHandler((msg, level) => OverlayRunned?.Invoke($"native[{level}]: {msg}"));
         _tool.StatusChanged += (data) => OverlayRunned?.Invoke(data);
         if (Directory.Exists("skins") == false)
             return;

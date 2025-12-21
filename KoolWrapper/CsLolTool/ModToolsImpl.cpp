@@ -17,7 +17,7 @@ static bool FILTER_TFT(wad::Index::Map::const_reference i) noexcept
 void ModToolsImpl::InitHashDict(const fs::path& hashdictPath)
 {
     if (m_hashLoaded) return;
-    std::cout << "Loading hashdict: " << hashdictPath << std::endl;
+    logi("Loading hashdict: ", hashdictPath);
     if (!m_hashDict.load(hashdictPath))
         throw std::runtime_error("Failed to load hashdict.");
     m_hashLoaded = true;
@@ -49,9 +49,8 @@ void ModToolsImpl::wad_exctract(const fs::path& src, fs::path dst)
     }
     catch (std::exception& ex)
     {
-        std::cout << "Extraction failed" << std::endl;
-        std::cout << ex.what() << std::endl;
-        std::cout << "src: " << src << " dst: " << dst << std::endl;
+        loge("Extraction failed", ex.what());
+        loge("src: ", src,"\n dst: ", dst);
     }
 }
 
@@ -81,9 +80,8 @@ void ModToolsImpl::wad_pack(const fs::path& src, fs::path dst)
     }
     catch (std::exception& ex)
     {
-        std::cout << "Pack failed" << std::endl;
-        std::cout << ex.what() << std::endl;
-        std::cout << "src: " << src << " dst: " << dst << std::endl;
+        loge("Pack failed", ex.what());
+        loge("src: ", src,"\n dst: ", dst);
     }
 }
 
@@ -157,7 +155,7 @@ void ModToolsImpl::mod_import(fs::path src, fs::path dst, fs::path game, bool no
     }
     catch (std::exception& ex)
     {
-        std::cout << ex.what() << std::endl;
+        loge("{}", ex.what());
     }
     fmtlog::flushOn(fmtlog::DBG);
 }
@@ -345,14 +343,14 @@ void ModToolsImpl::mod_runoverlay(const fs::path& overlay, const fs::path& confi
             {
                 if (cancelToken && *cancelToken)
                 {
-                    std::cout << "Patcher aborted due to cancellation token" << std::endl;
+                    logi("Patcher aborted due to cancellation token");
                     throw patcher::PatcherAborted();
                 }
 
                 if (msg != old_msg)
                 {
                     old_msg = msg;
-                    std::cout << "Status: " << patcher::STATUS_MSG[msg] << std::endl;
+                    logi("{}",patcher::STATUS_MSG[msg]);
                 }
             },
             overlay,
@@ -362,12 +360,12 @@ void ModToolsImpl::mod_runoverlay(const fs::path& overlay, const fs::path& confi
     }
     catch (const patcher::PatcherAborted&)
     {
-        std::cout << "Aborted by user." << std::endl;
+        logi("Aborted by user");
         error::stack().clear();
     }
     catch (std::exception& ex)
     {
-        std::cout << "Error: " << ex.what() << std::endl;
+        loge("Error: ", ex.what());
         throw;
     }
     catch (...)

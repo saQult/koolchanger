@@ -379,7 +379,7 @@ public class MainViewModel : ObservableObject
     {
         // TODO: remove this shit later, too much in dubug logs
         if(!msg.Contains("Modifying skin"))
-            DebugText = DateTime.Now + " " + msg + "\n" + DebugText;
+            DebugText = msg + "\n" + DebugText;
     }
 
     private void OpenSettings()

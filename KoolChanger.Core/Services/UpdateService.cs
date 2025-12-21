@@ -17,7 +17,7 @@ public class UpdateService
 
     private readonly ChampionService _championService = new();
     private readonly SkinService _skinService = new();
-
+    private readonly SanitizeService _sanitizeService = new (); 
     private readonly RitoBin _ritoBin = new();
 
     private const string TempDirName = "KoolChanger.tmp";
@@ -28,33 +28,7 @@ public class UpdateService
     private const string HashesGameFile = "hashes.game.txt";
     private const string Skin0Json = "skin0.json";
     private const string Skin0Bin = "skin0.bin";
-
-
-    private static readonly Dictionary<string, string> ChampionNormalize = new()
-    {
-        { "Xin Zhao", "XinZhao" },
-        { "Kai'Sa", "Kaisa" },
-        { "Vel'Koz", "Velkoz" },
-        { "Kha'Zix", "Khazix" },
-        { "Cho'Gath", "Chogath" },
-        { "Rek'Sai", "Reksai" },
-        { "Bel'Veth", "Belveth" },
-        { "Kog'Maw", "Kogmaw" },
-        { "Jarvan IV", "JarvanIV" },
-        { "Master Yi", "MasterYi" },
-        { "Miss Fortune", "MissFortune" },
-        { "Lee Sin", "LeeSin" },
-        { "Tahm Kench", "TahmKench" },
-        { "Twisted Fate", "TwistedFate" },
-        { "Aurelion Sol", "AurelionSol" },
-        { "Dr. Mundo", "DrMundo" },
-        { "Wukong", "MonkeyKing" },
-        { "RenataGlasc", "Renata" },
-        { "Nunu&Willump", "Nunu" }
-    };
-
-
-
+    
     private static string BaseTempPath => Path.Combine(Path.GetTempPath(), TempDirName);
 
     private static string BaseAppPath => new FileInfo(Environment.ProcessPath!).DirectoryName!;
@@ -92,7 +66,7 @@ public class UpdateService
 
     private async Task ProcessChampionSkinsAsync(Champion champion)
     {
-        champion.Name = NormalizeChampionName(champion.Name);
+        champion.Name = _sanitizeService.NormalizeChampionName(champion.Name);
         OnUpdating?.Invoke($"Processing {champion.Name}...");
         var championTempPath = Path.Combine(BaseTempPath, champion.Name + ".extracted");
 
@@ -272,10 +246,4 @@ public class UpdateService
         
         
     }
-    private static string NormalizeChampionName(string name)
-    {
-        return ChampionNormalize.TryGetValue(name, out var fixedName)
-            ? fixedName
-            : name.Replace(" ", "").Replace("'", "").Replace(".", "");
-    }    
 }

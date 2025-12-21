@@ -3,6 +3,21 @@
 #include "CsLolTool/ModToolsImpl.h"
 #include "RitoBin/RitoBinImpl.h"
 
+static msclr::gcroot<KoolWrapper::ModTool::LogHandler^> g_handler;
+
+static void LogCb(int64_t, fmtlog::LogLevel level, fmt::string_view, size_t,
+                  fmt::string_view, fmt::string_view msg, size_t bodyPos, size_t) {
+    if (!g_handler) return;
+    std::string body(msg.data() + bodyPos, msg.size() - bodyPos);
+    g_handler->Invoke(msclr::interop::marshal_as<String^>(body),
+                      static_cast<int>(level));
+}
+
+void KoolWrapper::ModTool::SetLogHandler(LogHandler^ handler) {
+    g_handler = handler;
+    fmtlog::setLogCB(&LogCb, fmtlog::DBG);
+    fmtlog::startPollingThread();          
+}
 
 std::wstring KoolWrapper::to_wstring(String^ s)
 {

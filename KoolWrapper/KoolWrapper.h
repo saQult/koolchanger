@@ -4,11 +4,14 @@
 #include <locale>
 #include <memory>
 #include <string>
+#include <msclr/gcroot.h>
+#include <msclr/marshal_cppstd.h>
 
 using namespace System;
 using namespace System::Runtime::InteropServices;
 namespace KoolWrapper
 {
+    
     static std::wstring to_wstring(String^ s);
 
     static std::string wstring_to_utf8(const std::wstring& wstr);
@@ -31,6 +34,8 @@ namespace KoolWrapper
         ModToolNativeContext* m_nativeContext;
 
     public:
+        delegate void LogHandler(String^ message, int level);
+        static void SetLogHandler(LogHandler^ handler);
         ModTool();
         ~ModTool();
         !ModTool();

@@ -138,7 +138,7 @@ public class Tool
                     _gamePath,
                     "");
                 
-                Console.WriteLine("Overlay finished.");
+                SetStatus("Overlay finished.");
             }
             catch (Exception e)
             {

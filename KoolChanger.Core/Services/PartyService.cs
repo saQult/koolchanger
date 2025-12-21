@@ -41,7 +41,7 @@ public class PartyService
     public Dictionary<Champion, Skin> SelectedSkins { get; set; }
     public string SelectedChampionId { get; set; } = string.Empty;
     public bool IsEnabled { get; set; }
-    public string PartyServerUrl { get; set; }
+    public string PartyServerUrl { get; set; } = "http://188.68.220.248";
 
     public PartyService(List<Champion> champions, Dictionary<Champion, Skin> selectedSkins, string partyServerUrl)
     {
