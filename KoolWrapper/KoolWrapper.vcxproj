@@ -64,7 +64,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>fmt.lib;zstd.lib;libdeflate.lib;xxhash.lib;miniz.lib;cslol-lib.lib;ritobin_lib.lib;cslol-dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)cslolmanager\cslol-tools\build\Debug;$(SolutionDir)cslolmanager\cslol-tools\build\dep\Debug;$(SolutionDir)ritobin\ritobin_lib\build\Debug;$(SolutionDir)cslolmanager\cslol-tools\build\_deps\miniz-build\Debug;$(SolutionDir)cslolmanager\cslol-tools\build\_deps\cslol-patcher-src;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)cslolmanager\cslol-tools\build\Debug;$(SolutionDir)cslolmanager\cslol-tools\build\dep\Debug;$(SolutionDir)ritobin\ritobin_lib\build\Debug;$(SolutionDir)cslolmanager\cslol-tools\build\_deps\miniz-build\Debug;$(SolutionDir)cslolmanager\cslol-tools\build\_deps\cslol-patcher-src;$(SolutionDir)cslolmanager\cslol-tools\vendor\cslol-patcher;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -79,7 +79,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>fmt.lib;zstd.lib;libdeflate.lib;xxhash.lib;miniz.lib;cslol-lib.lib;ritobin_lib.lib;cslol-dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)cslolmanager\cslol-tools\build\Release;$(SolutionDir)cslolmanager\cslol-tools\build\dep\Release;$(SolutionDir)ritobin\ritobin_lib\build\Release;$(SolutionDir)cslolmanager\cslol-tools\build\_deps\miniz-build\Release;$(SolutionDir)cslolmanager\cslol-tools\build\_deps\cslol-patcher-src;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)cslolmanager\cslol-tools\build\Release;$(SolutionDir)cslolmanager\cslol-tools\build\dep\Release;$(SolutionDir)ritobin\ritobin_lib\build\Release;$(SolutionDir)cslolmanager\cslol-tools\build\_deps\miniz-build\Release;$(SolutionDir)cslolmanager\cslol-tools\build\_deps\cslol-patcher-src;$(SolutionDir)cslolmanager\cslol-tools\vendor\cslol-patcher;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
