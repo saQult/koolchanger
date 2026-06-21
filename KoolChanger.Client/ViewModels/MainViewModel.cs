@@ -238,12 +238,19 @@ public class MainViewModel : ObservableObject
         RegisterPartyService();
         LoadChampionListBoxItems();
 
-        foreach (var champion in _allChampions)
+        var semaphore = new SemaphoreSlim(10);
+        var skinTasks = _allChampions.Select(async champion =>
         {
-            _allSkins.Add(
-                champion, 
-                new ObservableCollection<SkinViewModel>(await _dataInitService.LoadChampionSkinsAsync(champion, _selectedSkins)));
-        }
+            await semaphore.WaitAsync();
+            try
+            {
+                var skins = await _dataInitService.LoadChampionSkinsAsync(champion, _selectedSkins);
+                return (champion, skins);
+            }
+            finally { semaphore.Release(); }
+        });
+        foreach (var (champion, skins) in await Task.WhenAll(skinTasks))
+            _allSkins[champion] = new ObservableCollection<SkinViewModel>(skins);
     }
 
     private async Task OnChampionSelectedAsync()

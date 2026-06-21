@@ -269,10 +269,14 @@
                         Grid.Column="2"
                         Width="350"
                         Height="600">
-                        <TextBlock
-                            Foreground="#f5dbff"
-                            Text="{Binding DebugText}"
-                            TextWrapping="Wrap" />
+                        <ScrollViewer
+                            x:Name="logScrollViewer"
+                            VerticalScrollBarVisibility="Auto">
+                            <TextBlock
+                                Foreground="#f5dbff"
+                                Text="{Binding DebugText}"
+                                TextWrapping="Wrap" />
+                        </ScrollViewer>
                     </Border>
                 </Grid>
 

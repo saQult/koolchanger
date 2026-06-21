@@ -3,6 +3,10 @@
 
 
 hash::Dict ModToolsImpl::m_hashDict{};
+wad::Index ModToolsImpl::m_cachedGameIndex{};
+fs::path ModToolsImpl::m_cachedGamePath{};
+bool ModToolsImpl::m_cachedNoTFT = false;
+std::mutex ModToolsImpl::m_gameIndexMutex{};
 
 static bool FILTER_NONE(wad::Index::Map::const_reference i) noexcept { return false; }
 
@@ -14,8 +18,25 @@ static bool FILTER_TFT(wad::Index::Map::const_reference i) noexcept
     return false;
 }
 
+wad::Index ModToolsImpl::GetOrBuildGameIndex(const fs::path& game, bool noTFT)
+{
+    std::lock_guard lock(m_gameIndexMutex);
+    if (m_cachedGamePath != game || m_cachedNoTFT != noTFT)
+    {
+        logi("Indexing game (cache miss): {}", game);
+        m_cachedGameIndex = wad::Index::from_game_folder(game);
+        lol_throw_if_msg(m_cachedGameIndex.mounts.empty(), "Not a valid Game folder");
+        m_cachedGameIndex.remove_filter(noTFT ? FILTER_TFT : FILTER_NONE);
+        m_cachedGamePath = game;
+        m_cachedNoTFT = noTFT;
+    }
+    return m_cachedGameIndex;
+}
+
 void ModToolsImpl::InitHashDict(const fs::path& hashdictPath)
 {
+    if (m_hashLoaded) return;
+    std::lock_guard lock(m_gameIndexMutex);
     if (m_hashLoaded) return;
     logi("Loading hashdict: ", hashdictPath);
     if (!m_hashDict.load(hashdictPath))
@@ -169,9 +190,7 @@ void ModToolsImpl::mod_mkoverlay(fs::path src, fs::path dst, fs::path game, fs::
     lol_throw_if(game.empty());
 
     logi("Indexing game");
-    auto game_index = wad::Index::from_game_folder(game);
-    lol_throw_if_msg(game_index.mounts.empty(), "Not a valid Game folder");
-    game_index.remove_filter(noTFT ? FILTER_TFT : FILTER_NONE);
+    auto game_index = GetOrBuildGameIndex(game, noTFT);
 
     auto blocked = std::unordered_set<hash::Xxh64>{};
     for (const auto& [_, mounted] : game_index.mounts)
@@ -181,10 +200,22 @@ void ModToolsImpl::mod_mkoverlay(fs::path src, fs::path dst, fs::path game, fs::
     }
     auto mod_queue = std::vector<wad::Index>{};
 
-    logi("Reading mods");
+    // Read all mod folders in parallel, then resolve conflicts sequentially
+    logi("Reading mods (parallel)");
+    std::vector<std::future<wad::Index>> futures;
     for (const auto& mod_name : mods)
     {
-        auto mod_index = wad::Index::from_mod_folder(src / mod_name);
+        auto mod_path = src / mod_name;
+        futures.push_back(std::async(std::launch::async, [mod_path]()
+        {
+            return wad::Index::from_mod_folder(mod_path);
+        }));
+    }
+
+    logi("Resolving conflicts");
+    for (auto& future : futures)
+    {
+        auto mod_index = future.get();
         for (auto& [path_, mounted] : mod_index.mounts)
         {
             std::erase_if(mounted.archive.entries, [&](const auto& kvp) { return blocked.contains(kvp.first); });
@@ -195,10 +226,7 @@ void ModToolsImpl::mod_mkoverlay(fs::path src, fs::path dst, fs::path game, fs::
             continue;
         }
 
-        // We have to resolve any conflicts inside mod itself
         mod_index.resolve_conflicts(mod_index, ignoreConflict);
-
-        // We try to resolve conflicts with other mods
         for (auto& old : mod_queue)
         {
             old.resolve_conflicts(mod_index, ignoreConflict);
@@ -241,9 +269,7 @@ void ModToolsImpl::mod_addwad(fs::path src, fs::path dst, fs::path game, const b
     if (!game.empty())
     {
         logi("Indexing game wads");
-        auto game_index = wad::Index::from_game_folder(game);
-        lol_throw_if_msg(game_index.mounts.empty(), "Not a valid Game folder");
-        game_index.remove_filter(noTFT ? FILTER_TFT : FILTER_NONE);
+        auto game_index = GetOrBuildGameIndex(game, noTFT);
 
         logi("Rebasing");
         const auto base = game_index.find_by_mount_name_or_overlap(mounted.name(), mounted.archive);
@@ -302,9 +328,7 @@ void ModToolsImpl::mod_copy(fs::path src, fs::path dst, fs::path game, const boo
     if (!game.empty())
     {
         logi("Indexing game wads");
-        auto game_index = wad::Index::from_game_folder(game);
-        lol_throw_if_msg(game_index.mounts.empty(), "Not a valid Game folder");
-        game_index.remove_filter(noTFT ? FILTER_TFT : FILTER_NONE);
+        auto game_index = GetOrBuildGameIndex(game, noTFT);
 
         logi("Rebasing wads");
         mod_index = mod_index.rebase_from_game(game_index);

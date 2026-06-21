@@ -61,6 +61,7 @@
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions);NOMINMAX</PreprocessorDefinitions>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>fmt.lib;zstd.lib;libdeflate.lib;xxhash.lib;miniz.lib;cslol-lib.lib;ritobin_lib.lib;cslol-dll.lib;%(AdditionalDependencies)</AdditionalDependencies>

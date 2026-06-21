@@ -1,4 +1,4 @@
-﻿#region
+#region
 
 using System.IO.Compression;
 using KoolChanger.Core.Helpers;
@@ -17,7 +17,7 @@ public class UpdateService
 
     private readonly ChampionService _championService = new();
     private readonly SkinService _skinService = new();
-    private readonly SanitizeService _sanitizeService = new (); 
+    private readonly SanitizeService _sanitizeService = new ();
     private readonly RitoBin _ritoBin = new();
 
     private const string TempDirName = "KoolChanger.tmp";
@@ -28,7 +28,7 @@ public class UpdateService
     private const string HashesGameFile = "hashes.game.txt";
     private const string Skin0Json = "skin0.json";
     private const string Skin0Bin = "skin0.bin";
-    
+
     private static string BaseTempPath => Path.Combine(Path.GetTempPath(), TempDirName);
 
     private static string BaseAppPath => new FileInfo(Environment.ProcessPath!).DirectoryName!;
@@ -78,7 +78,7 @@ public class UpdateService
                              throw new InvalidOperationException("League of Legends path not found.");
 
             var wadPath = Path.Combine(leaguePath, "DATA", "FINAL", "Champions", champion.Name + ".wad.client");
-            var hashPath = Path.Combine(BaseAppPath, HashesDir, HashesGameFile);
+            var hashPath = Path.Combine(BaseAppPath, HashesDir, "lol", HashesGameFile);
 
             WadExtractor.extract(wadPath, championTempPath, hashPath);
 
@@ -91,7 +91,7 @@ public class UpdateService
             }
 
             var skinProcessingTasks = Directory.GetDirectories(charactersRoot)
-                .Select(d => new DirectoryInfo(d).Name) 
+                .Select(d => new DirectoryInfo(d).Name)
                 .SelectMany(characterName =>
                     GetSkinBinPaths(charactersRoot, characterName)
                         .Select(skinBinPath => ProcessSingleSkinAsync(champion, characterName, skinBinPath))
@@ -121,7 +121,7 @@ public class UpdateService
         var skinCompletedPath = Path.Combine(championCompletedPath, skinFileName);
         var targetCharacterPath = Path.Combine(skinCompletedPath, DataDir, CharactersDir, characterName);
         var targetSkinsPath = Path.Combine(targetCharacterPath, SkinsDir);
-        
+
         Directory.CreateDirectory(targetSkinsPath);
 
         var targetJsonPath = Path.Combine(targetSkinsPath, Skin0Json);
@@ -150,14 +150,14 @@ public class UpdateService
             var wadOutputPath = Path.Combine(championCompletedPath, $"{skinFileName}");
             WadExtractor.pack(wadOutputPath, "");
 
-            
+
             JObject info = new JObject
             {
                 ["Author"] = "krutie.pw innovations LLC",
                 ["Description"] = "Imported using KoolWrapper",
                 ["Heart"] = "",
                 ["Home"] = "",
-                ["Name"] = $"{characterName} {skinFileName}", 
+                ["Name"] = $"{characterName} {skinFileName}",
                 ["Version"] = "1.0.0"
             };
 
@@ -166,7 +166,7 @@ public class UpdateService
                 skinFileName,
                 Path.ChangeExtension(wadOutputPath, "wad.client"),
                 info);
-            
+
             OnUpdating?.Invoke($"Skin {characterName}/{skinFileName} packed into WAD.");
         }
         catch (Exception ex)
@@ -174,13 +174,13 @@ public class UpdateService
             OnUpdating?.Invoke($"Error processing skin {characterName}/{skinFileName}: {ex.Message}");
         }
     }
-    
+
 
     private void CreateSkinArchive(
         string championName,
-        string skinFileName,        
-        string wadFilePath,         
-        JObject infoJson            
+        string skinFileName,
+        string wadFilePath,
+        JObject infoJson
     )
     {
         string archiveName = $"{skinFileName}.zip";
@@ -203,7 +203,7 @@ public class UpdateService
         );
 
         File.Copy(wadFilePath, Path.Combine(wadDir, $"{championName}.wad.client"), true);
-            
+
         if (File.Exists(archivePath))
             File.Delete(archivePath);
 
@@ -217,7 +217,7 @@ public class UpdateService
     {
         var items = parsedJson["entries"]?["value"]?["items"] as JArray;
         if (items == null) return;
-        
+
         var skinDataProperties = items.FirstOrDefault(x =>
             x["value"]?.Value<string>("name") == "SkinCharacterDataProperties");
         if (skinDataProperties != null)
@@ -231,11 +231,11 @@ public class UpdateService
         {
             resourceResolver["key"] = newResourcesKey;
         }
-        
+
         var firstEntryItems = parsedJson["entries"]?["value"]?["items"]?[0]?["value"]?["items"] as JArray;
         if (firstEntryItems != null)
-        {            
-            var resourceResolverEntry = firstEntryItems.FirstOrDefault(x => 
+        {
+            var resourceResolverEntry = firstEntryItems.FirstOrDefault(x =>
                 x.Value<string>("key") == "mResourceResolver");
 
             if (resourceResolverEntry != null)
@@ -243,7 +243,7 @@ public class UpdateService
                 resourceResolverEntry["value"] = newResourcesKey;
             }
         }
-        
-        
+
+
     }
 }

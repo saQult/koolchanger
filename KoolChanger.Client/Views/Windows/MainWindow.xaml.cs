@@ -47,6 +47,9 @@ public partial class MainWindow : Window
                                 _preloader?.Hide();
                             }
                         });
+
+                    if (args.PropertyName == nameof(MainViewModel.DebugText))
+                        Dispatcher.Invoke(() => logScrollViewer.ScrollToTop());
                 };
             }
         };

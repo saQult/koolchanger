@@ -77,7 +77,7 @@ public partial class App : Application
         navigationService.RegisterPage<CustomSkinsViewModel, CustomSkinsPage>();
 
 
-        navigationService.NavigateTo<TestViewModel>();
+        navigationService.NavigateTo<MainViewModel>();
 
         base.OnStartup(e);
     }

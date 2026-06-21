@@ -12,7 +12,9 @@ public class DataInitializationService : IDataInitializationService
 {
     private readonly ChampionService _championService;
     private readonly SkinService _skinService;
-    private readonly INavigationService _navigationService; 
+    private readonly INavigationService _navigationService;
+
+    private static readonly string AppDir = new FileInfo(Environment.ProcessPath!).DirectoryName!;
 
     public List<Champion> AllChampions { get; private set; } = new();
     public event Action<string>? OnUpdating;
@@ -127,17 +129,33 @@ public class DataInitializationService : IDataInitializationService
 
     public async Task<List<SkinViewModel>> LoadChampionSkinsAsync(Champion selectedChamp, Dictionary<Champion, Skin> selectedSkins)
     {
+        var skins = selectedChamp.Skins.Skip(1).ToList();
+        var champIdStr = selectedChamp.Id.ToString();
+        var splashesDir = Path.Combine(AppDir, "assets", "champions", "splashes");
+
+        // Download all skin previews + chromas in parallel
+        var downloadTasks = skins.SelectMany(skin =>
+        {
+            var tasks = new List<Task> { EnsureSkinPreviewAsync(skin) };
+            foreach (var chroma in skin.Chromas)
+            {
+                var chromaPath = Path.Combine(splashesDir, $"{chroma.Id}.png");
+                if (!File.Exists(chromaPath))
+                    tasks.Add(_championService.DownloadImageAsync(chroma.ImageUrl, chromaPath));
+            }
+            return tasks;
+        });
+        await Task.WhenAll(downloadTasks);
+
         var resultSkins = new List<SkinViewModel>();
 
-        foreach (var skin in selectedChamp.Skins.Skip(1))
+        foreach (var skin in skins)
         {
-            await EnsureSkinPreviewAsync(skin);
-
             var skinVm = new SkinViewModel
             {
                 Id = skin.Id,
                 Name = skin.Name,
-                ImageUrl = Path.Combine(new FileInfo(Environment.ProcessPath!).DirectoryName!, "assets", "champions", "splashes", $"{skin.Id}.png"),
+                ImageUrl = Path.Combine(splashesDir, $"{skin.Id}.png"),
                 Model = skin,
                 Champion = selectedChamp,
                 IsSelected = IsSkinSelected(selectedSkins, selectedChamp, skin.Id)
@@ -146,70 +164,47 @@ public class DataInitializationService : IDataInitializationService
             if (skin.Chromas.Count > 0)
             {
                 skinVm.HasChromas = true;
-                var parentSkinVm = skinVm;
-
                 foreach (var chroma in skin.Chromas)
                 {
-                    var chromaPath = Path.Combine(new FileInfo(Environment.ProcessPath!).DirectoryName!, "assets", "champions", "splashes", $"{chroma.Id}.png");
-                    if (!File.Exists(chromaPath))
-                    {
-                        await _championService.DownloadImageAsync(chroma.ImageUrl, chromaPath);
-                    }
-
-                    var chromaVm = new SkinViewModel
+                    skinVm.Children.Add(new SkinViewModel
                     {
                         Id = chroma.Id,
                         Name = chroma.Name,
-                        ImageUrl = chromaPath,
+                        ImageUrl = Path.Combine(splashesDir, $"{chroma.Id}.png"),
                         Color = chroma.Colors.FirstOrDefault() ?? "#FFFFFF",
                         Model = chroma,
                         Champion = selectedChamp,
                         IsSelected = IsSkinSelected(selectedSkins, selectedChamp, chroma.Id),
                         IsChroma = true,
-                        Parent = parentSkinVm
-                    };
-
-                    parentSkinVm.Children.Add(chromaVm);
+                        Parent = skinVm
+                    });
                 }
             }
 
             var skinIdStr = skin.Id.ToString();
-            var champIdStr = selectedChamp.Id.ToString();
-            
             if (skinIdStr.StartsWith(champIdStr))
             {
                 var skinIdShort = skinIdStr.Substring(champIdStr.Length);
-                var specialFormsPath = Path.Combine("skins", $"{selectedChamp.Id}", "special_forms", $"{skinIdShort}");
+                var specialFormsPath = Path.Combine("skins", champIdStr, "special_forms", skinIdShort);
 
                 if (Directory.Exists(specialFormsPath))
                 {
                     var sortedForms = Directory.GetFiles(specialFormsPath)
-                        .OrderBy(x => 
+                        .OrderBy(x =>
                         {
                             int.TryParse(Path.GetFileNameWithoutExtension(x), out int val);
                             return val;
-                        }).ToList();
+                        });
 
                     foreach (var file in sortedForms)
                     {
                         var name = Path.GetFileNameWithoutExtension(file);
-                        var formImage = Path.Combine(new FileInfo(Environment.ProcessPath!).DirectoryName!, specialFormsPath, "models_image", $"{name}.png");
-
-                        SkinForm formSkinModel = new()
-                        {
-                            Id = skin.Id,
-                            Name = skin.Name,
-                            ImageUrl = skin.ImageUrl,
-                            Chromas = skin.Chromas,
-                            Stage = name
-                        };
-
                         skinVm.Children.Add(new SkinViewModel
                         {
                             Id = skin.Id,
                             Name = name,
-                            ImageUrl = formImage,
-                            Model = formSkinModel,
+                            ImageUrl = Path.Combine(AppDir, specialFormsPath, "models_image", $"{name}.png"),
+                            Model = new SkinForm { Id = skin.Id, Name = skin.Name, ImageUrl = skin.ImageUrl, Chromas = skin.Chromas, Stage = name },
                             Champion = selectedChamp,
                             IsSelected = IsSkinSelectedForm(selectedSkins, selectedChamp, skin.Id, name),
                             IsForm = true
@@ -226,11 +221,9 @@ public class DataInitializationService : IDataInitializationService
 
     private async Task EnsureSkinPreviewAsync(Skin skin)
     {
-        var path = Path.Combine(new FileInfo(Environment.ProcessPath!).DirectoryName!, "assets", "champions", "splashes", $"{skin.Id}.png");
+        var path = Path.Combine(AppDir, "assets", "champions", "splashes", $"{skin.Id}.png");
         if (!File.Exists(path))
-        {
             await _championService.DownloadImageAsync(skin.ImageUrl, path);
-        }
     }
 
     private bool IsSkinSelected(Dictionary<Champion, Skin> selectedSkins, Champion champ, long skinId)

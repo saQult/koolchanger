@@ -88,8 +88,8 @@
 
 
     <ItemGroup>
-        <!-- Берём все файлы из hashes, кроме hashesh.game.txt.0 и .1 -->
-        <HashesFiles Include="..\DataDragon\hashes\**\*.*" Exclude="..\DataDragon\hashes\**\hashes.game.txt.*" />
+        <!-- All hash files except the split game hash parts — absolute path so %(RecursiveDir) is relative to hashes\ -->
+        <HashesFiles Include="$(MSBuildProjectDirectory)\..\DataDragon\hashes\**\*.*" Exclude="$(MSBuildProjectDirectory)\..\DataDragon\hashes\**\hashes.game.txt.*" />
     </ItemGroup>
 
 
@@ -107,25 +107,27 @@
       <ProjectReference Include="..\KoolChanger.Core\KoolChanger.Core.csproj" />
     </ItemGroup>
 
-    <Target Name="CopyAndMergeHashes" AfterTargets="Build;Publish">
-        <!-- Папка назначения: для publish используется $(PublishDir), для обычной сборки $(OutputPath) -->
+    <!-- $(PublishDir) has a default value in .NET SDK even during regular Build, so use two separate targets -->
+    <Target Name="CopyAndMergeHashesBuild" AfterTargets="Build">
         <PropertyGroup>
-            <HashesOutputDir Condition=" '$(PublishDir)' != '' ">$(PublishDir)\hashes</HashesOutputDir>
-            <HashesOutputDir Condition=" '$(PublishDir)' == '' ">$(OutputPath)\hashes</HashesOutputDir>
+            <HashesOutputDir>$(TargetDir)hashes</HashesOutputDir>
         </PropertyGroup>
+        <MakeDir Directories="$(HashesOutputDir)\lol" />
+        <Copy
+            SourceFiles="@(HashesFiles)"
+            DestinationFiles="@(HashesFiles->'$(HashesOutputDir)\%(RecursiveDir)%(Filename)%(Extension)')" />
+        <Exec Command="powershell -NoProfile -Command &quot;Get-Content (Get-ChildItem -Path '$(MSBuildProjectDirectory)\..\DataDragon\hashes\lol' -Filter 'hashes.game.txt.*' | Sort-Object Name | ForEach-Object { $_.FullName }) | Set-Content -Path '$(HashesOutputDir)\lol\hashes.game.txt' -Encoding ASCII&quot;" />
+    </Target>
 
-        <!-- Копируем остальные файлы -->
-        <Copy SourceFiles="@(HashesFiles)" DestinationFolder="$(HashesOutputDir)" />
-
-        <!-- Склеиваем файлы hashesh.game.txt.0 и .1 -->
-        <ReadLinesFromFile File="..\DataDragon\hashes\lol\hashes.game.txt.0">
-            <Output TaskParameter="Lines" ItemName="GameHashLines0" />
-        </ReadLinesFromFile>
-        <ReadLinesFromFile File="..\DataDragon\hashes\lol\hashes.game.txt.1">
-            <Output TaskParameter="Lines" ItemName="GameHashLines1" />
-        </ReadLinesFromFile>
-
-        <WriteLinesToFile File="$(HashesOutputDir)\hashes.game.txt" Lines="@(GameHashLines0);@(GameHashLines1)" Overwrite="true" />
+    <Target Name="CopyAndMergeHashesPublish" AfterTargets="Publish">
+        <PropertyGroup>
+            <HashesOutputDir>$(PublishDir)hashes</HashesOutputDir>
+        </PropertyGroup>
+        <MakeDir Directories="$(HashesOutputDir)\lol" />
+        <Copy
+            SourceFiles="@(HashesFiles)"
+            DestinationFiles="@(HashesFiles->'$(HashesOutputDir)\%(RecursiveDir)%(Filename)%(Extension)')" />
+        <Exec Command="powershell -NoProfile -Command &quot;Get-Content (Get-ChildItem -Path '$(MSBuildProjectDirectory)\..\DataDragon\hashes\lol' -Filter 'hashes.game.txt.*' | Sort-Object Name | ForEach-Object { $_.FullName }) | Set-Content -Path '$(HashesOutputDir)\lol\hashes.game.txt' -Encoding ASCII&quot;" />
     </Target>
 
 

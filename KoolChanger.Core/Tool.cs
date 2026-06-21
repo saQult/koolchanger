@@ -11,8 +11,9 @@ public class Tool
     private string _gamePath;
     private ModTool _modTool;
     public event Action<string>? StatusChanged;
-    private readonly SemaphoreSlim _runOverlayLock = new(1, 1); // Позволяет только 1 потоку
+    private readonly SemaphoreSlim _runOverlayLock = new(1, 1);
     private Task? _currentRunOverlayTask;
+    private string? _lastOverlaySignature;
     private record ModInfo(string Author, string Name, string Description, string Version);
 
     public Tool(string gamePath, ModTool modTool)
@@ -82,13 +83,26 @@ public class Tool
 
     public void SaveOverlay(string profileName, IEnumerable<string> mods, bool skipConflicts)
     {
-        ModTool.MkOverlay( Path.Combine(Directory.GetCurrentDirectory(), "installed"),
-                            (Path.Combine(Directory.GetCurrentDirectory(), "profiles", profileName)),
-                                _gamePath, 
-                            (string.Join('/', mods)),
-                            true,
-                            skipConflicts);
-        File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), "profiles", profileName) + $"\\{profileName}.config", mods.Count().ToString());
+        var modsList = mods.OrderBy(x => x).ToList();
+        var profilePath = Path.Combine(Directory.GetCurrentDirectory(), "profiles", profileName);
+        var signature = string.Join("|", modsList);
+
+        if (signature == _lastOverlaySignature && Directory.Exists(profilePath))
+        {
+            SetStatus("Overlay up to date");
+            return;
+        }
+
+        ModTool.MkOverlay(
+            Path.Combine(Directory.GetCurrentDirectory(), "installed"),
+            profilePath,
+            _gamePath,
+            string.Join('/', modsList),
+            true,
+            skipConflicts);
+
+        File.WriteAllText(profilePath + $"\\{profileName}.config", modsList.Count.ToString());
+        _lastOverlaySignature = signature;
     }
 
    public Task RunOverlay(string profileName)

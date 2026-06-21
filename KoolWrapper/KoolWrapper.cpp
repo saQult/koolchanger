@@ -66,7 +66,6 @@ KoolWrapper::ModTool::ModTool()
             fmtlog::setLogFile(g_log_file, false);
             setvbuf(g_log_file, nullptr, _IONBF, 0);
             fmtlog::flushOn(fmtlog::DBG);
-            fmtlog::startPollingThread();
         }
     }
 }
@@ -138,10 +137,10 @@ void KoolWrapper::RitoBin::ConvertBintoJson(String^ srcPath, String^ dstPath, St
 
 
     auto args = Args();
-    args.input_file = std::string(nativeSrcPath.begin(), nativeSrcPath.end());
+    args.input_file = wstring_to_utf8(nativeSrcPath);
     args.output_format = "json";
-    args.dir = std::string(nativeDirHashes.begin(), nativeDirHashes.end());
-    args.output_file = std::string(nativeDstPath.begin(), nativeDstPath.end());
+    args.dir = wstring_to_utf8(nativeDirHashes);
+    args.output_file = wstring_to_utf8(nativeDstPath);
     args.run();
 }
 
@@ -151,14 +150,10 @@ void KoolWrapper::RitoBin::ConvertJsonToBin(String^ srcPath, String^ dstPath, St
     const auto nativeDstPath = to_wstring(dstPath);
     const auto nativeDirHashes = to_wstring(dirHashes);
 
-    auto nativeInputFormat = "json";
-    auto nativeOutputFormat = "bin";
-
-
     auto args = Args();
-    args.input_file = std::string(nativeSrcPath.begin(), nativeSrcPath.end());
+    args.input_file = wstring_to_utf8(nativeSrcPath);
     args.output_format = "bin";
-    args.output_file = std::string(nativeDstPath.begin(), nativeDstPath.end());
-    args.dir = std::string(nativeDirHashes.begin(), nativeDirHashes.end());
+    args.output_file = wstring_to_utf8(nativeDstPath);
+    args.dir = wstring_to_utf8(nativeDirHashes);
     args.run();
 }
